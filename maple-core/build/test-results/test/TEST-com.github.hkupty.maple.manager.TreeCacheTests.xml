@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.github.hkupty.maple.manager.TreeCacheTests" tests="1" skipped="0" failures="0" errors="0" timestamp="2023-02-11T20:47:02" hostname="isengard" time="0.038">
+  <properties/>
+  <testcase name="testLog()" classname="com.github.hkupty.maple.manager.TreeCacheTests" time="0.038"/>
+  <system-out><![CDATA[{"timestamp":1676148422106,"level":"INFO","threadName":"Test worker","message":"stuff","logger":""}
+]]></system-out>
+  <system-err><![CDATA[SLF4J: No SLF4J providers were found.
+SLF4J: Defaulting to no-operation (NOP) logger implementation
+SLF4J: See https://www.slf4j.org/codes.html#noProviders for further details.
+]]></system-err>
+</testsuite>

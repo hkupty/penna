@@ -1,0 +1,16 @@
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+    }
+}
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+}
+
+rootProject.name = 'maple'
+include "maple-api"
+include "maple-core"
+
