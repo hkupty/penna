@@ -3,6 +3,7 @@ package com.github.hkupty.maple.sink;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.StreamWriteFeature;
+import com.github.hkupty.maple.internals.ByteBufferOutputStream;
 import com.github.hkupty.maple.minilog.MiniLogger;
 import com.github.hkupty.maple.models.JsonLog;
 import com.github.hkupty.maple.sink.providers.LogFieldProvider;
@@ -10,6 +11,7 @@ import com.github.hkupty.maple.sink.providers.LogFieldProvider;
 import java.io.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -22,23 +24,29 @@ public class JacksonSink implements Sink, Sink.SinkWriter {
     private transient final JsonGenerator generator;
     private transient final LogFieldProvider[] providers;
     private transient final ReentrantLock lock;
+    private transient final ByteBuffer buffer;
+    private transient final ByteBufferOutputStream bbos;
+
 
     // TODO Move generator creation to out of constructor
     public JacksonSink(LogFieldProvider[] providers){
         this.providers = providers;
+
+        buffer = ByteBuffer.allocateDirect(1024 * 1024);
+        bbos = new ByteBufferOutputStream(buffer);
         JsonFactory factory = JsonFactory.builder()
                 .enable(StreamWriteFeature.USE_FAST_DOUBLE_WRITER)
                 .enable(StreamWriteFeature.WRITE_BIGDECIMAL_AS_PLAIN)
                 .disable(JsonFactory.Feature.CANONICALIZE_FIELD_NAMES)
                 .build();
         try {
-            generator = factory.createGenerator(SharedSinkLogic.getOutputStream());
-            generator.disable(JsonGenerator.Feature.STRICT_DUPLICATE_DETECTION);
-            lock = new ReentrantLock();
+            generator = factory.createGenerator(bbos);
         } catch (IOException ioe) {
-            MiniLogger.error("Panic! STDOUT is dead", ioe);
+            MiniLogger.error("Unable to create generator", ioe);
             throw new RuntimeException(ioe);
         }
+        generator.disable(JsonGenerator.Feature.STRICT_DUPLICATE_DETECTION);
+        lock = new ReentrantLock();
     }
 
     @Override
@@ -52,6 +60,11 @@ public class JacksonSink implements Sink, Sink.SinkWriter {
             generator.writeEndObject();
             generator.writeRaw("\n");
             generator.flush();
+            buffer.flip();
+            var fc = SharedSinkLogic.getFileChannel();
+            fc.write(buffer);
+            buffer.clear();
+
         } catch (IOException | JsonWriteException ex) {
             MiniLogger.error("Unable to log", ex);
         } finally {
