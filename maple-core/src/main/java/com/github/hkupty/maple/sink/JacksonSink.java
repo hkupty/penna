@@ -30,7 +30,7 @@ public class JacksonSink implements Sink, Sink.SinkWriter {
                 .enable(StreamWriteFeature.USE_FAST_DOUBLE_WRITER)
                 .enable(StreamWriteFeature.WRITE_BIGDECIMAL_AS_PLAIN)
                 .build();
-        var channel = Channels.newChannel(System.err);
+        var channel = Channels.newChannel(new FileOutputStream(FileDescriptor.out));
         generator = factory.createGenerator(Channels.newOutputStream(channel));
         generator.enable(JsonGenerator.Feature.AUTO_CLOSE_JSON_CONTENT);
         lock = new ReentrantLock();

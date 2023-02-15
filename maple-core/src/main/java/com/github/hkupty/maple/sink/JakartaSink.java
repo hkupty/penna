@@ -5,24 +5,29 @@ import com.github.hkupty.maple.sink.providers.LogFieldProvider;
 import com.github.hkupty.maple.sink.providers.LoggerProvider;
 import jakarta.json.Json;
 import jakarta.json.stream.JsonGenerator;
+import jakarta.json.stream.JsonGeneratorFactory;
 
+import java.io.FileDescriptor;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.channels.Channels;
+import java.nio.channels.WritableByteChannel;
 import java.util.concurrent.locks.ReentrantLock;
 
 
 public class JakartaSink implements Sink, Sink.SinkWriter{
     private transient final ReentrantLock lock;
-    private transient final JsonGenerator generator;
+    private transient final OutputStream channel;
+    private transient final JsonGeneratorFactory factory;
+    private transient JsonGenerator generator;
     private transient final LogFieldProvider[] providers;
 
     public JakartaSink(LogFieldProvider[] providers) {
-        var channel = Channels.newChannel(System.out);
+        channel = Channels.newOutputStream(Channels.newChannel(new FileOutputStream(FileDescriptor.err)));
+        factory = Json.createGeneratorFactory(null);
         lock = new ReentrantLock();
-        generator = Json
-                 .createGeneratorFactory(null)
-                 .createGenerator(Channels.newOutputStream(channel));
 
         this.providers = providers;
 
@@ -32,6 +37,7 @@ public class JakartaSink implements Sink, Sink.SinkWriter{
     public void render(JsonLog jsonLog) {
         try {
             lock.lock();
+            generator = factory.createGenerator(channel);
             generator.writeStartObject();
             for (int i = 0; i < providers.length; i++) {
                 providers[i].logField(this, jsonLog);
