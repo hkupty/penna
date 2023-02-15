@@ -5,13 +5,13 @@ import org.slf4j.Logger;
 import org.slf4j.spi.LoggingEventAware;
 
 public abstract class BaseLogger implements Logger, LoggingEventAware {
-    protected String name;
-    protected LoggingEventBuilderFactory eventBuilderFactory;
-    private final String repr;
+    protected transient final String name;
+    protected transient LoggingEventBuilderFactory eventBuilderFactory;
+    private transient final String repr;
 
     BaseLogger(String name, LoggingEventBuilderFactory eventBuilderFactory) {
         this.name = name;
-        this.setEventBuilderFactory(eventBuilderFactory);
+        this.eventBuilderFactory = eventBuilderFactory;
 
         repr = this.getClass().getName() + "{" +
                 "name='" + name + '\'' +

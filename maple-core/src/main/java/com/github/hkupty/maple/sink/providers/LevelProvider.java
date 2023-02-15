@@ -7,7 +7,7 @@ import com.github.hkupty.maple.sink.Sink;
 import java.io.IOException;
 
 public class LevelProvider implements LogFieldProvider {
-    private final String levelFieldName;
+    private transient final String levelFieldName;
 
     public LevelProvider(String levelFieldName) {
         this.levelFieldName = levelFieldName;

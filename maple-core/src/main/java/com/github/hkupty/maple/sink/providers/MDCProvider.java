@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.util.Map;
 
 public class MDCProvider implements LogFieldProvider {
-    private final String mdcFieldName;
+    private transient final String mdcFieldName;
 
     public MDCProvider(String mdcFieldName) {
         this.mdcFieldName = mdcFieldName;

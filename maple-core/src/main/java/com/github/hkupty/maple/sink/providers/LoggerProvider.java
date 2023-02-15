@@ -7,7 +7,7 @@ import com.github.hkupty.maple.sink.Sink;
 import java.io.IOException;
 
 public class LoggerProvider implements LogFieldProvider {
-    private final String loggerFieldName;
+    private transient final String loggerFieldName;
 
     public LoggerProvider(String loggerFieldName) {
         this.loggerFieldName = loggerFieldName;

@@ -7,9 +7,9 @@ import org.slf4j.spi.LoggingEventBuilder;
 public class TraceLoggingEventFactory implements LoggingEventBuilderFactory {
 
     private TraceLoggingEventFactory(){}
-    private static final LoggingEventBuilderFactory SINGLETON = new TraceLoggingEventFactory();
+    private static final LoggingEventBuilderFactory instance = new TraceLoggingEventFactory();
     public static LoggingEventBuilderFactory singleton() {
-        return SINGLETON;
+        return instance;
     }
     @Override
     public boolean isTraceEnabled() {

@@ -13,8 +13,8 @@ import java.util.regex.Pattern;
 
 public class LoggerFactory implements ILoggerFactory {
     private static final Pattern DOT_SPLIT = Pattern.compile("\\.");
-    private final TreeCache cache;
-    private Config config;
+    private transient final TreeCache cache;
+    private transient Config config;
 
     public LoggerFactory(){
         config = Config.getDefault();

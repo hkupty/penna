@@ -8,7 +8,7 @@ import java.util.function.Function;
 
 public class SinkFactory {
 
-    private static Function<LogFieldProvider[], Sink> sinkFactory;
+    private static Function<LogFieldProvider[], Sink> factoryFunction;
     private static ClassLoader cl;
 
     private static void initCl() {
@@ -45,18 +45,18 @@ public class SinkFactory {
     }
 
     public static synchronized void getSinkClass() {
-        if (sinkFactory == null) {
-            sinkFactory = getJacksonSink();
+        if (factoryFunction == null) {
+            factoryFunction = getJacksonSink();
         }
-        if (sinkFactory == null) {
-            sinkFactory = getJakartaSink();
+        if (factoryFunction == null) {
+            factoryFunction = getJakartaSink();
         }
     }
 
     public static Sink getSink(LogFieldProvider[] providers) {
-        if (sinkFactory == null) {
+        if (factoryFunction == null) {
             getSinkClass();
         }
-        return sinkFactory.apply(providers);
+        return factoryFunction.apply(providers);
     }
 }

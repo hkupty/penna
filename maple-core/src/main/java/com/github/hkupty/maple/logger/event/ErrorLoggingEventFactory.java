@@ -9,9 +9,9 @@ public class ErrorLoggingEventFactory implements LoggingEventBuilderFactory {
 
     private ErrorLoggingEventFactory(){}
 
-    private static final LoggingEventBuilderFactory SINGLETON = new ErrorLoggingEventFactory();
+    private static final LoggingEventBuilderFactory instance = new ErrorLoggingEventFactory();
     public static LoggingEventBuilderFactory singleton() {
-        return SINGLETON;
+        return instance;
     }
     @Override
     public boolean isTraceEnabled() {

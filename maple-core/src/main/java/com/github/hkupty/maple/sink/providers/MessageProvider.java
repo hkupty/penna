@@ -7,7 +7,7 @@ import com.github.hkupty.maple.sink.Sink;
 import java.io.IOException;
 
 public class MessageProvider implements LogFieldProvider {
-    private final String messageFieldName;
+    private transient final String messageFieldName;
 
     public MessageProvider(String messageFieldName) {
         this.messageFieldName = messageFieldName;

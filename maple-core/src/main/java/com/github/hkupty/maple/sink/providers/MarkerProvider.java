@@ -5,7 +5,7 @@ import com.github.hkupty.maple.sink.Sink;
 
 
 public class MarkerProvider implements LogFieldProvider {
-    private final String markerFieldName;
+    private transient final String markerFieldName;
 
     public MarkerProvider(String markerFieldName) {
         this.markerFieldName = markerFieldName;

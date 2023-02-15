@@ -8,9 +8,9 @@ import org.slf4j.spi.NOPLoggingEventBuilder;
 public class InfoLoggingEventFactory implements LoggingEventBuilderFactory {
     private InfoLoggingEventFactory(){}
 
-    private static final LoggingEventBuilderFactory SINGLETON = new InfoLoggingEventFactory();
+    private static final LoggingEventBuilderFactory instance = new InfoLoggingEventFactory();
     public static LoggingEventBuilderFactory singleton() {
-        return SINGLETON;
+        return instance;
     }
     @Override
     public boolean isTraceEnabled() {

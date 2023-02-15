@@ -1,6 +1,7 @@
 plugins {
     id 'maple.base-java'
     id 'maple.jmh'
+    id 'pmd'
 }
 group 'com.github.hkutpy.maple'
 version '1.0-SNAPSHOT'

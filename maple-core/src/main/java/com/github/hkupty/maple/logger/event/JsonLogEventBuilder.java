@@ -19,14 +19,14 @@ public class JsonLogEventBuilder implements LoggingEventBuilder {
     private static final Marker[] baseMarkers = new Marker[]{};
     private static final KeyValuePair[] baseKeyValues = new KeyValuePair[]{};
 
-    private final Level level;
-    private ArrayList<Marker> markers;
-    private ArrayList<KeyValuePair> keyValuePairs;
-    private ArrayList<Object> arguments;
-    private String message;
-    private final long timestamp;
-    private Throwable throwable;
-    private final BaseLogger logger;
+    private transient final Level level;
+    private transient ArrayList<Marker> markers;
+    private transient ArrayList<KeyValuePair> keyValuePairs;
+    private transient ArrayList<Object> arguments;
+    private transient String message;
+    private transient final long timestamp;
+    private transient Throwable throwable;
+    private transient final BaseLogger logger;
 
 
     public JsonLogEventBuilder(BaseLogger logger, Level level) {

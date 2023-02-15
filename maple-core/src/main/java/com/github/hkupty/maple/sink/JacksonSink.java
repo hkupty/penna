@@ -17,9 +17,11 @@ public class JacksonSink implements Sink, Sink.SinkWriter {
     private static class JsonWriteException extends RuntimeException {
         JsonWriteException(String message, Throwable cause) { super(message, cause);}
     }
-    private final JsonGenerator generator;
-    private final LogFieldProvider[] providers;
-    private final ReentrantLock lock;
+
+    private static final String ERROR_MSG = "Failed to write ";
+    private transient final JsonGenerator generator;
+    private transient final LogFieldProvider[] providers;
+    private transient final ReentrantLock lock;
 
     // TODO Move generator creation to out of constructor
     public JacksonSink(LogFieldProvider[] providers) throws IOException {
@@ -33,8 +35,6 @@ public class JacksonSink implements Sink, Sink.SinkWriter {
         generator.enable(JsonGenerator.Feature.AUTO_CLOSE_JSON_CONTENT);
         lock = new ReentrantLock();
     }
-
-
 
     @Override
     public void render(JsonLog jsonLog) {
@@ -57,7 +57,7 @@ public class JacksonSink implements Sink, Sink.SinkWriter {
         try {
             generator.writeStringField(key, value);
         } catch (IOException e) {
-            throw new JsonWriteException("Failed to write string", e);
+            throw new JsonWriteException(ERROR_MSG + "string", e);
         }
     }
 
@@ -66,7 +66,7 @@ public class JacksonSink implements Sink, Sink.SinkWriter {
         try {
             generator.writeString(value);
         } catch (IOException e) {
-            throw new JsonWriteException("Failed to write string", e);
+            throw new JsonWriteException(ERROR_MSG + "string", e);
         }
     }
 
@@ -75,7 +75,7 @@ public class JacksonSink implements Sink, Sink.SinkWriter {
         try {
             generator.writeNumber(value);
         } catch (IOException e) {
-            throw new JsonWriteException("Failed to write double", e);
+            throw new JsonWriteException(ERROR_MSG + "double", e);
         }
     }
 
@@ -84,7 +84,7 @@ public class JacksonSink implements Sink, Sink.SinkWriter {
         try {
             generator.writeNumberField(key, value);
         } catch (IOException e) {
-            throw new JsonWriteException("Failed to write double", e);
+            throw new JsonWriteException(ERROR_MSG + "double", e);
         }
     }
 
@@ -93,7 +93,7 @@ public class JacksonSink implements Sink, Sink.SinkWriter {
         try {
             generator.writeNumberField(key, value);
         } catch (IOException e) {
-            throw new JsonWriteException("Failed to write integer", e);
+            throw new JsonWriteException(ERROR_MSG + "integer", e);
         }
     }
 
@@ -102,7 +102,7 @@ public class JacksonSink implements Sink, Sink.SinkWriter {
         try {
             generator.writeNumber(value);
         } catch (IOException e) {
-            throw new JsonWriteException("Failed to write integer", e);
+            throw new JsonWriteException(ERROR_MSG + "integer", e);
         }
     }
     @Override
@@ -110,7 +110,7 @@ public class JacksonSink implements Sink, Sink.SinkWriter {
         try {
             generator.writeNumberField(key, value);
         } catch (IOException e) {
-            throw new JsonWriteException("Failed to write long", e);
+            throw new JsonWriteException(ERROR_MSG + "long", e);
         }
     }
 
@@ -119,7 +119,7 @@ public class JacksonSink implements Sink, Sink.SinkWriter {
         try {
             generator.writeNumber(value);
         } catch (IOException e) {
-            throw new JsonWriteException("Failed to write long", e);
+            throw new JsonWriteException(ERROR_MSG + "long", e);
         }
     }
 
@@ -128,7 +128,7 @@ public class JacksonSink implements Sink, Sink.SinkWriter {
         try {
             generator.writeNumberField(key, value);
         } catch (IOException e) {
-            throw new JsonWriteException("Failed to write big decimal", e);
+            throw new JsonWriteException(ERROR_MSG + "big decimal", e);
         }
     }
 
@@ -137,7 +137,7 @@ public class JacksonSink implements Sink, Sink.SinkWriter {
         try {
             generator.writeNumber(value);
         } catch (IOException e) {
-            throw new JsonWriteException("Failed to write big decimal", e);
+            throw new JsonWriteException(ERROR_MSG + "big decimal", e);
         }
     }
 
@@ -146,7 +146,7 @@ public class JacksonSink implements Sink, Sink.SinkWriter {
         try {
             generator.writeNumberField(key, value);
         } catch (IOException e) {
-            throw new JsonWriteException("Failed to write big integer", e);
+            throw new JsonWriteException(ERROR_MSG + "big integer", e);
         }
     }
 
@@ -155,7 +155,7 @@ public class JacksonSink implements Sink, Sink.SinkWriter {
         try {
             generator.writeNumber(value);
         } catch (IOException e) {
-            throw new JsonWriteException("Failed to write big integer", e);
+            throw new JsonWriteException(ERROR_MSG + "big integer", e);
         }
     }
 
@@ -164,7 +164,7 @@ public class JacksonSink implements Sink, Sink.SinkWriter {
         try {
             generator.writeObjectField(key, value);
         } catch (IOException e) {
-            throw new JsonWriteException("Failed to write object", e);
+            throw new JsonWriteException(ERROR_MSG + "object", e);
         }
     }
 
@@ -173,7 +173,7 @@ public class JacksonSink implements Sink, Sink.SinkWriter {
         try {
             generator.writeObject(value);
         } catch (IOException e) {
-            throw new JsonWriteException("Failed to write object", e);
+            throw new JsonWriteException(ERROR_MSG + "object", e);
         }
     }
 
@@ -182,7 +182,7 @@ public class JacksonSink implements Sink, Sink.SinkWriter {
         try {
             generator.writeBooleanField(key, value);
         } catch (IOException e) {
-            throw new JsonWriteException("Failed to write boolean", e);
+            throw new JsonWriteException(ERROR_MSG + "boolean", e);
         }
     }
 
@@ -191,7 +191,7 @@ public class JacksonSink implements Sink, Sink.SinkWriter {
         try {
             generator.writeBoolean(value);
         } catch (IOException e) {
-            throw new JsonWriteException("Failed to write boolean", e);
+            throw new JsonWriteException(ERROR_MSG + "boolean", e);
         }
     }
 
@@ -201,7 +201,7 @@ public class JacksonSink implements Sink, Sink.SinkWriter {
             generator.writeFieldName(objectKey);
             generator.writeStartObject();
         } catch (IOException e) {
-            throw new JsonWriteException("Failed to write object", e);
+            throw new JsonWriteException(ERROR_MSG + "object", e);
         }
     }
 
@@ -210,7 +210,7 @@ public class JacksonSink implements Sink, Sink.SinkWriter {
         try {
             generator.writeStartObject();
         } catch (IOException e) {
-            throw new JsonWriteException("Failed to write object", e);
+            throw new JsonWriteException(ERROR_MSG + "object", e);
         }
     }
 
@@ -220,7 +220,7 @@ public class JacksonSink implements Sink, Sink.SinkWriter {
             generator.writeFieldName(arrayKey);
             generator.writeStartArray();
         } catch (IOException e) {
-            throw new JsonWriteException("Failed to write object", e);
+            throw new JsonWriteException(ERROR_MSG + "object", e);
         }
     }
 
@@ -229,7 +229,7 @@ public class JacksonSink implements Sink, Sink.SinkWriter {
         try {
             generator.writeStartArray();
         } catch (IOException e) {
-            throw new JsonWriteException("Failed to write array", e);
+            throw new JsonWriteException(ERROR_MSG + "array", e);
         }
     }
 
@@ -238,7 +238,7 @@ public class JacksonSink implements Sink, Sink.SinkWriter {
         try {
             generator.writeEndArray();
         } catch (IOException e) {
-            throw new JsonWriteException("Failed to write array", e);
+            throw new JsonWriteException(ERROR_MSG + "array", e);
         }
     }
 
@@ -247,7 +247,7 @@ public class JacksonSink implements Sink, Sink.SinkWriter {
         try {
             generator.writeEndObject();
         } catch (IOException e) {
-            throw new JsonWriteException("Failed to write object", e);
+            throw new JsonWriteException(ERROR_MSG + "object", e);
         }
 
     }

@@ -7,7 +7,7 @@ import com.github.hkupty.maple.sink.Sink;
 import java.io.IOException;
 
 public class ThreadProvider implements LogFieldProvider {
-    private final String threadFieldName;
+    private transient final String threadFieldName;
 
     public ThreadProvider(String threadFieldName) {
         this.threadFieldName = threadFieldName;

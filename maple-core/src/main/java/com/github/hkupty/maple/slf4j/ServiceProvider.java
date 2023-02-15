@@ -10,7 +10,7 @@ import org.slf4j.spi.SLF4JServiceProvider;
 public class ServiceProvider implements SLF4JServiceProvider {
 
     public static String REQUESTED_API_VERSION = "2.0.99";
-    private LoggerFactory loggerFactory;
+    private transient LoggerFactory loggerFactory;
 
     @Override
     public ILoggerFactory getLoggerFactory() {

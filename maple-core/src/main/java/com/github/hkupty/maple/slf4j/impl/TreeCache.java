@@ -18,7 +18,7 @@ public class TreeCache {
         }
     }
 
-    private final Entry ROOT;
+    private transient final Entry ROOT;
 
     public TreeCache(BaseLogger root) {
         ROOT = Entry.create(new String[]{}, root);

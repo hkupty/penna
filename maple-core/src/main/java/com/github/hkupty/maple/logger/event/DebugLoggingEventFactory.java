@@ -8,9 +8,9 @@ import org.slf4j.spi.NOPLoggingEventBuilder;
 public class DebugLoggingEventFactory implements LoggingEventBuilderFactory {
     private DebugLoggingEventFactory(){}
 
-    private static final LoggingEventBuilderFactory SINGLETON = new DebugLoggingEventFactory();
+    private static final LoggingEventBuilderFactory instance = new DebugLoggingEventFactory();
     public static LoggingEventBuilderFactory singleton() {
-        return SINGLETON;
+        return instance;
     }
 
     @Override

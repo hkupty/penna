@@ -7,7 +7,7 @@ import com.github.hkupty.maple.sink.Sink;
 import java.io.IOException;
 
 public class TimestampProvider implements LogFieldProvider {
-    private final String timestampFieldName;
+    private transient final String timestampFieldName;
 
     public TimestampProvider(String timestampFieldName) {
         this.timestampFieldName = timestampFieldName;

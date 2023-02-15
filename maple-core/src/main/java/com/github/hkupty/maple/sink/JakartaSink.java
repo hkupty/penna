@@ -13,9 +13,9 @@ import java.util.concurrent.locks.ReentrantLock;
 
 
 public class JakartaSink implements Sink, Sink.SinkWriter{
-    private final ReentrantLock lock;
-    private final JsonGenerator generator;
-    private final LogFieldProvider[] providers;
+    private transient final ReentrantLock lock;
+    private transient final JsonGenerator generator;
+    private transient final LogFieldProvider[] providers;
 
     public JakartaSink(LogFieldProvider[] providers) {
         var channel = Channels.newChannel(System.out);

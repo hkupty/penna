@@ -7,7 +7,7 @@ import com.github.hkupty.maple.sink.Sink;
 import java.io.IOException;
 
 public class KeyValueProvider implements LogFieldProvider {
-    private final String keyValueFieldName;
+    private transient final String keyValueFieldName;
 
     public KeyValueProvider(String keyValueFieldName) {
         this.keyValueFieldName = keyValueFieldName;

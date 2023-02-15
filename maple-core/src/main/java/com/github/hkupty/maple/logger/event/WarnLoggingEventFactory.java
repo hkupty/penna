@@ -9,9 +9,9 @@ public class WarnLoggingEventFactory implements LoggingEventBuilderFactory {
 
     private WarnLoggingEventFactory(){}
 
-    private static final LoggingEventBuilderFactory SINGLETON = new WarnLoggingEventFactory();
+    private static final LoggingEventBuilderFactory instance = new WarnLoggingEventFactory();
     public static LoggingEventBuilderFactory singleton() {
-        return SINGLETON;
+        return instance;
     }
     @Override
     public boolean isTraceEnabled() {

@@ -7,7 +7,7 @@ import com.github.hkupty.maple.sink.Sink;
 import java.io.IOException;
 
 public class ThrowableProvider implements LogFieldProvider {
-    private final String throwableFieldName;
+    private transient final String throwableFieldName;
 
     public ThrowableProvider(String throwableFieldName) {
         this.throwableFieldName = throwableFieldName;

@@ -10,14 +10,14 @@ import java.util.Arrays;
 import java.util.List;
 
 public class JsonLoggingEvent implements LoggingEvent {
+    private static Object[] emptyObjArray = new Object[]{};
+
     String logger;
     Level level;
-
     String message;
     List<Marker> markers;
     List<Object> arguments;
     List<KeyValuePair> keyValuePairs;
-
     Throwable throwable;
     String threadName;
     long timeStamp;
@@ -64,7 +64,7 @@ public class JsonLoggingEvent implements LoggingEvent {
     @Override
     public Object[] getArgumentArray() {
         if (arguments == null)
-            return null;
+            return emptyObjArray;
         return arguments.toArray();
     }
 
