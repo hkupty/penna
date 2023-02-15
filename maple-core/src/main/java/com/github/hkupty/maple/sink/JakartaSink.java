@@ -25,7 +25,7 @@ public class JakartaSink implements Sink, Sink.SinkWriter{
     private transient final LogFieldProvider[] providers;
 
     public JakartaSink(LogFieldProvider[] providers) {
-        channel = Channels.newOutputStream(Channels.newChannel(new FileOutputStream(FileDescriptor.err)));
+        channel = SharedSinkLogic.getOutputStream();
         factory = Json.createGeneratorFactory(null);
         lock = new ReentrantLock();
 

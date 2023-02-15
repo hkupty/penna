@@ -24,16 +24,21 @@ public class JacksonSink implements Sink, Sink.SinkWriter {
     private transient final ReentrantLock lock;
 
     // TODO Move generator creation to out of constructor
-    public JacksonSink(LogFieldProvider[] providers) throws IOException {
+    public JacksonSink(LogFieldProvider[] providers){
         this.providers = providers;
         JsonFactory factory = JsonFactory.builder()
                 .enable(StreamWriteFeature.USE_FAST_DOUBLE_WRITER)
                 .enable(StreamWriteFeature.WRITE_BIGDECIMAL_AS_PLAIN)
+                .disable(JsonFactory.Feature.CANONICALIZE_FIELD_NAMES)
                 .build();
-        var channel = Channels.newChannel(new FileOutputStream(FileDescriptor.out));
-        generator = factory.createGenerator(Channels.newOutputStream(channel));
-        generator.enable(JsonGenerator.Feature.AUTO_CLOSE_JSON_CONTENT);
-        lock = new ReentrantLock();
+        try {
+            generator = factory.createGenerator(SharedSinkLogic.getOutputStream());
+            generator.disable(JsonGenerator.Feature.STRICT_DUPLICATE_DETECTION);
+            lock = new ReentrantLock();
+        } catch (IOException ioe) {
+            MiniLogger.error("Panic! STDOUT is dead", ioe);
+            throw new RuntimeException(ioe);
+        }
     }
 
     @Override
@@ -41,7 +46,9 @@ public class JacksonSink implements Sink, Sink.SinkWriter {
         try {
             lock.lock();
             generator.writeStartObject();
-            generator.writeStringField("message", jsonLog.getMessage());
+            for (int i = 0; i < providers.length; i++ ){
+                providers[i].logField(this, jsonLog);
+            }
             generator.writeEndObject();
             generator.writeRaw("\n");
             generator.flush();

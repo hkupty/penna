@@ -24,14 +24,7 @@ public class SinkFactory {
         } catch (ClassNotFoundException e) {
             return null;
         }
-        return (init) -> {
-            try {
-                return new JacksonSink(init);
-            } catch (IOException e) {
-                MiniLogger.error("Unable to create logger", e);
-            }
-            return null;
-        };
+        return JacksonSink::new;
     }
 
     private static Function<LogFieldProvider[], Sink> getJakartaSink() {
@@ -41,7 +34,7 @@ public class SinkFactory {
         } catch (ClassNotFoundException e) {
             return null;
         }
-        return (init) -> new JakartaSink(init);
+        return JakartaSink::new;
     }
 
     public static synchronized void getSinkClass() {

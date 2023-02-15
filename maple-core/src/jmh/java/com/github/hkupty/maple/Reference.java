@@ -12,6 +12,7 @@ import org.openjdk.jmh.infra.Blackhole;
 import org.slf4j.Logger;
 
 import java.io.*;
+import java.util.concurrent.TimeUnit;
 
 
 public class Reference {
@@ -38,28 +39,32 @@ public class Reference {
     }
 
     @Fork(value = 1, warmups = 1)
+    @BenchmarkMode(Mode.AverageTime)
+    @OutputTimeUnit(TimeUnit.NANOSECONDS)
     @Benchmark
     public void aMapleEvent(BenchmarkState state){
         state.mapleLogger.atWarn().log("maple logging event....");
     }
-//
-//    @Fork(value = 1, warmups = 1)
-//    @Warmup(time = 5, iterations = 2)
-//    @Measurement(time = 5, iterations = 2)
-//    @Benchmark
-//    public void mapleLog(BenchmarkState state){
-//        state.mapleLogger.warn("maple logging message...");
-//    }
-//
-//    @Fork(value = 1, warmups = 1)
-//    @Warmup(time = 5, iterations = 2)
-//    @Measurement(time = 5, iterations = 2)
-//    @Benchmark
-//    public void logbackLog(BenchmarkState state, Blackhole bh){
-//        state.logbackLogger.warn("logback logging message");
-//    }
 
     @Fork(value = 1, warmups = 1)
+    @BenchmarkMode(Mode.AverageTime)
+    @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    @Benchmark
+    public void mapleLog(BenchmarkState state){
+        state.mapleLogger.warn("maple logging message...");
+    }
+
+    @Fork(value = 1, warmups = 1)
+    @BenchmarkMode(Mode.AverageTime)
+    @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    @Benchmark
+    public void logbackLog(BenchmarkState state, Blackhole bh){
+        state.logbackLogger.warn("logback logging message");
+    }
+
+    @Fork(value = 1, warmups = 1)
+    @BenchmarkMode(Mode.AverageTime)
+    @OutputTimeUnit(TimeUnit.NANOSECONDS)
     @Benchmark
     public void logbackEvent(BenchmarkState state, Blackhole bh){ state.logbackLogger.atWarn().log("logback logging event.."); }
 }

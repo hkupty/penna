@@ -11,6 +11,10 @@ public record Config(
         Level level,
         LogFieldProvider[] providers
 ) {
+    private static final LogFieldProvider[] defaultProviders = new LogFieldProvider[]{
+            new MessageProvider()
+    };
+
 
     private static final EnumMap<Level, LoggingEventBuilderFactory> levelMapping = new EnumMap<>(Level.class);
 
@@ -22,18 +26,7 @@ public record Config(
         levelMapping.put(Level.ERROR, ErrorLoggingEventFactory.singleton());
     }
     public static Config getDefault() {
-        return new Config(
-                Level.INFO,
-                new LogFieldProvider[]{
-                    // new TimestampProvider(),
-                        // new LevelProvider(),
-                        // new ThreadProvider(),
-                        new MessageProvider(),
-                       // new LoggerProvider(),
-                       // new KeyValueProvider(),
-                       // new ThrowableProvider()
-                }
-        );
+        return new Config(Level.INFO, defaultProviders);
     }
 
     public LoggingEventBuilderFactory factory() {
