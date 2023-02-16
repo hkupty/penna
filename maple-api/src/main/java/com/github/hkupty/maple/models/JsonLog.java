@@ -7,29 +7,35 @@ import org.slf4j.event.LoggingEvent;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
+/** Intentionally capped {@link LoggingEvent}.
+ * This is because most of the "static" values can be reused by the providers;
+ * This class will be given to providers, so, only the dynamic information from the logs will be used.
+ *
+ * @param arguments
+ * @param level
+ * @param markers
+ * @param keyValuePairs
+ * @param message
+ * @param throwable
+ */
 public record JsonLog(
        Object[] arguments,
-       String level,
-       String logger,
+       Level level,
        Marker[] markers,
        KeyValuePair[] keyValuePairs,
        String message,
-       String threadName,
-       Throwable throwable,
-       long timestamp,
+       Throwable throwable
 
-       Map<String, String> mdc
 ) implements LoggingEvent {
     @Override
     public Level getLevel() {
-        return Level.valueOf(level);
+        return level;
     }
 
     @Override
     public String getLoggerName() {
-        return logger;
+        return null;
     }
 
     @Override
@@ -64,11 +70,11 @@ public record JsonLog(
 
     @Override
     public long getTimeStamp() {
-        return timestamp;
+        return 0;
     }
 
     @Override
     public String getThreadName() {
-        return threadName;
+        return null;
     }
 }

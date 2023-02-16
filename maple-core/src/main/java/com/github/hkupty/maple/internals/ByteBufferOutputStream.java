@@ -1,9 +1,13 @@
 package com.github.hkupty.maple.internals;
 
-import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 
+/**
+ * This is a simple layer on top of a ByteBuffer that has to be
+ * handled separately. Do not use it directly because it will *not*
+ * control the byte buffer appropriately.
+ */
 public class ByteBufferOutputStream extends OutputStream {
 
     private final ByteBuffer buffer;

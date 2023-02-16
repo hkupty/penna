@@ -1,14 +1,16 @@
-package com.github.hkupty.maple.logger.event;
+package com.github.hkupty.maple.logger.factory;
 
-import com.github.hkupty.maple.logger.BaseLogger;
+import com.github.hkupty.maple.logger.MapleLogger;
+import com.github.hkupty.maple.logger.event.JsonLogEventBuilder;
 import org.slf4j.event.Level;
 import org.slf4j.spi.LoggingEventBuilder;
 import org.slf4j.spi.NOPLoggingEventBuilder;
 
-public class InfoLoggingEventFactory implements LoggingEventBuilderFactory {
-    private InfoLoggingEventFactory(){}
+public class ErrorLoggingEventFactory implements LoggingEventBuilderFactory {
 
-    private static final LoggingEventBuilderFactory instance = new InfoLoggingEventFactory();
+    private ErrorLoggingEventFactory(){}
+
+    private static final LoggingEventBuilderFactory instance = new ErrorLoggingEventFactory();
     public static LoggingEventBuilderFactory singleton() {
         return instance;
     }
@@ -18,7 +20,7 @@ public class InfoLoggingEventFactory implements LoggingEventBuilderFactory {
     }
 
     @Override
-    public LoggingEventBuilder trace(BaseLogger logger) {
+    public LoggingEventBuilder trace(MapleLogger logger) {
         return NOPLoggingEventBuilder.singleton();
     }
 
@@ -28,28 +30,28 @@ public class InfoLoggingEventFactory implements LoggingEventBuilderFactory {
     }
 
     @Override
-    public LoggingEventBuilder debug(BaseLogger logger) {
+    public LoggingEventBuilder debug(MapleLogger logger) {
         return NOPLoggingEventBuilder.singleton();
     }
 
     @Override
     public boolean isInfoEnabled() {
-        return true;
+        return false;
     }
 
     @Override
-    public LoggingEventBuilder info(BaseLogger logger) {
-        return new JsonLogEventBuilder(logger, Level.INFO);
+    public LoggingEventBuilder info(MapleLogger logger) {
+        return NOPLoggingEventBuilder.singleton();
     }
 
     @Override
     public boolean isWarnEnabled() {
-        return true;
+        return false;
     }
 
     @Override
-    public LoggingEventBuilder warn(BaseLogger logger) {
-        return new JsonLogEventBuilder(logger, Level.WARN);
+    public LoggingEventBuilder warn(MapleLogger logger) {
+        return NOPLoggingEventBuilder.singleton();
     }
 
     @Override
@@ -58,7 +60,7 @@ public class InfoLoggingEventFactory implements LoggingEventBuilderFactory {
     }
 
     @Override
-    public LoggingEventBuilder error(BaseLogger logger) {
+    public LoggingEventBuilder error(MapleLogger logger) {
         return new JsonLogEventBuilder(logger, Level.ERROR);
     }
 }

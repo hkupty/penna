@@ -1,12 +1,13 @@
 package com.github.hkupty.maple.manager;
 
-import com.github.hkupty.maple.logger.ProxyLogger;
+import com.github.hkupty.maple.logger.MapleLogger;
 import com.github.hkupty.maple.logger.TestLogger;
-import com.github.hkupty.maple.logger.event.InfoLoggingEventFactory;
-import com.github.hkupty.maple.logger.event.WarnLoggingEventFactory;
+import com.github.hkupty.maple.logger.factory.InfoLoggingEventFactory;
+import com.github.hkupty.maple.logger.factory.WarnLoggingEventFactory;
 import com.github.hkupty.maple.slf4j.impl.Config;
 import com.github.hkupty.maple.slf4j.impl.TreeCache;
 import org.junit.jupiter.api.Test;
+import org.slf4j.event.Level;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -33,7 +34,7 @@ public class TreeCacheTests {
         assertNotNull(cache.find(new String[]{"com", "github", "hkupty", "maple"}));
         var finalLogger = cache.find(new String[]{"com", "github", "hkupty", "maple", "LeLogger"});
         assertNotNull(finalLogger);
-        assertEquals(InfoLoggingEventFactory.singleton(), ((TestLogger)finalLogger).getEventBuilderFactory());;
+        assertEquals(InfoLoggingEventFactory.singleton(), ((TestLogger)finalLogger).getEventBuilderFactory());
     }
 
     @Test
@@ -43,15 +44,15 @@ public class TreeCacheTests {
                 (baseLogger, partialIdentifier) ->
                         new TestLogger(String.join(".", partialIdentifier))
         );
-        cache.updateLoggerEventFactory(new String[]{"com", "github"}, WarnLoggingEventFactory.singleton());
+        cache.updateConfig(new String[]{"com", "github"}, old -> old.copy(Level.WARN));
 
         var nodeLogger = cache.find(new String[]{"com"});
         assertNotNull(nodeLogger);
-        assertEquals(InfoLoggingEventFactory.singleton(), ((TestLogger)nodeLogger).getEventBuilderFactory());;
+        assertEquals(InfoLoggingEventFactory.singleton(), ((TestLogger)nodeLogger).getEventBuilderFactory());
 
         var finalLogger = cache.find(new String[]{"com", "github", "hkupty", "maple", "LeLogger"});
         assertNotNull(finalLogger);
-        assertEquals(WarnLoggingEventFactory.singleton(), ((TestLogger)finalLogger).getEventBuilderFactory());;
+        assertEquals(WarnLoggingEventFactory.singleton(), ((TestLogger)finalLogger).getEventBuilderFactory());
     }
     @Test
     void canRecursivelyUpdateAllChildren() {
@@ -60,24 +61,24 @@ public class TreeCacheTests {
                 (baseLogger, partialIdentifier) ->
                         new TestLogger(String.join(".", partialIdentifier))
         );
-        cache.updateLoggerEventFactory(new String[]{}, WarnLoggingEventFactory.singleton());
+        cache.updateConfig(new String[]{}, old -> old.copy(Level.WARN));
 
         var rootLogger = cache.find(new String[]{"com"});
         assertNotNull(rootLogger);
-        assertEquals(WarnLoggingEventFactory.singleton(), ((TestLogger)rootLogger).getEventBuilderFactory());;
+        assertEquals(WarnLoggingEventFactory.singleton(), ((TestLogger)rootLogger).getEventBuilderFactory());
 
         var nodeLogger = cache.find(new String[]{"com"});
         assertNotNull(nodeLogger);
-        assertEquals(WarnLoggingEventFactory.singleton(), ((TestLogger)nodeLogger).getEventBuilderFactory());;
+        assertEquals(WarnLoggingEventFactory.singleton(), ((TestLogger)nodeLogger).getEventBuilderFactory());
 
         var finalLogger = cache.find(new String[]{"com", "github", "hkupty", "maple", "LeLogger"});
         assertNotNull(finalLogger);
-        assertEquals(WarnLoggingEventFactory.singleton(), ((TestLogger)finalLogger).getEventBuilderFactory());;
+        assertEquals(WarnLoggingEventFactory.singleton(), ((TestLogger)finalLogger).getEventBuilderFactory());
     }
 
     @Test
     void testLog() {
-        var logger = new ProxyLogger( "", Config.getDefault() );
+        var logger = new MapleLogger( "", Config.getDefault() );
         logger.atInfo().log("stuff");
     }
 

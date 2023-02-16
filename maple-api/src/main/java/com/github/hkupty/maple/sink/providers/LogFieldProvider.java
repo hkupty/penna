@@ -8,4 +8,5 @@ import java.io.IOException;
 @FunctionalInterface
 public interface LogFieldProvider {
     void logField(Sink.SinkWriter generator, JsonLog log);
+
 }

@@ -1,7 +1,6 @@
-package com.github.hkupty.maple.logger.event;
+package com.github.hkupty.maple.logger.factory;
 
-import com.github.hkupty.maple.logger.BaseLogger;
-import org.slf4j.Logger;
+import com.github.hkupty.maple.logger.MapleLogger;
 import org.slf4j.spi.LoggingEventBuilder;
 import org.slf4j.spi.NOPLoggingEventBuilder;
 
@@ -18,7 +17,7 @@ public class NOPLoggingEventFactory implements LoggingEventBuilderFactory {
     }
 
     @Override
-    public LoggingEventBuilder trace(BaseLogger logger) {
+    public LoggingEventBuilder trace(MapleLogger logger) {
         return NOPLoggingEventBuilder.singleton();
     }
 
@@ -28,7 +27,7 @@ public class NOPLoggingEventFactory implements LoggingEventBuilderFactory {
     }
 
     @Override
-    public LoggingEventBuilder debug(BaseLogger logger) {
+    public LoggingEventBuilder debug(MapleLogger logger) {
         return NOPLoggingEventBuilder.singleton();
     }
 
@@ -38,7 +37,7 @@ public class NOPLoggingEventFactory implements LoggingEventBuilderFactory {
     }
 
     @Override
-    public LoggingEventBuilder info(BaseLogger logger) {
+    public LoggingEventBuilder info(MapleLogger logger) {
         return NOPLoggingEventBuilder.singleton();
     }
 
@@ -48,7 +47,7 @@ public class NOPLoggingEventFactory implements LoggingEventBuilderFactory {
     }
 
     @Override
-    public LoggingEventBuilder warn(BaseLogger logger) {
+    public LoggingEventBuilder warn(MapleLogger logger) {
         return NOPLoggingEventBuilder.singleton();
     }
 
@@ -58,5 +57,5 @@ public class NOPLoggingEventFactory implements LoggingEventBuilderFactory {
     }
 
     @Override
-    public LoggingEventBuilder error(BaseLogger logger) { return NOPLoggingEventBuilder.singleton(); }
+    public LoggingEventBuilder error(MapleLogger logger) { return NOPLoggingEventBuilder.singleton(); }
 }

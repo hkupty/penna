@@ -1,34 +1,50 @@
 package com.github.hkupty.maple.logger;
 
+import com.github.hkupty.maple.logger.provider.DataFrameProvider;
+import com.github.hkupty.maple.logger.provider.ProviderFactory;
+import com.github.hkupty.maple.models.frames.DataFrame;
 import com.github.hkupty.maple.slf4j.impl.Config;
 import com.github.hkupty.maple.sink.Sink;
-import com.github.hkupty.maple.logger.event.LoggingEventBuilderFactory;
-import com.github.hkupty.maple.minilog.MiniLogger;
-import com.github.hkupty.maple.models.JsonLog;
+import com.github.hkupty.maple.logger.factory.LoggingEventBuilderFactory;
 import com.github.hkupty.maple.sink.SinkFactory;
-import com.github.hkupty.maple.sink.providers.LogFieldProvider;
 import org.slf4j.Logger;
 import org.slf4j.Marker;
 import org.slf4j.event.LoggingEvent;
 import org.slf4j.spi.LoggingEventAware;
 import org.slf4j.spi.LoggingEventBuilder;
 
-import java.io.IOException;
+import java.util.Arrays;
 
-import static com.github.hkupty.maple.logger.LogEventAdapter.transform;
+public class MapleLogger implements Logger, LoggingEventAware {
+    private transient final String name;
+    private transient LoggingEventBuilderFactory eventBuilderFactory;
+    private transient DataFrameProvider[] providers;
 
-public class ProxyLogger extends BaseLogger implements Logger, LoggingEventAware {
+    private transient Config config;
 
     private final Sink sink;
 
-    public ProxyLogger(String name, LogFieldProvider[] providers, LoggingEventBuilderFactory eventBuilderFactory) {
-        super(name, eventBuilderFactory);
-        sink = SinkFactory.getSink(providers);
+    public MapleLogger(String name, Config config) {
+        this.name = name;
+        sink = SinkFactory.getSink();
+        this.updateConfig(config);
     }
 
-    public ProxyLogger(String name, Config config) {
-        this(name, config.providers(), config.factory());
+
+    public LoggingEventBuilderFactory getEventBuilderFactory() {
+        return eventBuilderFactory;
     }
+
+    public void updateConfig(Config config) {
+        eventBuilderFactory = config.factory();
+        providers = ProviderFactory.getProviders(this, config.fields());
+        this.config = config;
+    }
+
+    public Config getConfig() {
+        return config;
+    }
+
 
 
     @Override
@@ -355,14 +371,16 @@ public class ProxyLogger extends BaseLogger implements Logger, LoggingEventAware
 
     @Override
     public void log(LoggingEvent event) {
-        try {
-            if (event instanceof JsonLog jsonLog) {
-                sink.render(jsonLog);
-            } else {
-                sink.render(transform(event));
+        var frames = new DataFrame<?>[providers.length];
+        var limit = 0;
+        for(int i = 0; i < providers.length; i++) {
+            DataFrame frame;
+            if ((frame = providers[i].get(event)) != null) {
+                frames[limit] = frame;
+                limit += 1;
             }
-        } catch (IOException ex)  {
-            MiniLogger.error("Unable to log", ex);
         }
+
+        sink.render(Arrays.copyOf(frames, limit));
     }
 }

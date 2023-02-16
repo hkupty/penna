@@ -5,10 +5,11 @@ import com.github.hkupty.maple.sink.providers.LogFieldProvider;
 
 import java.io.IOException;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class SinkFactory {
 
-    private static Function<LogFieldProvider[], Sink> factoryFunction;
+    private static Supplier<Sink> factoryFunction;
     private static ClassLoader cl;
 
     private static void initCl() {
@@ -17,7 +18,7 @@ public class SinkFactory {
         }
     }
 
-    private static Function<LogFieldProvider[], Sink> getJacksonSink() {
+    private static Supplier<Sink> getJacksonSink() {
         initCl();
         try {
             Class.forName("com.fasterxml.jackson.core.JsonGenerator", false, cl);
@@ -27,7 +28,7 @@ public class SinkFactory {
         return JacksonSink::new;
     }
 
-    private static Function<LogFieldProvider[], Sink> getJakartaSink() {
+    private static Supplier<Sink> getJakartaSink() {
         initCl();
         try {
             Class.forName("jakarta.json.stream.JsonGenerator", false, cl);
@@ -37,19 +38,22 @@ public class SinkFactory {
         return JakartaSink::new;
     }
 
-    public static synchronized void getSinkClass() {
+    public static synchronized Supplier<Sink> getSinkClass() {
         if (factoryFunction == null) {
             factoryFunction = getJacksonSink();
         }
+
         if (factoryFunction == null) {
             factoryFunction = getJakartaSink();
         }
+
+        return factoryFunction;
     }
 
-    public static Sink getSink(LogFieldProvider[] providers) {
+    public static Sink getSink() {
         if (factoryFunction == null) {
             getSinkClass();
         }
-        return factoryFunction.apply(providers);
+        return factoryFunction.get();
     }
 }

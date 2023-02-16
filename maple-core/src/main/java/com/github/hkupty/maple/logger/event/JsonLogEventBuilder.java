@@ -1,8 +1,7 @@
 package com.github.hkupty.maple.logger.event;
 
-import com.github.hkupty.maple.logger.BaseLogger;
+import com.github.hkupty.maple.logger.MapleLogger;
 import com.github.hkupty.maple.models.JsonLog;
-import org.slf4j.MDC;
 import org.slf4j.Marker;
 import org.slf4j.event.KeyValuePair;
 import org.slf4j.event.Level;
@@ -11,6 +10,7 @@ import org.slf4j.spi.LoggingEventBuilder;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.function.Supplier;
 
 public class JsonLogEventBuilder implements LoggingEventBuilder {
@@ -24,24 +24,18 @@ public class JsonLogEventBuilder implements LoggingEventBuilder {
     private transient ArrayList<KeyValuePair> keyValuePairs;
     private transient ArrayList<Object> arguments;
     private transient String message;
-    private transient final long timestamp;
     private transient Throwable throwable;
-    private transient final BaseLogger logger;
+    private transient final MapleLogger logger;
 
 
-    public JsonLogEventBuilder(BaseLogger logger, Level level) {
+    public JsonLogEventBuilder(MapleLogger logger, Level level) {
         this.level = level;
         this.logger = logger;
-
-        // TODO revisit
-        this.timestamp = System.currentTimeMillis();
     }
-
 
     @Override
     public LoggingEventBuilder setCause(Throwable cause) {
         this.throwable = cause;
-
         return this;
     }
 
@@ -55,7 +49,6 @@ public class JsonLogEventBuilder implements LoggingEventBuilder {
     @Override
     public LoggingEventBuilder addMarker(Marker marker) {
         getMarkers().add(marker);
-
         return this;
     }
 
@@ -68,21 +61,23 @@ public class JsonLogEventBuilder implements LoggingEventBuilder {
 
     @Override
     public LoggingEventBuilder addArgument(Object p) {
-        getArgumentsList().add(p);
-
+        if (p instanceof Throwable throwable) {
+            setCause(throwable);
+        } else {
+            getArgumentsList().add(p);
+        }
         return this;
     }
 
     @Override
     public LoggingEventBuilder addArgument(Supplier<?> objectSupplier) {
         getArgumentsList().add(objectSupplier.get());
-
         return this;
     }
 
     private ArrayList<KeyValuePair> getKeyValueList() {
         if (this.keyValuePairs == null) {
-            this.keyValuePairs = new ArrayList<KeyValuePair>();
+            this.keyValuePairs = new ArrayList<>();
         }
         return this.keyValuePairs;
     }
@@ -115,15 +110,11 @@ public class JsonLogEventBuilder implements LoggingEventBuilder {
     private JsonLog build() {
         return new JsonLog(
                 arguments != null ? arguments.toArray(baseObjects) : baseObjects,
-                level.name(),
-                logger.getName(),
+                level,
                 markers != null ? markers.toArray(baseMarkers) : baseMarkers,
                 keyValuePairs != null ? keyValuePairs.toArray(baseKeyValues) : baseKeyValues,
                 message,
-                "pedro",
-                throwable,
-                timestamp,
-                MDC.getCopyOfContextMap()
+                throwable
         );
     }
 
