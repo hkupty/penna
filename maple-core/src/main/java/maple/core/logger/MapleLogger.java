@@ -1,0 +1,383 @@
+package maple.core.logger;
+
+import maple.api.logger.IMapleLogger;
+import maple.api.models.Config;
+import maple.api.models.LogField;
+import maple.api.models.MapleLogEvent;
+import maple.core.logger.event.JsonLogEventBuilder;
+import maple.core.logger.guard.LevelGuard;
+import maple.core.sink.SinkQueue;
+import maple.core.sink.SinkService;
+import org.slf4j.Marker;
+import org.slf4j.event.LoggingEvent;
+import org.slf4j.spi.LoggingEventBuilder;
+
+
+public class MapleLogger implements IMapleLogger {
+
+    private transient final String name;
+    private transient LevelGuard eventBuilderFactory;
+    private transient Config config;
+
+    private final SinkQueue queue;
+
+    public MapleLogger(String name, Config config) {
+        // We're using a small pool because at any point, each thread will be using only a single object.
+        // Still, might not be wise to hold a single reference per thread.
+        this.name = name;
+        queue = SinkService.getQueue();
+        this.updateConfig(config);
+    }
+
+
+    public LevelGuard getEventBuilderFactory() {
+        return eventBuilderFactory;
+    }
+
+    @Override
+    public LogField[] getFieldsToLog() {
+        return config.fields();
+    }
+
+    public void updateConfig(Config config) {
+        eventBuilderFactory = LevelGuard.FromConfig.get(config);
+        this.config = config;
+    }
+
+    public Config getConfig() {
+        return config;
+    }
+
+
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public LoggingEventBuilder atTrace() { return eventBuilderFactory.trace(this); }
+
+    @Override
+    public boolean isTraceEnabled() {
+        return eventBuilderFactory.isTraceEnabled();
+    }
+
+    @Override
+    public void trace(String msg) {
+        atTrace().log(msg);
+    }
+
+    @Override
+    public void trace(String format, Object arg) {
+        atTrace().log(format, arg);
+    }
+
+    @Override
+    public void trace(String format, Object arg1, Object arg2) {
+        atTrace().log(format, arg1, arg2);
+    }
+
+    @Override
+    public void trace(String format, Object... arguments) {
+        atTrace().log(format, arguments);
+    }
+
+    @Override
+    public void trace(String msg, Throwable t) {
+        atTrace().setCause(t).log(msg);
+    }
+
+    @Override
+    public boolean isTraceEnabled(Marker marker) {
+        return eventBuilderFactory.isTraceEnabled();
+    }
+
+    @Override
+    public void trace(Marker marker, String msg) {
+        atTrace().addMarker(marker).log(msg);
+    }
+
+    @Override
+    public void trace(Marker marker, String format, Object arg) {
+        atTrace().addMarker(marker).log(format, arg);
+    }
+
+    @Override
+    public void trace(Marker marker, String format, Object arg1, Object arg2) {
+        atTrace().addMarker(marker).log(format, arg1, arg2);
+    }
+
+    @Override
+    public void trace(Marker marker, String format, Object... argArray) {
+        atTrace().addMarker(marker).log(format, argArray);
+    }
+
+    @Override
+    public void trace(Marker marker, String msg, Throwable t) {
+        atTrace().addMarker(marker).setCause(t).log(msg);
+    }
+
+    @Override
+    public LoggingEventBuilder atDebug() { return eventBuilderFactory.debug(this); }
+
+    @Override
+    public boolean isDebugEnabled() {
+        return eventBuilderFactory.isDebugEnabled();
+    }
+
+    @Override
+    public void debug(String msg) {
+        atDebug().log(msg);
+    }
+
+    @Override
+    public void debug(String format, Object arg) {
+        atDebug().log(format, arg);
+    }
+
+    @Override
+    public void debug(String format, Object arg1, Object arg2) {
+        atDebug().log(format, arg1, arg2);
+    }
+
+    @Override
+    public void debug(String format, Object... arguments) {
+        atDebug().log(format, arguments);
+    }
+
+    @Override
+    public void debug(String msg, Throwable t) {
+        atDebug().setCause(t).log(msg);
+    }
+
+    @Override
+    public boolean isDebugEnabled(Marker marker) {
+        return eventBuilderFactory.isDebugEnabled();
+    }
+
+    @Override
+    public void debug(Marker marker, String msg) {
+        atDebug().addMarker(marker).log(msg);
+    }
+
+    @Override
+    public void debug(Marker marker, String format, Object arg) {
+        atDebug().addMarker(marker).log(format, arg);
+    }
+
+    @Override
+    public void debug(Marker marker, String format, Object arg1, Object arg2) {
+        atDebug().addMarker(marker).log(format, arg1, arg2);
+    }
+
+    @Override
+    public void debug(Marker marker, String format, Object... arguments) {
+        atDebug().addMarker(marker).log(format, arguments);
+    }
+
+    @Override
+    public void debug(Marker marker, String msg, Throwable t) {
+        atDebug().addMarker(marker).setCause(t).log(msg);
+    }
+
+    @Override
+    public LoggingEventBuilder atInfo() { return eventBuilderFactory.info(this); }
+
+    @Override
+    public boolean isInfoEnabled() {
+        return eventBuilderFactory.isInfoEnabled();
+    }
+
+    @Override
+    public void info(String msg) {
+        atInfo().log(msg);
+    }
+
+    @Override
+    public void info(String format, Object arg) {
+        atInfo().log(format, arg);
+    }
+
+    @Override
+    public void info(String format, Object arg1, Object arg2) {
+        atInfo().log(format, arg1, arg2);
+    }
+
+    @Override
+    public void info(String format, Object... arguments) {
+        atInfo().log(format, arguments);
+    }
+
+    @Override
+    public void info(String msg, Throwable t) {
+        atInfo().setCause(t).log(msg);
+    }
+
+    @Override
+    public boolean isInfoEnabled(Marker marker) {
+        return eventBuilderFactory.isInfoEnabled();
+    }
+
+    @Override
+    public void info(Marker marker, String msg) {
+        atInfo().addMarker(marker).log(msg);
+    }
+
+    @Override
+    public void info(Marker marker, String format, Object arg) {
+        atInfo().addMarker(marker).log(format, arg);
+    }
+
+    @Override
+    public void info(Marker marker, String format, Object arg1, Object arg2) {
+        atInfo().addMarker(marker).log(format, arg1, arg2);
+    }
+
+    @Override
+    public void info(Marker marker, String format, Object... arguments) {
+        atInfo().addMarker(marker).log(format, arguments);
+    }
+
+    @Override
+    public void info(Marker marker, String msg, Throwable t) {
+        atInfo().addMarker(marker).setCause(t).log(msg);
+    }
+
+    @Override
+    public LoggingEventBuilder atWarn() { return eventBuilderFactory.warn(this); }
+
+    @Override
+    public boolean isWarnEnabled() {
+        return eventBuilderFactory.isWarnEnabled();
+    }
+
+    @Override
+    public void warn(String msg) {
+        atWarn().log(msg);
+    }
+
+    @Override
+    public void warn(String format, Object arg) {
+        atWarn().log(format, arg);
+    }
+
+    @Override
+    public void warn(String format, Object arg1, Object arg2) {
+        atWarn().log(format, arg1, arg2);
+    }
+
+    @Override
+    public void warn(String format, Object... arguments) {
+        atWarn().log(format, arguments);
+    }
+
+    @Override
+    public void warn(String msg, Throwable t) {
+        atWarn().setCause(t).log(msg);
+    }
+
+    @Override
+    public boolean isWarnEnabled(Marker marker) {
+        return eventBuilderFactory.isWarnEnabled();
+    }
+
+    @Override
+    public void warn(Marker marker, String msg) {
+        atWarn().addMarker(marker).log(msg);
+    }
+
+    @Override
+    public void warn(Marker marker, String format, Object arg) {
+        atWarn().addMarker(marker).log(format, arg);
+    }
+
+    @Override
+    public void warn(Marker marker, String format, Object arg1, Object arg2) {
+        atWarn().addMarker(marker).log(format, arg1, arg2);
+
+    }
+
+    @Override
+    public void warn(Marker marker, String format, Object... arguments) {
+        atWarn().addMarker(marker).log(format, arguments);
+    }
+
+    @Override
+    public void warn(Marker marker, String msg, Throwable t) {
+        atWarn().addMarker(marker).setCause(t).log(msg);
+    }
+
+    @Override
+    public LoggingEventBuilder atError() { return eventBuilderFactory.error(this); }
+
+    @Override
+    public boolean isErrorEnabled() {
+        return eventBuilderFactory.isErrorEnabled();
+    }
+
+    @Override
+    public void error(String msg) {
+        atError().log(msg);
+    }
+
+    @Override
+    public void error(String format, Object arg) {
+        atError().log(format, arg);
+    }
+
+    @Override
+    public void error(String format, Object arg1, Object arg2) {
+        atError().log(format, arg1, arg2);
+    }
+
+    @Override
+    public void error(String format, Object... arguments) {
+        atError().log(format, arguments);
+    }
+
+    @Override
+    public void error(String msg, Throwable t) {
+        atError().setCause(t).log(msg);
+    }
+
+    @Override
+    public boolean isErrorEnabled(Marker marker) {
+        return eventBuilderFactory.isErrorEnabled();
+    }
+
+    @Override
+    public void error(Marker marker, String msg) {
+        atError().addMarker(marker).log(msg);
+    }
+
+    @Override
+    public void error(Marker marker, String format, Object arg) {
+        atError().addMarker(marker).log(format, arg);
+    }
+
+    @Override
+    public void error(Marker marker, String format, Object arg1, Object arg2) {
+        atError().addMarker(marker).log(format, arg1, arg2);
+    }
+
+    @Override
+    public void error(Marker marker, String format, Object... arguments) {
+        atError().addMarker(marker).log(format, arguments);
+    }
+
+    @Override
+    public void error(Marker marker, String msg, Throwable t) {
+        atError().addMarker(marker).setCause(t).log(msg);
+    }
+
+    @Override
+    public void log(MapleLogEvent log) {
+        queue.enqueue(log);
+    }
+
+    @Override
+    public void log(LoggingEvent event) {
+        log(JsonLogEventBuilder.Factory.fromLoggingEvent(event));
+    }
+}

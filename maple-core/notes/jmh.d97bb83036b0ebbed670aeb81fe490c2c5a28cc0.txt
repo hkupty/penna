@@ -1,0 +1,24 @@
+Benchmark                                   Mode  Cnt     Score     Error   Units
+Reference.aMapleEvent                       avgt    5  4265.346 ± 375.957   ns/op
+Reference.aMapleEvent:·gc.alloc.rate        avgt    5    23.954 ±   2.061  MB/sec
+Reference.aMapleEvent:·gc.alloc.rate.norm   avgt    5   107.094 ±   0.259    B/op
+Reference.aMapleEvent:·gc.count             avgt    5     4.000            counts
+Reference.aMapleEvent:·gc.time              avgt    5     4.000                ms
+Reference.aMapleEvent:·stack                avgt            NaN               ---
+Reference.logbackEvent                      avgt    5  3238.826 ± 518.584   ns/op
+Reference.logbackEvent:·gc.alloc.rate       avgt    5   767.319 ± 119.880  MB/sec
+Reference.logbackEvent:·gc.alloc.rate.norm  avgt    5  2602.490 ±   0.373    B/op
+Reference.logbackEvent:·gc.count            avgt    5   130.000            counts
+Reference.logbackEvent:·gc.time             avgt    5    71.000                ms
+Reference.logbackEvent:·stack               avgt            NaN               ---
+Reference.logbackLog                        avgt    5  3207.123 ± 379.399   ns/op
+Reference.logbackLog:·gc.alloc.rate         avgt    5   750.631 ±  88.293  MB/sec
+Reference.logbackLog:·gc.alloc.rate.norm    avgt    5  2522.467 ±   0.283    B/op
+Reference.logbackLog:·gc.count              avgt    5   127.000            counts
+Reference.logbackLog:·gc.time               avgt    5    72.000                ms
+Reference.logbackLog:·stack                 avgt            NaN               ---
+Reference.mapleLog                          avgt    5  4339.735 ± 527.446   ns/op
+Reference.mapleLog:·gc.alloc.rate           avgt    5     0.698 ±   0.004  MB/sec
+Reference.mapleLog:·gc.alloc.rate.norm      avgt    5     3.177 ±   0.372    B/op
+Reference.mapleLog:·gc.count                avgt    5       ≈ 0            counts
+Reference.mapleLog:·stack                   avgt            NaN               ---

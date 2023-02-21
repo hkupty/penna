@@ -30,6 +30,14 @@ rate of failure, time of the day or % of resources being used.
 While figuring out those rules is something out of the scope of Maple, being able to toggle different log levels
 to different loggers programmatically should definitely be in scope.
 
+## Low memory footprint
+[_metadata_:established-version]:- "0.1"
+[_metadata_:target-version]:- "1.0"
+As a logging library, maple shouldn't cause impact in you application.
+Given that logging json messages can be expensive, maple goes the extra mile to ensure it doesn't cause significant
+impacts. That last thing one would want is to have increased GC pauses after adding a logging library.
+
+
 # Architecture
 
 Maple architecture consists of basically default implementations of SLF4j interfaces, with a few extra components

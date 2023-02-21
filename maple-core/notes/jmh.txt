@@ -1,0 +1,7 @@
+Benchmark                                  Mode  Cnt     Score      Error   Units
+Reference.aMapleEvent                      avgt    5  7799.096 ± 2294.272   ns/op
+Reference.aMapleEvent:·gc.alloc.rate       avgt    5     0.563 ±    0.005  MB/sec
+Reference.aMapleEvent:·gc.alloc.rate.norm  avgt    5     4.607 ±    1.315    B/op
+Reference.aMapleEvent:·gc.count            avgt    5     1.000             counts
+Reference.aMapleEvent:·gc.time             avgt    5     2.000                 ms
+Reference.aMapleEvent:·stack               avgt            NaN                ---

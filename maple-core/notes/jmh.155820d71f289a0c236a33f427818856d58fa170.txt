@@ -1,0 +1,25 @@
+Benchmark                                   Mode  Cnt     Score      Error   Units
+Reference.aMapleEvent                       avgt    5  4476.560 ± 1174.101   ns/op
+Reference.aMapleEvent:·gc.alloc.rate        avgt    5    22.907 ±    5.659  MB/sec
+Reference.aMapleEvent:·gc.alloc.rate.norm   avgt    5   107.154 ±    0.787    B/op
+Reference.aMapleEvent:·gc.count             avgt    5     4.000             counts
+Reference.aMapleEvent:·gc.time              avgt    5     5.000                 ms
+Reference.aMapleEvent:·stack                avgt            NaN                ---
+Reference.logbackEvent                      avgt    5  3254.223 ±  282.248   ns/op
+Reference.logbackEvent:·gc.alloc.rate       avgt    5   762.975 ±   65.333  MB/sec
+Reference.logbackEvent:·gc.alloc.rate.norm  avgt    5  2602.509 ±    0.218    B/op
+Reference.logbackEvent:·gc.count            avgt    5   130.000             counts
+Reference.logbackEvent:·gc.time             avgt    5    64.000                 ms
+Reference.logbackEvent:·stack               avgt            NaN                ---
+Reference.logbackLog                        avgt    5  3226.163 ±  373.465   ns/op
+Reference.logbackLog:·gc.alloc.rate         avgt    5   746.189 ±   86.253  MB/sec
+Reference.logbackLog:·gc.alloc.rate.norm    avgt    5  2522.493 ±    0.270    B/op
+Reference.logbackLog:·gc.count              avgt    5   127.000             counts
+Reference.logbackLog:·gc.time               avgt    5    69.000                 ms
+Reference.logbackLog:·stack                 avgt            NaN                ---
+Reference.mapleLog                          avgt    5  4109.380 ±  266.351   ns/op
+Reference.mapleLog:·gc.alloc.rate           avgt    5    13.678 ±    0.833  MB/sec
+Reference.mapleLog:·gc.alloc.rate.norm      avgt    5    58.926 ±    0.192    B/op
+Reference.mapleLog:·gc.count                avgt    5     2.000             counts
+Reference.mapleLog:·gc.time                 avgt    5     2.000                 ms
+Reference.mapleLog:·stack                   avgt            NaN                ---

@@ -1,4 +1,5 @@
 plugins {
+    id 'java-library'
     id 'maple.base-java'
     id 'maple.jmh'
     // id 'pmd'
@@ -12,7 +13,8 @@ dependencies {
     compileOnly 'com.fasterxml.jackson.core:jackson-core:2.14.2'
     compileOnly 'jakarta.json:jakarta.json-api:2.1.1'
 
-     jmhRuntimeOnly 'com.fasterxml.jackson.core:jackson-core:2.14.2'
+    jmhRuntimeOnly 'com.fasterxml.jackson.core:jackson-core:2.14.2'
+    jmhRuntimeOnly 'com.fasterxml.jackson.core:jackson-databind:2.14.2'
 
     // Testing jakarta sink
 //    jmhImplementation 'jakarta.json:jakarta.json-api:2.1.1'
@@ -26,12 +28,21 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
     testRuntimeOnly 'com.fasterxml.jackson.core:jackson-core:2.14.2'
+    testRuntimeOnly 'com.fasterxml.jackson.core:jackson-databind:2.14.2'
 }
+
+
+tasks.named('compileJava') {
+    // use the project's version or define one directly
+    options.javaModuleVersion = provider { project.version }
+}
+
+
 
 test {
     useJUnitPlatform()
 }
 
 jmh {
-    args = ["-prof", "stack", "-prof", "gc", "-rf", "text", "-rff", "build/jmh.txt"]
+    args = ["-prof", "gc", "-rf", "text", "-rff", "build/jmh.txt"]
 }

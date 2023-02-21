@@ -13,4 +13,6 @@ buildscript {
 rootProject.name = 'maple'
 include "maple-api"
 include "maple-core"
+include 'sample'
+include 'direct-sample'
 
