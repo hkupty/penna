@@ -19,3 +19,5 @@ include 'throughput'
 include 'maple-yaml-config'
 
 project(":throughput").projectDir = file("tests/throughput")
+include 'playground'
+
