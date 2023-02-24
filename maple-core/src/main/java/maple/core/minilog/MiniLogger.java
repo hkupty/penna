@@ -1,11 +1,14 @@
 package maple.core.minilog;
 
 public class MiniLogger {
-    public static void error(String message, Throwable throwable) {
+    public static void error(String message) {
         System.err.print("[:Maple.MiniLogger/Error \"");
         System.err.print(message);
         System.err.println("\"]");
-        System.err.println();
+    }
+
+    public static void error(String message, Throwable throwable) {
+        error(message);
         System.err.print("[:Maple.MiniLogger/Exception ");
         System.err.println(throwable.getMessage());
         var stack = throwable.getStackTrace();

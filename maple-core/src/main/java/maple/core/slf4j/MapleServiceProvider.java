@@ -1,5 +1,7 @@
 package maple.core.slf4j;
 
+import maple.api.config.ConfigManager;
+import maple.core.config.ConfigManagerFactory;
 import org.slf4j.ILoggerFactory;
 import org.slf4j.IMarkerFactory;
 import org.slf4j.helpers.BasicMDCAdapter;
@@ -7,7 +9,7 @@ import org.slf4j.helpers.BasicMarkerFactory;
 import org.slf4j.spi.MDCAdapter;
 import org.slf4j.spi.SLF4JServiceProvider;
 
-public class MapleServiceProvider implements SLF4JServiceProvider {
+public final class MapleServiceProvider implements SLF4JServiceProvider {
 
     /**
      * Declare the version of the SLF4J API this implementation is compiled
@@ -41,7 +43,12 @@ public class MapleServiceProvider implements SLF4JServiceProvider {
 
     @Override
     public void initialize() {
-        loggerFactory = new MapleLoggerFactory();
+        ConfigManager manager = ConfigManagerFactory.getConfigManager();
+        MapleLoggerFactory mapleLoggerFactory = MapleLoggerFactory.getInstance();
+        manager.bind(mapleLoggerFactory);
+        manager.configure();
+
+        this.loggerFactory = mapleLoggerFactory;
         markerFactory = new BasicMarkerFactory();
         mdcAdapter = new BasicMDCAdapter();
     }

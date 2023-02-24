@@ -2,45 +2,103 @@ package maple.core.sink.impl;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonGenerator.Feature;
 import com.fasterxml.jackson.core.json.JsonWriteFeature;
 import maple.api.models.LogField;
-import maple.api.models.MapleLogEvent;
+import maple.core.models.MapleLogEvent;
+import maple.core.internals.ThreadCreator;
 import maple.core.sink.SinkImpl;
+import maple.core.sink.impl.jackson.NOPPrettyPrinter;
 import org.slf4j.MDC;
 import org.slf4j.event.Level;
 
 import java.io.IOException;
-import java.io.OutputStream;
-import java.util.EnumMap;
+import java.io.Writer;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.locks.LockSupport;
 
-public class JacksonMapleSink implements SinkImpl {
-    private static final EnumMap<Level, String> levelMapping = new EnumMap<>(Level.class);
-    private static final int MAX_STACK_DEPTH = 15;
+public final class JacksonMapleSink implements SinkImpl {
+    private static final String LINE_BREAK = System.getProperty("line.separator");
+    private static final String[] LEVEL_MAPPING = new String[5];
 
     static {
-        levelMapping.put(Level.TRACE, "trace");
-        levelMapping.put(Level.DEBUG, "debug");
-        levelMapping.put(Level.INFO, "info");
-        levelMapping.put(Level.WARN, "warn");
-        levelMapping.put(Level.ERROR, "error");
+        LEVEL_MAPPING[Level.TRACE.ordinal()] = "TRACE";
+        LEVEL_MAPPING[Level.DEBUG.ordinal()] = "DEBUG";
+        LEVEL_MAPPING[Level.INFO.ordinal()] = "INFO";
+        LEVEL_MAPPING[Level.WARN.ordinal()] = "WARN";
+        LEVEL_MAPPING[Level.ERROR.ordinal()] = "ERROR";
     }
-    private AtomicLong counter = new AtomicLong(0L);
+
+    /**
+     * The Emitter functional interface allows us to define the specific
+     * function signature `MapleLogEvent -> ()` that throws an exception without using generics.
+     * This, in itself, is not a huge advantage, but allows us to go for a very straightforward
+     * approach when writing the log messages, by picking the fields we want to write from the message
+     * based on {@link MapleLogEvent#fieldsToLog} and mapping to the appropriate function.
+     * <br />
+     * In {@link JacksonMapleSink}, it is defined as a local reference to each emit* method in an
+     * array, where each method is in the same position in the mapping array as the
+     * respective {@link LogField#ordinal()} for that log field.
+     * <br />
+     * In other words, we do a very fast lookup based on array position to determine which emit* methods to call,
+     * in which order.
+     */
+    @FunctionalInterface
+    private interface Emitter {
+        void apply(MapleLogEvent event) throws IOException;
+    }
+    private final Emitter[] emitters;
+    private static final int MAX_STACK_DEPTH = 15;
+
+    private final AtomicLong counter = new AtomicLong(0L);
+    private final AtomicLong timestamp = new AtomicLong(0L);
+
+    private final Thread timestampTicker;
+
     private JsonGenerator jsonGenerator;
 
-    public JacksonMapleSink() {}
+
+
+    public JacksonMapleSink() {
+        timestampTicker = ThreadCreator.newThread("maple-timestamp-ticker", () -> {
+          while (true)  {
+              timestamp.set(System.currentTimeMillis());
+              LockSupport.parkNanos(1_000_000);
+          }
+        });
+        timestampTicker.start();
+
+        // WARNING! Introducing new log fields requires this array to be updated.
+        emitters = new Emitter[LogField.values().length];
+        emitters[LogField.Counter.ordinal()] = this::emitCounter;
+        emitters[LogField.Timestamp.ordinal()] = this::emitTimestamp;
+        emitters[LogField.Level.ordinal()] = this::emitLevel;
+        emitters[LogField.Message.ordinal()] = this::emitMessage;
+        emitters[LogField.LoggerName.ordinal()] = this::emitLogger;
+        emitters[LogField.ThreadName.ordinal()] = this::emitThreadName;
+        emitters[LogField.MDC.ordinal()] = this::emitMDC;
+        emitters[LogField.Markers.ordinal()] = this::emitMarkers;
+        emitters[LogField.Throwable.ordinal()] = this::emitThrowable;
+        emitters[LogField.KeyValuePairs.ordinal()] = this::emitKeyValuePair;
+        emitters[LogField.Extra.ordinal()] = this::emitExtra;
+    }
 
     @Override
-    public void init(OutputStream os) throws IOException {
-        var factory = JsonFactory.builder()
+    public void init(Writer writer) throws IOException {
+        JsonFactory factory = JsonFactory.builder()
                 .enable(JsonWriteFeature.ESCAPE_NON_ASCII)
                 .build();
-        jsonGenerator = factory.createGenerator(os);
-        jsonGenerator.disable(com.fasterxml.jackson.core.JsonGenerator.Feature.STRICT_DUPLICATE_DETECTION);
-        jsonGenerator.disable(com.fasterxml.jackson.core.JsonGenerator.Feature.AUTO_CLOSE_JSON_CONTENT);
-        jsonGenerator.disable(com.fasterxml.jackson.core.JsonGenerator.Feature.FLUSH_PASSED_TO_STREAM);
+
+        jsonGenerator = factory.createGenerator(writer);
+        jsonGenerator.setPrettyPrinter(NOPPrettyPrinter.getInstance());
+        jsonGenerator.enable(Feature.FLUSH_PASSED_TO_STREAM);
+        jsonGenerator.disable(Feature.AUTO_CLOSE_TARGET);
+        jsonGenerator.disable(Feature.STRICT_DUPLICATE_DETECTION);
+        jsonGenerator.disable(Feature.AUTO_CLOSE_JSON_CONTENT);
+        // Initialize with an empty line break
+        jsonGenerator.writeRaw(LINE_BREAK);
     }
 
     private void writeThrowable(Throwable throwable) throws IOException {
@@ -116,7 +174,7 @@ public class JacksonMapleSink implements SinkImpl {
 
 
     private void emitTimestamp(MapleLogEvent logEvent) throws IOException {
-        jsonGenerator.writeNumberField(LogField.Timestamp.fieldName, System.currentTimeMillis());
+        jsonGenerator.writeNumberField(LogField.Timestamp.fieldName, timestamp.get());
     }
 
     private void emitMDC(MapleLogEvent logEvent) throws IOException {
@@ -135,7 +193,7 @@ public class JacksonMapleSink implements SinkImpl {
     }
 
     private void emitLevel(MapleLogEvent logEvent) throws IOException {
-        jsonGenerator.writeStringField(LogField.Level.fieldName, levelMapping.get(logEvent.level));
+        jsonGenerator.writeStringField(LogField.Level.fieldName, LEVEL_MAPPING[logEvent.level.ordinal()]);
     }
 
     private void emitThreadName(MapleLogEvent logEvent) throws IOException {
@@ -184,27 +242,13 @@ public class JacksonMapleSink implements SinkImpl {
         }
     }
 
-
     @Override
     public void write(MapleLogEvent logEvent) throws IOException {
         jsonGenerator.writeStartObject();
         for (int i = 0; i < logEvent.fieldsToLog.length; i++){
-            switch (logEvent.fieldsToLog[i]){
-                case Level -> emitLevel(logEvent);
-                case Counter -> emitCounter(logEvent);
-                case LoggerName -> emitLogger(logEvent);
-                case Message -> emitMessage(logEvent);
-                case Markers -> emitMarkers(logEvent);
-                case KeyValuePairs -> emitKeyValuePair(logEvent);
-                case ThreadName -> emitThreadName(logEvent);
-                case Timestamp -> emitTimestamp(logEvent);
-                case Throwable -> emitThrowable(logEvent);
-                case MDC -> emitMDC(logEvent);
-                case Extra -> emitExtra(logEvent);
-            }
+            emitters[logEvent.fieldsToLog[i].ordinal()].apply(logEvent);
         }
         jsonGenerator.writeEndObject();
-        jsonGenerator.writeRaw('\n');
         jsonGenerator.flush();
     }
 }

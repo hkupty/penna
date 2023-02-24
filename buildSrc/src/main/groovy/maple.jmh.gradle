@@ -3,7 +3,6 @@ sourceSets {
     java.srcDirs = ["src/jmh/java"]
     resources.srcDirs = ["src/jmh/resources"]
     compileClasspath += sourceSets.main.runtimeClasspath
-
   }
 }
 dependencies {

@@ -1,0 +1,13 @@
+maple:
+  level: debug
+  fields:
+    - message
+    - loggerName
+  loggers:
+    - com.stuff:
+      fields:
+        - timestamp
+      loggers:
+        - jinx:
+            fields:
+              - Counter

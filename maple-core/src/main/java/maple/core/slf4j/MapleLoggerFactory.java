@@ -1,28 +1,35 @@
 package maple.core.slf4j;
 
+import maple.api.config.ConfigManager;
+import maple.api.config.Configurable;
 import maple.core.logger.MapleLogger;
-import maple.api.models.Config;
+import maple.api.config.Config;
 import maple.core.logger.TreeCache;
 import org.slf4j.ILoggerFactory;
 import org.slf4j.Logger;
 
 import java.util.Objects;
-import java.util.function.Function;
 import java.util.regex.Pattern;
 
-public class MapleLoggerFactory implements ILoggerFactory {
+public final class MapleLoggerFactory implements ILoggerFactory, Configurable {
     private static final Pattern DOT_SPLIT = Pattern.compile("\\.");
-    private static final String[] rootPath = new String[] {};
+    private static final MapleLoggerFactory singleton = new MapleLoggerFactory();
     private transient final TreeCache cache;
-    private transient Config defaultConfig;
 
-    public MapleLoggerFactory(){
-        this(Config.getDefault());
+    public static MapleLoggerFactory getInstance(){
+        return singleton;
     }
 
-    public MapleLoggerFactory(Config config) {
-        this.defaultConfig = config;
-        var rootLogger = new MapleLogger("", defaultConfig);
+    @Override
+    public void configure(ConfigManager.ConfigItem[] configItems) {
+        for (int i = 0; i < configItems.length; i++) {
+            var config = configItems[i];
+            cache.updateConfig(config.loggerPath(), config.config());
+        }
+    }
+
+    private MapleLoggerFactory(){
+        var rootLogger = new MapleLogger("", Config.getDefault());
         cache = new TreeCache(rootLogger);
     }
 
@@ -39,31 +46,5 @@ public class MapleLoggerFactory implements ILoggerFactory {
                     });
         }
         return logger;
-    }
-
-    public void updateConfig(Config config) {
-        defaultConfig = config;
-        cache.updateConfig(rootPath, config);
-    }
-    public void updateConfig(Function<Config, Config> configUpdateFn) {
-        defaultConfig = configUpdateFn.apply(defaultConfig);
-        cache.updateConfig(rootPath, configUpdateFn);
-    }
-    public void updateConfig(String baseLogger, Config config) {
-        var path = DOT_SPLIT.split(baseLogger);
-        if (path.length == 1 && path[0].isEmpty()) {
-            updateConfig(config);
-        } else {
-            cache.updateConfig(path, config);
-        }
-    }
-
-    public void updateConfig(String baseLogger, Function<Config, Config> updateConfigFn) {
-        var path = DOT_SPLIT.split(baseLogger);
-        if (path.length == 1 && path[0].isEmpty()) {
-            updateConfig(updateConfigFn);
-        } else {
-            cache.updateConfig(path, updateConfigFn);
-        }
     }
 }

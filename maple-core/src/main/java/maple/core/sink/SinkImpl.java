@@ -1,11 +1,12 @@
 package maple.core.sink;
 
-import maple.api.models.MapleLogEvent;
+import maple.core.models.MapleLogEvent;
+import maple.core.sink.impl.JacksonMapleSink;
 
 import java.io.IOException;
-import java.io.OutputStream;
+import java.io.Writer;
 
-public interface SinkImpl {
-    void init(OutputStream os) throws IOException;
+public sealed interface SinkImpl permits JacksonMapleSink {
+    void init(Writer writer) throws IOException;
     void write(MapleLogEvent logEvent) throws IOException;
 }

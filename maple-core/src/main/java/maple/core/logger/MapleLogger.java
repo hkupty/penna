@@ -1,37 +1,28 @@
 package maple.core.logger;
 
-import maple.api.logger.IMapleLogger;
-import maple.api.models.Config;
+import maple.api.config.Config;
 import maple.api.models.LogField;
-import maple.api.models.MapleLogEvent;
-import maple.core.logger.event.JsonLogEventBuilder;
+import maple.core.models.MapleLogEvent;
 import maple.core.logger.guard.LevelGuard;
-import maple.core.sink.SinkQueue;
+import maple.core.logger.event.MapleLogEventBuilder;
+import maple.core.sink.SinkProxy;
 import maple.core.sink.SinkService;
 import org.slf4j.Marker;
 import org.slf4j.event.LoggingEvent;
 import org.slf4j.spi.LoggingEventBuilder;
 
 
-public class MapleLogger implements IMapleLogger {
+public final class MapleLogger implements IMapleLogger {
 
     private transient final String name;
-    private transient LevelGuard eventBuilderFactory;
+    private transient LevelGuard levelGuard;
     private transient Config config;
-
-    private final SinkQueue queue;
+    private final SinkProxy sink;
 
     public MapleLogger(String name, Config config) {
-        // We're using a small pool because at any point, each thread will be using only a single object.
-        // Still, might not be wise to hold a single reference per thread.
         this.name = name;
-        queue = SinkService.getQueue();
+        sink = SinkService.getProxy();
         this.updateConfig(config);
-    }
-
-
-    public LevelGuard getEventBuilderFactory() {
-        return eventBuilderFactory;
     }
 
     @Override
@@ -40,7 +31,7 @@ public class MapleLogger implements IMapleLogger {
     }
 
     public void updateConfig(Config config) {
-        eventBuilderFactory = LevelGuard.FromConfig.get(config);
+        levelGuard = LevelGuard.FromConfig.get(config);
         this.config = config;
     }
 
@@ -48,19 +39,17 @@ public class MapleLogger implements IMapleLogger {
         return config;
     }
 
-
-
     @Override
     public String getName() {
         return name;
     }
 
     @Override
-    public LoggingEventBuilder atTrace() { return eventBuilderFactory.trace(this); }
+    public LoggingEventBuilder atTrace() { return levelGuard.trace(this); }
 
     @Override
     public boolean isTraceEnabled() {
-        return eventBuilderFactory.isTraceEnabled();
+        return levelGuard.isTraceEnabled();
     }
 
     @Override
@@ -90,7 +79,7 @@ public class MapleLogger implements IMapleLogger {
 
     @Override
     public boolean isTraceEnabled(Marker marker) {
-        return eventBuilderFactory.isTraceEnabled();
+        return levelGuard.isTraceEnabled();
     }
 
     @Override
@@ -119,11 +108,11 @@ public class MapleLogger implements IMapleLogger {
     }
 
     @Override
-    public LoggingEventBuilder atDebug() { return eventBuilderFactory.debug(this); }
+    public LoggingEventBuilder atDebug() { return levelGuard.debug(this); }
 
     @Override
     public boolean isDebugEnabled() {
-        return eventBuilderFactory.isDebugEnabled();
+        return levelGuard.isDebugEnabled();
     }
 
     @Override
@@ -153,7 +142,7 @@ public class MapleLogger implements IMapleLogger {
 
     @Override
     public boolean isDebugEnabled(Marker marker) {
-        return eventBuilderFactory.isDebugEnabled();
+        return levelGuard.isDebugEnabled();
     }
 
     @Override
@@ -182,11 +171,11 @@ public class MapleLogger implements IMapleLogger {
     }
 
     @Override
-    public LoggingEventBuilder atInfo() { return eventBuilderFactory.info(this); }
+    public LoggingEventBuilder atInfo() { return levelGuard.info(this); }
 
     @Override
     public boolean isInfoEnabled() {
-        return eventBuilderFactory.isInfoEnabled();
+        return levelGuard.isInfoEnabled();
     }
 
     @Override
@@ -216,7 +205,7 @@ public class MapleLogger implements IMapleLogger {
 
     @Override
     public boolean isInfoEnabled(Marker marker) {
-        return eventBuilderFactory.isInfoEnabled();
+        return levelGuard.isInfoEnabled();
     }
 
     @Override
@@ -245,11 +234,11 @@ public class MapleLogger implements IMapleLogger {
     }
 
     @Override
-    public LoggingEventBuilder atWarn() { return eventBuilderFactory.warn(this); }
+    public LoggingEventBuilder atWarn() { return levelGuard.warn(this); }
 
     @Override
     public boolean isWarnEnabled() {
-        return eventBuilderFactory.isWarnEnabled();
+        return levelGuard.isWarnEnabled();
     }
 
     @Override
@@ -279,7 +268,7 @@ public class MapleLogger implements IMapleLogger {
 
     @Override
     public boolean isWarnEnabled(Marker marker) {
-        return eventBuilderFactory.isWarnEnabled();
+        return levelGuard.isWarnEnabled();
     }
 
     @Override
@@ -295,7 +284,6 @@ public class MapleLogger implements IMapleLogger {
     @Override
     public void warn(Marker marker, String format, Object arg1, Object arg2) {
         atWarn().addMarker(marker).log(format, arg1, arg2);
-
     }
 
     @Override
@@ -309,11 +297,11 @@ public class MapleLogger implements IMapleLogger {
     }
 
     @Override
-    public LoggingEventBuilder atError() { return eventBuilderFactory.error(this); }
+    public LoggingEventBuilder atError() { return levelGuard.error(this); }
 
     @Override
     public boolean isErrorEnabled() {
-        return eventBuilderFactory.isErrorEnabled();
+        return levelGuard.isErrorEnabled();
     }
 
     @Override
@@ -343,7 +331,7 @@ public class MapleLogger implements IMapleLogger {
 
     @Override
     public boolean isErrorEnabled(Marker marker) {
-        return eventBuilderFactory.isErrorEnabled();
+        return levelGuard.isErrorEnabled();
     }
 
     @Override
@@ -373,11 +361,11 @@ public class MapleLogger implements IMapleLogger {
 
     @Override
     public void log(MapleLogEvent log) {
-        queue.enqueue(log);
+        sink.write(log);
     }
 
     @Override
     public void log(LoggingEvent event) {
-        log(JsonLogEventBuilder.Factory.fromLoggingEvent(event));
+        log(MapleLogEventBuilder.Factory.fromLoggingEvent(this, event));
     }
 }

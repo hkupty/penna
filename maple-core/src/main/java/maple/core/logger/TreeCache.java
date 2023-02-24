@@ -1,7 +1,7 @@
 package maple.core.logger;
 
 
-import maple.api.models.Config;
+import maple.api.config.Config;
 import org.slf4j.Logger;
 
 import java.util.ArrayList;
@@ -11,6 +11,14 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+/**
+ * The tree cache is a data structure that allows us to reuse loggers based on their namespace as well as
+ * update their configuration live, recursively.
+ * <br />
+ * By having this data structure here we can offload the responsibility of managing the loggers
+ * from {@link maple.core.slf4j.MapleLoggerFactory}, at the cost of a small memory footprint, while we have an
+ * easily traversable storage of the loggers.
+ */
 public class TreeCache {
     private record Entry(String[] identifier, MapleLogger logger, ArrayList<Entry> children){
         static Entry create(String[] identifier, MapleLogger logger) {

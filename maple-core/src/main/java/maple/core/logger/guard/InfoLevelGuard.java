@@ -1,7 +1,7 @@
 package maple.core.logger.guard;
 
-import maple.core.logger.event.JsonLogEventBuilder;
 import maple.core.logger.MapleLogger;
+import maple.core.logger.event.MapleLogEventBuilder;
 import org.slf4j.event.Level;
 import org.slf4j.spi.LoggingEventBuilder;
 import org.slf4j.spi.NOPLoggingEventBuilder;
@@ -40,7 +40,7 @@ public final class InfoLevelGuard implements LevelGuard {
 
     @Override
     public LoggingEventBuilder info(MapleLogger logger) {
-        return JsonLogEventBuilder.Factory.get(logger, Level.INFO);
+        return MapleLogEventBuilder.Factory.get(logger, Level.INFO);
     }
 
     @Override
@@ -50,7 +50,7 @@ public final class InfoLevelGuard implements LevelGuard {
 
     @Override
     public LoggingEventBuilder warn(MapleLogger logger) {
-        return JsonLogEventBuilder.Factory.get(logger, Level.WARN);
+        return MapleLogEventBuilder.Factory.get(logger, Level.WARN);
     }
 
     @Override
@@ -60,6 +60,6 @@ public final class InfoLevelGuard implements LevelGuard {
 
     @Override
     public LoggingEventBuilder error(MapleLogger logger) {
-        return JsonLogEventBuilder.Factory.get(logger, Level.ERROR);
+        return MapleLogEventBuilder.Factory.get(logger, Level.ERROR);
     }
 }

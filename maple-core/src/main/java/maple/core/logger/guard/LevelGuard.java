@@ -1,12 +1,20 @@
 package maple.core.logger.guard;
 
-import maple.api.models.Config;
+import maple.api.config.Config;
 import maple.core.logger.MapleLogger;
 import org.slf4j.event.Level;
 import org.slf4j.spi.LoggingEventBuilder;
 
 import java.util.EnumMap;
 
+/**
+ * The Level guard is a property of the {@link MapleLogger} that proxies the
+ * {@link maple.core.logger.event.MapleLogEventBuilder} creation.
+ * This is done in order for us to avoid runtime checks for "is X-level allowed".
+ * <br />
+ * By introducing the {@link LevelGuard} as a thin proxy in the logger we allow better control over the behavior
+ * for the log levels in the logger.
+ */
 public sealed interface LevelGuard permits
         NOPGuard,
         TraceLevelGuard,
