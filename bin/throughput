@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+USER="$(whoami)"
+
+MAPLE_JAR="tests/throughput/build/libs/mapleJar.jar"
+LOGBACK_JAR="tests/throughput/build/libs/logbackJar.jar"
+mkdir -p out
+sudo mount -t ramfs -o size=1G ramfs ./out
+sudo chown -R "${USER}:${USER}" ./out
+
+# TODO Write to csv, plot the results
+
+localdir=$(dirname "$0")
+
+function batch() {
+  TIME="${2:-10}"
+  THREADS="${1:-1}"
+  echo "Waiting"
+  sleep 5
+  echo "${TIME} / ${THREADS}"
+  echo "Running maple"
+  gradle -q :throughput:buildMapleJar
+  perf stat java -jar "${MAPLE_JAR}" ${TIME} ${THREADS} > out/maple.json
+  echo "Running logback"
+  gradle -q :throughput:buildLogbackJar
+  perf stat java -jar "${LOGBACK_JAR}" ${TIME} ${THREADS} > out/logback.json
+
+  echo ""
+
+  MAPLE_TOTAL="$(wc -l out/maple.json | cut -d ' ' -f1)"
+  LOGBACK_TOTAL="$(wc -l out/logback.json | cut -d ' ' -f1)"
+
+  echo ">> Total"
+  printf "%10s %10s\n" "maple" "${MAPLE_TOTAL}"
+  printf "%10s %10s\n" "logback" "${LOGBACK_TOTAL}"
+  echo ""
+  echo ">> logs/s"
+  printf "%10s %10s\n" "maple" $(python -c "print($MAPLE_TOTAL / $TIME)")
+  printf "%10s %10s\n" "logback" $(python -c "print($LOGBACK_TOTAL / $TIME)")
+}
+
+
+cd "${localdir}/.." && {
+  batch 2 2
+  batch 2 5
+  batch 2
+  batch 2 20
+  batch 2 35
+}
+
+rm -rf out/*
+sudo umount out/
+rm -rf out

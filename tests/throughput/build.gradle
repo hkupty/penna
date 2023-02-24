@@ -2,9 +2,8 @@ plugins {
     id 'java'
 }
 
-group 'org.example'
-version 'unspecified'
-
+group 'maple'
+version '0.1'
 
 repositories {
     mavenCentral()
@@ -19,7 +18,7 @@ configurations {
 task runMaple(type: JavaExec) {
     classpath sourceSets.main.runtimeClasspath
     classpath configurations.runtimeMaple
-    mainClass = "maple.perf.Main"
+    mainClass = "maple.throughput.Main"
 }
 
 task buildMapleJar(type: Jar) {
@@ -27,7 +26,7 @@ task buildMapleJar(type: Jar) {
     dependsOn sourceSets.main.runtimeClasspath
     dependsOn configurations.runtimeMaple
     manifest{
-        attributes 'Main-Class': "maple.perf.Main"
+        attributes 'Main-Class': "maple.throughput.Main"
     }
     archiveBaseName = "mapleJar"
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
@@ -42,7 +41,7 @@ task runLogback(type: JavaExec) {
     classpath sourceSets.main.runtimeClasspath
     classpath configurations.sharedRuntime
     classpath configurations.runtimeLogback
-    mainClass = "maple.perf.Main"
+    mainClass = "maple.throughput.Main"
 }
 
 task buildLogbackJar(type: Jar) {
@@ -50,7 +49,7 @@ task buildLogbackJar(type: Jar) {
     dependsOn sourceSets.main.runtimeClasspath
     dependsOn configurations.runtimeLogback
     manifest{
-        attributes 'Main-Class': "maple.perf.Main"
+        attributes 'Main-Class': "maple.throughput.Main"
     }
     archiveBaseName = "logbackJar"
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
@@ -59,7 +58,6 @@ task buildLogbackJar(type: Jar) {
                 configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }
     with jar
-
 }
 
 dependencies {
@@ -69,10 +67,12 @@ dependencies {
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
 
     runtimeMaple project(":maple-core")
+
     runtimeLogback 'ch.qos.logback:logback-classic:1.4.5'
+    runtimeLogback 'ch.qos.logback.contrib:logback-jackson:0.1.5'
+    runtimeLogback 'ch.qos.logback.contrib:logback-json-core:0.1.5'
+    runtimeLogback 'ch.qos.logback.contrib:logback-json-classic:0.1.5'
     runtimeLogback 'com.fasterxml.jackson.core:jackson-databind:2.14.2'
-    runtimeLogback 'com.fasterxml.jackson.core:jackson-annotations:2.14.2'
-    runtimeLogback 'net.logstash.logback:logstash-logback-encoder:7.3'
 }
 
 test {
