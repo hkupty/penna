@@ -1,6 +1,5 @@
 package maple.core.sink;
 
-import maple.core.internals.CharBufferWriter;
 import maple.core.models.MapleLogEvent;
 import maple.core.minilog.MiniLogger;
 import maple.core.sink.impl.JacksonMapleSink;
