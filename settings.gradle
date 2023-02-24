@@ -13,4 +13,9 @@ buildscript {
 rootProject.name = 'maple'
 include "maple-api"
 include "maple-core"
+include 'sample'
+include 'direct-sample'
+include 'throughput'
+include 'maple-yaml-config'
 
+project(":throughput").projectDir = file("tests/throughput")

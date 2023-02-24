@@ -2,7 +2,7 @@ plugins {
     id 'java'
 }
 
-group 'com.hkupty.maple'
+group 'maple'
 version '0.1'
 
 repositories {
