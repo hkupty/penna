@@ -6,7 +6,7 @@ plugins {
 }
 
 group 'com.hkupty.maple'
-version '1.0-SNAPSHOT'
+version '0.1'
 
 repositories {
     mavenCentral()
@@ -38,10 +38,6 @@ jmh {
     args = ["-prof", "stack", "-prof", "gc"]
 }
 
-signing {
-    sign configurations.archives
-}
-
 java {
     withJavadocJar()
     withSourcesJar()
@@ -50,9 +46,33 @@ java {
 publishing {
     publications {
         mavenJava(MavenPublication) {
+          artifactId = 'maple-core'
+            from components.java
+            versionMapping {
+                usage('java-api') {
+                    fromResolutionOf('runtimeClasspath')
+                }
+                usage('java-runtime') {
+                    fromResolutionResult()
+                }
+            }
           pom {
             name = "maple-core"
             description = "An opinionated slf4j backend for structured logging"
+            url = 'https://github.com/hkupty/maple'
+            licenses {
+                    license {
+                        name = 'MIT License'
+                        url = 'https://github.com/hkupty/maple/blob/main/LICENSE'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'hkupty'
+                        name = 'Henry John Kupty'
+                        email = 'hkupty@gmail.com'
+                    }
+                }
             scm {
                     connection = 'scm:git:git://github.com/hkupty/maple'
                     developerConnection = 'scm:git:ssh://github.com/hkupty/maple'
@@ -63,13 +83,16 @@ publishing {
     }
     repositories {
         maven {
-            def releasesRepoUrl = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
-            def snapshotsRepoUrl = "https://s01.oss.sonatype.org/content/repositories/snapshots/"
-            url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+            url = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
             credentials {
               username ossrhUsername
               password ossrhPassword
             }
         }
     }
+}
+
+signing {
+    sign configurations.archives
+    sign publishing.publications.mavenJava
 }
