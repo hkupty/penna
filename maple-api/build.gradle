@@ -2,7 +2,7 @@ plugins {
     id 'maple.base-java'
 }
 
-group 'com.github.hkutpy.maple'
+group 'com.hkupty.maple'
 version '1.0-SNAPSHOT'
 
 repositories {
