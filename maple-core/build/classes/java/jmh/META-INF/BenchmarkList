@@ -1,2 +1,0 @@
-JMH S 33 com.github.hkupty.maple.Reference S 67 com.github.hkupty.maple.jmh_generated.Reference_aMapleEvent_jmhTest S 11 aMapleEvent S 10 Throughput E A 1 1 1 E E E E E E E I 1 1 I 1 1 E E E E E E E E 
-JMH S 33 com.github.hkupty.maple.Reference S 68 com.github.hkupty.maple.jmh_generated.Reference_logbackEvent_jmhTest S 12 logbackEvent S 10 Throughput E A 1 1 1 E E E E E E E I 1 1 I 1 1 E E E E E E E E 
