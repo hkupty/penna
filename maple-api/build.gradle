@@ -1,5 +1,7 @@
 plugins {
     id 'maple.base-java'
+    id 'maven-publish'
+    id 'signing'
 }
 
 group 'com.hkupty.maple'
@@ -11,13 +13,47 @@ repositories {
 
 dependencies {
     compileOnly 'org.slf4j:slf4j-api:2.0.6'
-    compileOnly 'com.fasterxml.jackson.core:jackson-core:2.14.2'
 
-    // TODO check
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
 }
 
 test {
     useJUnitPlatform()
+}
+
+signing {
+    sign configurations.archives
+}
+
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+          pom {
+            name = "maple-api"
+            description = "An opinionated slf4j backend for structured logging"
+            scm {
+                    connection = 'scm:git:git://github.com/hkupty/maple'
+                    developerConnection = 'scm:git:ssh://github.com/hkupty/maple'
+                    url = 'https://github.com/hkupty/maple'
+                }
+            }
+        }
+    }
+    repositories {
+        maven {
+            def releasesRepoUrl = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
+            def snapshotsRepoUrl = "https://s01.oss.sonatype.org/content/repositories/snapshots/"
+            url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+            credentials {
+              username ossrhUsername
+              password ossrhPassword
+            }
+        }
+    }
 }
