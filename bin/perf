@@ -1,0 +1,79 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+localdir=$(dirname "$0")
+
+cd "${localdir}/.." && {
+  echo "10 / 1"
+  echo "Running maple"
+  gradle -q :perf:buildMapleJar
+  perf stat java -jar perf/build/libs/mapleJar.jar > maple.json
+  echo "Running logback"
+  gradle -q :perf:buildLogbackJar
+  perf stat java -jar perf/build/libs/logbackJar.jar > logback.json
+
+  echo ""
+
+  wc -l *.json
+
+  echo "Waiting"
+  sleep 5
+
+  echo "10 / 2"
+  echo "Running maple"
+  gradle -q :perf:buildMapleJar
+  perf stat java -jar perf/build/libs/mapleJar.jar 10 2 > maple.json
+  echo "Running logback"
+  gradle -q :perf:buildLogbackJar
+  perf stat java -jar perf/build/libs/logbackJar.jar 10 2 > logback.json
+
+  echo ""
+
+  wc -l *.json
+
+  echo "Waiting"
+  sleep 5
+
+  echo "10 / 4"
+  echo "Running maple"
+  gradle -q :perf:buildMapleJar
+  perf stat java -jar perf/build/libs/mapleJar.jar 10 4 > maple.json
+  echo "Running logback"
+  gradle -q :perf:buildLogbackJar
+  perf stat java -jar perf/build/libs/logbackJar.jar 10 4 > logback.json
+
+  echo ""
+
+  wc -l *.json
+
+  echo "Waiting"
+  sleep 5
+
+  echo "10 / 16"
+  echo "Running maple"
+  gradle -q :perf:buildMapleJar
+  perf stat java -jar perf/build/libs/mapleJar.jar 10 16 > maple.json
+  echo "Running logback"
+  gradle -q :perf:buildLogbackJar
+  perf stat java -jar perf/build/libs/logbackJar.jar 10 16 > logback.json
+
+  echo ""
+
+  wc -l *.json
+
+  echo "Waiting"
+  sleep 5
+
+  echo "10 / 32"
+  echo "Running maple"
+  gradle -q :perf:buildMapleJar
+  perf stat java -jar perf/build/libs/mapleJar.jar 10 32 > maple.json
+  echo "Running logback"
+  gradle -q :perf:buildLogbackJar
+  perf stat java -jar perf/build/libs/logbackJar.jar 10 32 > logback.json
+
+  echo ""
+
+  wc -l *.json
+}
