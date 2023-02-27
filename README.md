@@ -14,11 +14,11 @@ Please use with caution. Feedback, however, is very welcome.
 
 Maple is a backend for slf4j, so you don't need to so much to interact with it.
 
-In order to use it, add it to the [build manager of your preference](https://mvnrepository.com/artifact/com.hkupty.maple/maple-core/0.2), for example:
+In order to use it, add it to the [build manager of your preference](https://mvnrepository.com/artifact/com.hkupty.maple/maple-core/0.3), for example:
 
 ```groovy
 // gradle
-implementation 'com.hkupty.maple:maple-core:0.2'
+implementation 'com.hkupty.maple:maple-core:0.3'
 ```
 
 By default, you will get log level `INFO` enabled as well as the following fields:
