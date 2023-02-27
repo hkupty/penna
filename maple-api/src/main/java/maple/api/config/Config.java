@@ -22,10 +22,10 @@ public record Config(
             LogField.Message,
             LogField.LoggerName,
             LogField.ThreadName,
-            //LogField.MDC,
-            //LogField.Markers,
-            LogField.Throwable,
-            LogField.KeyValuePairs
+            LogField.MDC,
+            LogField.Markers,
+            LogField.KeyValuePairs,
+            LogField.Throwable
     };
 
     /**
