@@ -3,14 +3,11 @@ package maple.core.logger;
 
 import maple.api.config.Config;
 import maple.api.config.ConfigManager;
-import org.slf4j.Logger;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
-import java.util.function.BiFunction;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 /**
  * The tree cache is a data structure that allows us to reuse loggers based on their namespace as well as
@@ -21,62 +18,88 @@ import java.util.function.Function;
  * easily traversable storage of the loggers.
  */
 public class TreeCache {
-    private record Entry(String[] identifier, MapleLogger logger, ArrayList<Entry> children){
-        static Entry create(String[] identifier, MapleLogger logger) {
-            return new Entry(identifier, logger, new ArrayList<>());
+
+    static class EntryData{
+        MapleLogger logger;
+        Config config;
+
+        EntryData(MapleLogger logger, Config config) {
+            this.logger = logger;
+            this.config = config;
+        }
+
+        static EntryData empty(Config config) { return new EntryData(null, config);}
+
+        private EntryData initialize(String[] identifier) {
+            this.logger = new MapleLogger(String.join(".", identifier), this.config);
+            return this;
+        }
+
+        void updateConfig(Config config) {
+            this.config = config;
+            if (this.logger != null) {
+                logger.updateConfig(config);
+            }
         }
     }
 
-    private transient final Entry ROOT;
-
-    public TreeCache(MapleLogger root) {
-        ROOT = Entry.create(new String[]{}, root);
-    }
-
-    private Entry search(Entry cursor, String[] identifier, int index){
-       for(var childEntry : cursor.children) {
-           if (childEntry.identifier.length > index) {
-               if (childEntry.identifier[index].equals(identifier[index])){
-                   if (index == identifier.length - 1) {
-                       return childEntry;
-                   } else {
-                       return search(childEntry, identifier, index + 1);
-                   }
-               }
-           }
-       }
-       return null;
-    }
-
-    public Logger find(String[] identifier) {
-        if(identifier.length == 0) {
-            return ROOT.logger;
+    private record Entry(String[] identifier, EntryData data, ArrayList<Entry> children){
+        static Entry create(String[] identifier, Config config) {
+            return new Entry(identifier, EntryData.empty(config), new ArrayList<>());
         }
-        var entry = search(ROOT, identifier, 0);
-        if (!Objects.isNull(entry)) {
-            return entry.logger;
+
+        void initialize() {
+            if (data.logger == null) {
+                data.initialize(this.identifier);
+            }
+        }
+
+        MapleLogger logger() {
+            return data.logger;
+        }
+    }
+
+    transient final Entry ROOT;
+
+    public TreeCache(Config config) {
+        ROOT = Entry.create(new String[]{}, config);
+    }
+
+    private Entry search(Entry cursor, String key, int index){
+        for(var childEntry : cursor.children) {
+            if (childEntry.identifier.length > index) {
+                if (childEntry.identifier[index].equals(key)){
+                    return childEntry;
+                }
+            }
         }
         return null;
     }
 
-     public Logger createRecursively(String[] identifier, BiFunction<MapleLogger, String[], MapleLogger> filler){
+     Entry getOrCreate(String[] identifier){
         var cursor = ROOT;
-        for(int index = 1; index <= identifier.length; index++) {
-            var slicedIdentifier = Arrays.copyOfRange(identifier, 0, index);
-            var child = search(cursor, slicedIdentifier, index);
+        for(int index = 0; index < identifier.length; index++) {
+            var child = search(cursor, identifier[index], index);
             if (Objects.isNull(child)) {
-                child = Entry.create(slicedIdentifier, filler.apply(cursor.logger, slicedIdentifier));
+                var slicedIdentifier = Arrays.copyOfRange(identifier, 0, index + 1);
+                child = Entry.create(slicedIdentifier, cursor.data.config);
                 cursor.children.add(child);
             }
             cursor = child;
-
         }
 
-        return cursor.logger;
+        return cursor;
     }
 
-    private void traverse(Entry base, Consumer<MapleLogger> update) {
-        update.accept(base.logger);
+    public MapleLogger getLoggerAt(String[] identifier) {
+        Entry entry = getOrCreate(identifier);
+        entry.initialize();
+        return entry.logger();
+    }
+
+    // Default visibility, for testing
+    void traverse(Entry base, Consumer<EntryData> update) {
+        update.accept(base.data);
         for (int index = 0; index < base.children.size(); index++){
             traverse(base.children.get(index), update);
         }
@@ -91,12 +114,8 @@ public class TreeCache {
         if (hierarchyIdentifier.length == 0) {
             base = ROOT;
         } else {
-            base = search(ROOT, hierarchyIdentifier, 0);
+            base = getOrCreate(hierarchyIdentifier);
         }
-        if (base != null) {
-            traverse(base, logger -> {
-                logger.updateConfig(configUpdateFn.applyUpdate(logger.getConfig()));
-            });
-        }
+        traverse(base, data -> data.updateConfig(configUpdateFn.applyUpdate(data.config)));
     }
 }
