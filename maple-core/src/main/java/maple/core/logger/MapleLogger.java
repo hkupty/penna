@@ -15,7 +15,7 @@ import org.slf4j.spi.LoggingEventBuilder;
 public final class MapleLogger implements IMapleLogger {
 
     private transient final String name;
-    private transient LevelGuard levelGuard;
+    transient LevelGuard levelGuard;
     private transient Config config;
     private final SinkProxy sink;
 
