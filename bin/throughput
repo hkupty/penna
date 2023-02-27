@@ -4,8 +4,10 @@ set -euo pipefail
 
 USER="$(whoami)"
 
-MAPLE_JAR="tests/throughput/build/libs/mapleJar.jar"
-LOGBACK_JAR="tests/throughput/build/libs/logbackJar.jar"
+FLAGS="${@}"
+
+MAPLE_JAR="tests/throughput/build/libs/mapleJar-0.1.jar"
+LOGBACK_JAR="tests/throughput/build/libs/logbackJar-0.1.jar"
 mkdir -p out
 sudo mount -t ramfs -o size=1G ramfs ./out
 sudo chown -R "${USER}:${USER}" ./out
@@ -22,10 +24,10 @@ function batch() {
   echo "${TIME} / ${THREADS}"
   echo "Running maple"
   gradle -q :throughput:buildMapleJar
-  perf stat java -jar "${MAPLE_JAR}" ${TIME} ${THREADS} > out/maple.json
+  perf stat java ${FLAGS} -jar "${MAPLE_JAR}" ${TIME} ${THREADS} > out/maple.json
   echo "Running logback"
   gradle -q :throughput:buildLogbackJar
-  perf stat java -jar "${LOGBACK_JAR}" ${TIME} ${THREADS} > out/logback.json
+  perf stat java ${FLAGS} -jar "${LOGBACK_JAR}" ${TIME} ${THREADS} > out/logback.json
 
   echo ""
 
@@ -43,13 +45,8 @@ function batch() {
 
 
 cd "${localdir}/.." && {
-  batch 2 2
-  batch 2 5
+  batch 1
   batch 2
-  batch 2 20
-  batch 2 35
 }
 
-rm -rf out/*
 sudo umount out/
-rm -rf out
