@@ -10,6 +10,31 @@ Maple is currently in alpha and, while usable, *has not been tested in productio
 
 Please use with caution. Feedback, however, is very welcome.
 
+## Usage
+
+Maple is a backend for slf4j, so you don't need to so much to interact with it.
+
+In order to use it, add it to the [build manager of your preference](https://mvnrepository.com/artifact/com.hkupty.maple/maple-core/0.2), for example:
+
+```groovy
+// gradle
+implementation 'com.hkupty.maple:maple-core:0.2'
+```
+
+By default, you will get log level `INFO` enabled as well as the following fields:
+- `Timestamp`
+- `Level`
+- `Message`
+- `LoggerName`
+- `ThreadName`
+- `MDC`
+- `Markers`
+- `KeyValuePairs`
+- `Throwable`
+
+Maple has support for logging also a `Counter` to each message, individually marking each message with a monotonically increasing
+long counting from process startup, but that is disabled by default.
+
 ## Principles
 
 ### Structured logging
