@@ -1,6 +1,6 @@
 # Maple
 
-[![version](https://img.shields.io/maven-central/v/com.hkupty.maple/maple-core?style=flat-square)]()
+[![version](https://img.shields.io/maven-central/v/com.hkupty.maple/maple-core?style=flat-square)](https://mvnrepository.com/artifact/com.hkupty.maple)
 
 Maple is an opinionated backend for [slf4j](https://github.com/qos-ch/slf4j/) that focuses on doing one thing right: Logging structured logs in json format to the console.
 
@@ -9,6 +9,31 @@ Maple is an opinionated backend for [slf4j](https://github.com/qos-ch/slf4j/) th
 Maple is currently in alpha and, while usable, *has not been tested in production yet*.
 
 Please use with caution. Feedback, however, is very welcome.
+
+## Usage
+
+Maple is a backend for slf4j, so you don't need to so much to interact with it.
+
+In order to use it, add it to the [build manager of your preference](https://mvnrepository.com/artifact/com.hkupty.maple/maple-core/0.2), for example:
+
+```groovy
+// gradle
+implementation 'com.hkupty.maple:maple-core:0.2'
+```
+
+By default, you will get log level `INFO` enabled as well as the following fields:
+- `Timestamp`
+- `Level`
+- `Message`
+- `LoggerName`
+- `ThreadName`
+- `MDC`
+- `Markers`
+- `KeyValuePairs`
+- `Throwable`
+
+Maple has support for logging also a `Counter` to each message, individually marking each message with a monotonically increasing
+long counting from process startup, but that is disabled by default.
 
 ## Principles
 

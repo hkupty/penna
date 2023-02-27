@@ -36,6 +36,11 @@ public final class ConfigManagerFactory {
                         new ConfigItem.RootConfig(Config.getDefault())
                 });
             }
+
+            @Override
+            public void updateConfigs(Reconfiguration... reconfigurations) {
+                configurable.reconfigure(reconfigurations);
+            }
         };
     }
 

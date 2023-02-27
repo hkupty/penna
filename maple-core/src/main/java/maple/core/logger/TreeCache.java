@@ -2,6 +2,7 @@ package maple.core.logger;
 
 
 import maple.api.config.Config;
+import maple.api.config.ConfigManager;
 import org.slf4j.Logger;
 
 import java.util.ArrayList;
@@ -85,7 +86,7 @@ public class TreeCache {
         updateConfig(hierarchyIdentifier, old -> config);
     }
 
-    public void updateConfig(String[] hierarchyIdentifier, Function<Config, Config> configUpdateFn) {
+    public void updateConfig(String[] hierarchyIdentifier, ConfigManager.UpdateConfigFn configUpdateFn) {
         Entry base;
         if (hierarchyIdentifier.length == 0) {
             base = ROOT;
@@ -94,7 +95,7 @@ public class TreeCache {
         }
         if (base != null) {
             traverse(base, logger -> {
-                logger.updateConfig(configUpdateFn.apply(logger.getConfig()));
+                logger.updateConfig(configUpdateFn.applyUpdate(logger.getConfig()));
             });
         }
     }

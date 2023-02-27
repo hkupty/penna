@@ -28,6 +28,15 @@ public final class MapleLoggerFactory implements ILoggerFactory, Configurable {
         }
     }
 
+    @Override
+    public void reconfigure(ConfigManager.Reconfiguration[] reconfigurations) {
+        for (int i = 0; i < reconfigurations.length; i++) {
+            var reconfig = reconfigurations[i];
+            cache.updateConfig(reconfig.loggerPath(), reconfig.updateFn());
+        }
+
+    }
+
     private MapleLoggerFactory(){
         var rootLogger = new MapleLogger("", Config.getDefault());
         cache = new TreeCache(rootLogger);

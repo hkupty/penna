@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+MAPLE_JAR="tests/throughput/build/libs/mapleJar-0.1.jar"
+
+TIME="${1:-180}"
+THREADS="${2:-1}"
+
+perf record -a java -XX:+UnlockDiagnosticVMOptions -XX:+DumpPerfMapAtExit "${MAPLE_JAR}" "${TIME}" "${THREADS}"

@@ -13,6 +13,6 @@ module maple.core {
     // Exposes a service provider for SLF4j
     provides org.slf4j.spi.SLF4JServiceProvider with MapleServiceProvider;
 
-    // Only allows users to "see" maple through the *.slf4j package
-    exports maple.core.slf4j;
+    // The only user-facing namespace should be config.
+    exports maple.core.config;
 }
