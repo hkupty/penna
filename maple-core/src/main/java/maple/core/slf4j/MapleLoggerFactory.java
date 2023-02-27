@@ -2,13 +2,11 @@ package maple.core.slf4j;
 
 import maple.api.config.ConfigManager;
 import maple.api.config.Configurable;
-import maple.core.logger.MapleLogger;
 import maple.api.config.Config;
 import maple.core.logger.TreeCache;
 import org.slf4j.ILoggerFactory;
 import org.slf4j.Logger;
 
-import java.util.Objects;
 import java.util.regex.Pattern;
 
 public final class MapleLoggerFactory implements ILoggerFactory, Configurable {
@@ -38,22 +36,11 @@ public final class MapleLoggerFactory implements ILoggerFactory, Configurable {
     }
 
     private MapleLoggerFactory(){
-        var rootLogger = new MapleLogger("", Config.getDefault());
-        cache = new TreeCache(rootLogger);
+        cache = new TreeCache(Config.getDefault());
     }
 
     @Override
     public Logger getLogger(String name) {
-        String[] identifier = DOT_SPLIT.split(name);
-        var logger = cache.find(identifier);
-        if (Objects.isNull(logger)) {
-            return cache.createRecursively(
-                    identifier,
-                    (parent, partialIdentifier) -> {
-                        var loggerName = String.join(".", partialIdentifier);
-                        return new MapleLogger(loggerName, parent.getConfig());
-                    });
-        }
-        return logger;
+        return cache.getLoggerAt(DOT_SPLIT.split(name));
     }
 }
