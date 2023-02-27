@@ -1,6 +1,6 @@
 # Maple
 
-[![version](https://img.shields.io/maven-central/v/com.hkupty.maple/maple-core?style=flat-square)]()
+[![version](https://img.shields.io/maven-central/v/com.hkupty.maple/maple-core?style=flat-square)](https://mvnrepository.com/artifact/com.hkupty.maple)
 
 Maple is an opinionated backend for [slf4j](https://github.com/qos-ch/slf4j/) that focuses on doing one thing right: Logging structured logs in json format to the console.
 
