@@ -18,21 +18,13 @@ public final class MapleLoggerFactory implements ILoggerFactory, Configurable {
         return singleton;
     }
 
+
     @Override
     public void configure(ConfigManager.ConfigItem[] configItems) {
         for (int i = 0; i < configItems.length; i++) {
-            var config = configItems[i];
-            cache.updateConfig(config.loggerPath(), config.config());
+            var configItem = configItems[i];
+            cache.updateConfig(configItem.loggerPath(), configItem.updateFn());
         }
-    }
-
-    @Override
-    public void reconfigure(ConfigManager.Reconfiguration[] reconfigurations) {
-        for (int i = 0; i < reconfigurations.length; i++) {
-            var reconfig = reconfigurations[i];
-            cache.updateConfig(reconfig.loggerPath(), reconfig.updateFn());
-        }
-
     }
 
     private MapleLoggerFactory(){
