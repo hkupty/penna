@@ -17,19 +17,10 @@ import java.util.regex.Pattern;
  * <br />
  * For example, if one just wants to change the log level without changing the fields to be logged:
  * <pre>
- * myConfigManager.updateConfigs(RootReconfigure(oldConfig -> oldConfig.copy(Level.DEBUG)));
+ * myConfigManager.updateConfigs(RootConfigItem(oldConfig -> oldConfig.copy(Level.DEBUG)));
  * </pre>
- * Another case would be adding or removing fields from a specific logger:
- * <pre>
- * import java.util.EnumSet
- * myConfigManager.updateConfigs(
- *   LoggerConfig("com.my.app.controller", oldConfig -> {
- *      var newFields = EnumSet.of(oldConfig.fields[0], oldConfig.fields);
- *      newFields.add(LogFields.Counter);
- *      newFields.remove(LogFields.MDC);
- *      return oldConfig.copy(newFields);
- *   }));
- * </pre>
+ * Another case would be adding or removing fields from a specific logger.
+ * Note that the order of the fields matter, since this is the order they'll be rendered.
  */
 public interface ConfigManager {
 
