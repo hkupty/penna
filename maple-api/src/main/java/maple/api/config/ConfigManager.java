@@ -1,5 +1,7 @@
 package maple.api.config;
 
+import java.util.Arrays;
+import java.util.Objects;
 import java.util.regex.Pattern;
 
 /**
@@ -70,7 +72,30 @@ public interface ConfigManager {
          * @param loggerPath Specific point in the config hierarchy where the update function will be applied.
          * @param updateFn Function that will update (or overwrite) the existing configuration.
          */
-        record LoggerPathConfigItem(String[] loggerPath, ConfigurationChange updateFn) implements ConfigItem {}
+        record LoggerPathConfigItem(String[] loggerPath, ConfigurationChange updateFn) implements ConfigItem {
+            @Override
+            public boolean equals(Object o) {
+                if (this == o) return true;
+                if (!(o instanceof LoggerPathConfigItem other)) return false;
+                return other.updateFn.equals(updateFn) && Arrays.equals(other.loggerPath, loggerPath);
+            }
+
+            @Override
+            public int hashCode() {
+                var hash = 31 + Objects.hashCode(updateFn);
+                hash = (31 * hash) +  Arrays.hashCode(loggerPath);
+
+                return hash;
+            }
+
+            @Override
+            public String toString() {
+                return "LoggerPathConfigItem{" +
+                        "loggerPath=" + Arrays.toString(loggerPath) +
+                        ", updateFn=" + updateFn +
+                        '}';
+            }
+        }
 
         /**
          * Convenience record that takes the logger name instead and breaks it into the required {@link #loggerPath()}.
