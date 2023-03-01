@@ -2,6 +2,7 @@ plugins {
     id 'maple.base-java'
     id 'maven-publish'
     id 'signing'
+    id 'pmd'
 }
 
 group 'com.hkupty.maple'

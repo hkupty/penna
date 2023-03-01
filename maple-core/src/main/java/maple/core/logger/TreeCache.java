@@ -109,7 +109,7 @@ public class TreeCache {
         updateConfig(hierarchyIdentifier, old -> config);
     }
 
-    public void updateConfig(String[] hierarchyIdentifier, ConfigManager.UpdateConfigFn configUpdateFn) {
+    public void updateConfig(String[] hierarchyIdentifier, ConfigManager.ConfigurationChange configUpdateFn) {
         Entry base;
         if (hierarchyIdentifier.length == 0) {
             base = ROOT;

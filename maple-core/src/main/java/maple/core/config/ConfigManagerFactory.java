@@ -1,6 +1,5 @@
 package maple.core.config;
 
-import maple.api.config.Config;
 import maple.api.config.ConfigManager;
 import maple.api.config.Configurable;
 import maple.core.minilog.MiniLogger;
@@ -32,14 +31,12 @@ public final class ConfigManagerFactory {
 
             @Override
             public void configure() {
-                configurable.configure(new ConfigItem[]{
-                        new ConfigItem.RootConfig(Config.getDefault())
-                });
+                // Do nothing, MapleLoggerFactory already initialized with the defaultConfig
             }
 
             @Override
-            public void updateConfigs(Reconfiguration... reconfigurations) {
-                configurable.reconfigure(reconfigurations);
+            public void updateConfigs(ConfigItem... configItems) {
+                configurable.configure(configItems);
             }
         };
     }

@@ -33,7 +33,7 @@ By default, you will get log level `INFO` enabled as well as the following field
 - `Throwable`
 
 Maple has support for logging also a `Counter` to each message, individually marking each message with a monotonically increasing
-long counting from process startup, but that is disabled by default.
+`long` counting from process startup, but that is disabled by default.
 
 ## Principles
 
