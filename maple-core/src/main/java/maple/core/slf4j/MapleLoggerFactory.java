@@ -20,9 +20,8 @@ public final class MapleLoggerFactory implements ILoggerFactory, Configurable {
 
 
     @Override
-    public void configure(ConfigManager.ConfigItem[] configItems) {
-        for (int i = 0; i < configItems.length; i++) {
-            var configItem = configItems[i];
+    public void configure(ConfigManager.ConfigItem... configItems) {
+        for (ConfigManager.ConfigItem configItem : configItems) {
             cache.updateConfig(configItem.loggerPath(), configItem.updateFn());
         }
     }

@@ -12,11 +12,11 @@ import java.util.List;
 
 public class MapleLogEvent implements LoggingEvent {
 
-    public ArrayList<Object> arguments = new ArrayList<>();
-    public ArrayList<Marker> markers = new ArrayList<>();
-    public ArrayList<KeyValuePair> keyValuePairs = new ArrayList<>();
-    public LogField[] fieldsToLog = null;
-    public Object extra = null;
+    public List<Object> arguments = new ArrayList<>();
+    public List<Marker> markers = new ArrayList<>();
+    public List<KeyValuePair> keyValuePairs = new ArrayList<>();
+    public LogField[] fieldsToLog;
+    public Object extra;
     public Level level;
     public String message;
     public String threadName;

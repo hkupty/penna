@@ -11,5 +11,5 @@ public interface Configurable {
      * Apply given {@link maple.api.config.ConfigManager.ConfigItem}s to the respective loggers.
      * @param configItems Sequence of configurations to be applied.
      */
-    void configure(ConfigManager.ConfigItem[] configItems);
+    void configure(ConfigManager.ConfigItem... configItems);
 }

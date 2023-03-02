@@ -24,7 +24,10 @@ public sealed interface LevelGuard permits
         ErrorLevelGuard
 {
 
-    class FromConfig {
+    final class FromConfig {
+
+        private FromConfig() {}
+
         private static final EnumMap<Level, LevelGuard> levelMapping = new EnumMap<>(Level.class);
 
         static {

@@ -7,10 +7,17 @@ import maple.core.sink.impl.JacksonMapleSink;
 import java.io.*;
 import java.util.function.Supplier;
 
-public class MapleSink {
+public final class MapleSink {
     private transient final SinkImpl impl;
 
-    public static class Factory {
+    public static final class Factory {
+
+        private Factory() {}
+
+        // From the same ticket that PMD references, https://bugs.openjdk.org/browse/JDK-8080225, it is noted that
+        // in JDK 10 the problem was solved. We are targeting JDK 17+, so the problem won't affect us.
+        // Plus, any other alternative is significantly slower.
+        @SuppressWarnings("PMD.AvoidFileStream")
         public static MapleSink getSink() {
             Supplier<SinkImpl> impl;
             if ((impl = tryJackson()) != null) {
