@@ -23,11 +23,9 @@ public class Main {
         for (int i = 0; i < threads; i++) {
             int finalI = i;
             new Thread(() -> {
-                MDC.put("thread", "number-" + finalI);
             while (Instant.now().isBefore(target)) {
                 logger.atInfo().log("some message");
             }
-            MDC.remove("thread");
             }).start();
         }
     }
