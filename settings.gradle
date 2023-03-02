@@ -16,8 +16,12 @@ include "maple-core"
 include 'sample'
 include 'direct-sample'
 include 'throughput'
+include 'noop'
+include 'count'
 include 'maple-yaml-config'
 
 project(":throughput").projectDir = file("tests/throughput")
+project(":noop").projectDir = file("tests/noop")
+project(":count").projectDir = file("tests/count")
 include 'playground'
 

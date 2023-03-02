@@ -15,7 +15,7 @@ import java.io.IOException;
  * Because of that, we don't need to format the log with pretty spaces or anything, but
  * just ensure we break lines between individual log messages.
  */
-public class NOPPrettyPrinter implements PrettyPrinter {
+public final class NOPPrettyPrinter implements PrettyPrinter {
     private static final String LINE_BREAK = System.getProperty("line.separator");
     private static final NOPPrettyPrinter singleton = new NOPPrettyPrinter();
 

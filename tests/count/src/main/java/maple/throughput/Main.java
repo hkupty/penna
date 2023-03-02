@@ -9,21 +9,26 @@ import java.time.temporal.ChronoUnit;
 
 public class Main {
     public static void main(String[] args) {
-        int time = 10;
+        long count;
         int threads = 1;
         if (args.length > 0) {
-            time = Integer.parseInt(args[0]);
+            count = Long.parseLong(args[0]);
+        } else {
+            count = 100_000L;
         }
         if (args.length > 1) {
             threads = Integer.parseInt(args[1]);
         }
         Logger logger = LoggerFactory.getLogger(Main.class);
-        Instant target = Instant.now().plus(time, ChronoUnit.MILLIS);
 
         for (int i = 0; i < threads; i++) {
+            int finalI = i;
             new Thread(() -> {
-                while (Instant.now().isBefore(target)) {
-                    logger.atInfo().log("some message");
+                for(long l = 0; l < count; l++) {
+                    logger.atInfo()
+                            .addKeyValue("thread", finalI)
+                            .addKeyValue("count", l)
+                            .log("some message");
                 }
             }).start();
         }

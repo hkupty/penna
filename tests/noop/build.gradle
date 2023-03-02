@@ -68,9 +68,6 @@ dependencies {
 
     runtimeMaple project(":maple-core")
 
-
-
-    runtimeLogback 'com.fasterxml.jackson.core:jackson-core:2.14.2'
     runtimeLogback 'ch.qos.logback:logback-classic:1.4.5'
     runtimeLogback 'ch.qos.logback.contrib:logback-jackson:0.1.5'
     runtimeLogback 'ch.qos.logback.contrib:logback-json-core:0.1.5'

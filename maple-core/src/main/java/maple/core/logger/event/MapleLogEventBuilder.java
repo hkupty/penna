@@ -8,8 +8,8 @@ import org.slf4j.event.Level;
 import org.slf4j.event.LoggingEvent;
 import org.slf4j.spi.LoggingEventBuilder;
 
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.function.Supplier;
 
 /**
@@ -36,10 +36,12 @@ import java.util.function.Supplier;
 public final class MapleLogEventBuilder implements LoggingEventBuilder {
     public static final int POOL_SIZE = 16;
     private final MapleLogEvent[] pool;
-    private int currentIndex = 0;
+    private int currentIndex;
     private MapleLogEvent current;
 
     public final static class Factory {
+
+        private Factory() {}
         private final static ThreadLocal<MapleLogEventBuilder> pool = ThreadLocal.withInitial(MapleLogEventBuilder::new);
 
         public static MapleLogEvent fromLoggingEvent(MapleLogger logger, LoggingEvent event) {
@@ -105,7 +107,7 @@ public final class MapleLogEventBuilder implements LoggingEventBuilder {
         return this;
     }
 
-    private ArrayList<Marker> getMarkers() {
+    private List<Marker> getMarkers() {
         return this.current.markers;
     }
     @Override
@@ -114,7 +116,7 @@ public final class MapleLogEventBuilder implements LoggingEventBuilder {
         return this;
     }
 
-    private ArrayList<Object> getArgumentsList() {
+    private List<Object> getArgumentsList() {
         return this.current.arguments;
     }
 
@@ -134,7 +136,7 @@ public final class MapleLogEventBuilder implements LoggingEventBuilder {
         return this;
     }
 
-    private ArrayList<KeyValuePair> getKeyValueList() {
+    private List<KeyValuePair> getKeyValueList() {
         return this.current.keyValuePairs;
     }
 

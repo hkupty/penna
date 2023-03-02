@@ -30,7 +30,7 @@ public class TreeCache {
 
         static EntryData empty(Config config) { return new EntryData(null, config);}
 
-        private EntryData initialize(String[] identifier) {
+        private EntryData initialize(String... identifier) {
             this.logger = new MapleLogger(String.join(".", identifier), this.config);
             return this;
         }
@@ -67,16 +67,14 @@ public class TreeCache {
 
     private Entry search(Entry cursor, String key, int index){
         for(var childEntry : cursor.children) {
-            if (childEntry.identifier.length > index) {
-                if (childEntry.identifier[index].equals(key)){
-                    return childEntry;
-                }
+            if (childEntry.identifier.length > index && childEntry.identifier[index].equals(key)) {
+                return childEntry;
             }
         }
         return null;
     }
 
-     Entry getOrCreate(String[] identifier){
+     Entry getOrCreate(String... identifier){
         var cursor = ROOT;
         for(int index = 0; index < identifier.length; index++) {
             var child = search(cursor, identifier[index], index);
@@ -91,7 +89,7 @@ public class TreeCache {
         return cursor;
     }
 
-    public MapleLogger getLoggerAt(String[] identifier) {
+    public MapleLogger getLoggerAt(String... identifier) {
         Entry entry = getOrCreate(identifier);
         entry.initialize();
         return entry.logger();

@@ -16,6 +16,7 @@ public final class MapleServiceProvider implements SLF4JServiceProvider {
      * against. The value of this field is modified with each major release.
      */
     // to avoid constant folding by the compiler, this field must *not* be final
+    @SuppressWarnings("PMD")
     public static String REQUESTED_API_VERSION = "2.0.99"; // !final
 
     private ILoggerFactory loggerFactory;
@@ -32,6 +33,7 @@ public final class MapleServiceProvider implements SLF4JServiceProvider {
         return markerFactory;
     }
 
+    @Override
     public MDCAdapter getMDCAdapter() {
         return mdcAdapter;
     }

@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+USER="$(whoami)"
+
+FLAGS="${@}"
+
+MAPLE_JAR="tests/noop/build/libs/mapleJar-0.1.jar"
+LOGBACK_JAR="tests/noop/build/libs/logbackJar-0.1.jar"
+
+echo "Running maple"
+gradle -q :noop:buildMapleJar
+perf stat java ${FLAGS} -jar "${MAPLE_JAR}"
+echo "Running logback"
+gradle -q :noop:buildLogbackJar
+perf stat java ${FLAGS} -jar "${LOGBACK_JAR}"

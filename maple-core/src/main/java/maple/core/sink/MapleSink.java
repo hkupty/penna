@@ -2,25 +2,48 @@ package maple.core.sink;
 
 import maple.core.models.MapleLogEvent;
 import maple.core.minilog.MiniLogger;
+import maple.core.sink.impl.GsonMapleSink;
+import maple.core.sink.impl.JakartaMapleSink;
 import maple.core.sink.impl.JacksonMapleSink;
 
 import java.io.*;
 import java.util.function.Supplier;
 
-public class MapleSink {
+public final class MapleSink {
     private transient final SinkImpl impl;
 
-    public static class Factory {
+    public static final class Factory {
+
+        private Factory() {}
+
+        // From the same ticket that PMD references, https://bugs.openjdk.org/browse/JDK-8080225, it is noted that
+        // in JDK 10 the problem was solved. We are targeting JDK 17+, so the problem won't affect us.
+        // Plus, any other alternative is significantly slower.
+        private static final Supplier<Supplier<SinkImpl>>[] candidates = new Supplier[]{
+                Factory::tryJackson,
+                Factory::tryGson,
+                Factory::tryJakarta
+        };
+
+        @SuppressWarnings("PMD.AvoidFileStream")
         public static MapleSink getSink() {
             Supplier<SinkImpl> impl;
-            if ((impl = tryJackson()) != null) {
-                try {
-                    SinkImpl sinkImpl = impl.get();
-                    sinkImpl.init(new FileWriter(FileDescriptor.out));
-                    return new MapleSink(sinkImpl);
-                } catch (IOException e) {
-                    MiniLogger.error("Unable to create jackson logger", e);
-                }
+            int counter = 0;
+            do {
+                impl = candidates[counter].get();
+                counter++;
+            } while (counter < candidates.length && impl == null);
+
+            if (impl == null) {
+                return null;
+            }
+
+            try {
+                SinkImpl sinkImpl = impl.get();
+                sinkImpl.init(new FileWriter(FileDescriptor.out));
+                return new MapleSink(sinkImpl);
+            } catch (IOException e) {
+                MiniLogger.error("Unable to create logger", e);
             }
             return null;
         }
@@ -29,6 +52,24 @@ public class MapleSink {
             try {
                 Class.forName("com.fasterxml.jackson.core.JsonGenerator");
                 return JacksonMapleSink::new;
+            } catch (ClassNotFoundException e) {
+                return null;
+            }
+        }
+
+        private static Supplier<SinkImpl> tryGson() {
+            try {
+                Class.forName("com.google.gson.stream.JsonWriter");
+                return GsonMapleSink::new;
+            } catch (ClassNotFoundException e) {
+                return null;
+            }
+        }
+
+        private static Supplier<SinkImpl> tryJakarta() {
+            try {
+                Class.forName("jakarta.json.stream.JsonGenerator");
+                return JakartaMapleSink::new;
             } catch (ClassNotFoundException e) {
                 return null;
             }

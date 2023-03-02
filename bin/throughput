@@ -38,15 +38,15 @@ function batch() {
   printf "%10s %10s\n" "maple" "${MAPLE_TOTAL}"
   printf "%10s %10s\n" "logback" "${LOGBACK_TOTAL}"
   echo ""
-  echo ">> logs/s"
+  echo ">> logs/ms"
   printf "%10s %10s\n" "maple" $(python -c "print($MAPLE_TOTAL / $TIME)")
   printf "%10s %10s\n" "logback" $(python -c "print($LOGBACK_TOTAL / $TIME)")
 }
 
 
 cd "${localdir}/.." && {
-  batch 1
-  batch 2
+  batch 1 10000
+  batch 2 10000
 }
 
 sudo umount out/

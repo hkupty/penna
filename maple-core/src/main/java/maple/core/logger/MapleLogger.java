@@ -5,8 +5,7 @@ import maple.api.models.LogField;
 import maple.core.models.MapleLogEvent;
 import maple.core.logger.guard.LevelGuard;
 import maple.core.logger.event.MapleLogEventBuilder;
-import maple.core.sink.SinkProxy;
-import maple.core.sink.SinkService;
+import maple.core.sink.MapleSink;
 import org.slf4j.Marker;
 import org.slf4j.event.LoggingEvent;
 import org.slf4j.spi.LoggingEventBuilder;
@@ -17,11 +16,11 @@ public final class MapleLogger implements IMapleLogger {
     private transient final String name;
     transient LevelGuard levelGuard;
     private transient Config config;
-    private final SinkProxy sink;
+    private final ThreadLocal<MapleSink> sink;
 
     public MapleLogger(String name, Config config) {
         this.name = name;
-        sink = SinkService.getProxy();
+        sink = ThreadLocal.withInitial(MapleSink.Factory::getSink);
         this.updateConfig(config);
     }
 
@@ -361,9 +360,11 @@ public final class MapleLogger implements IMapleLogger {
 
     @Override
     public void log(MapleLogEvent log) {
-        sink.write(log);
+        sink.get().write(log);
     }
 
+    // Please excuse my friend, he's drunk, and he doesn't know *we are the logging framework*.
+    @SuppressWarnings("PMD.GuardLogStatement")
     @Override
     public void log(LoggingEvent event) {
         log(MapleLogEventBuilder.Factory.fromLoggingEvent(this, event));

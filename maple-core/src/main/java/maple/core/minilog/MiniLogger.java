@@ -1,6 +1,9 @@
 package maple.core.minilog;
 
-public class MiniLogger {
+// Minilogger is our last resource. For now, we print to stderr normally.
+@SuppressWarnings("PMD.SystemPrintln")
+public final class MiniLogger {
+    private MiniLogger() {}
     public static void error(String message) {
         System.err.print("[:Maple.MiniLogger/Error \"");
         System.err.print(message);

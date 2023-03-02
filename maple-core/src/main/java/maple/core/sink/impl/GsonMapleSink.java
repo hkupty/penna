@@ -1,14 +1,10 @@
 package maple.core.sink.impl;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonGenerator.Feature;
-import com.fasterxml.jackson.core.json.JsonWriteFeature;
+import com.google.gson.stream.JsonWriter;
 import maple.api.models.LogField;
-import maple.core.models.MapleLogEvent;
 import maple.core.internals.ThreadCreator;
+import maple.core.models.MapleLogEvent;
 import maple.core.sink.SinkImpl;
-import maple.core.sink.impl.jackson.NOPPrettyPrinter;
 import org.slf4j.MDC;
 import org.slf4j.event.Level;
 
@@ -19,7 +15,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.LockSupport;
 
-public final class JacksonMapleSink implements SinkImpl {
+public final class GsonMapleSink implements SinkImpl {
     private static final String LINE_BREAK = System.getProperty("line.separator");
     private static final String[] LEVEL_MAPPING = new String[5];
 
@@ -38,7 +34,7 @@ public final class JacksonMapleSink implements SinkImpl {
      * approach when writing the log messages, by picking the fields we want to write from the message
      * based on {@link MapleLogEvent#fieldsToLog} and mapping to the appropriate function.
      * <br />
-     * In {@link JacksonMapleSink}, it is defined as a local reference to each emit* method in an
+     * In {@link GsonMapleSink}, it is defined as a local reference to each emit* method in an
      * array, where each method is in the same position in the mapping array as the
      * respective {@link LogField#ordinal()} for that log field.
      * <br />
@@ -49,7 +45,7 @@ public final class JacksonMapleSink implements SinkImpl {
      */
     @FunctionalInterface
     private interface Emitter {
-        void apply(final MapleLogEvent event) throws IOException;
+        void apply(MapleLogEvent event) throws IOException;
     }
 
     private final Emitter[] emitters;
@@ -58,16 +54,18 @@ public final class JacksonMapleSink implements SinkImpl {
     private final AtomicLong counter = new AtomicLong(0L);
     private final AtomicLong timestamp = new AtomicLong(0L);
 
-    private JsonGenerator jsonGenerator;
+    private final Thread timestampTicker;
+
+    private JsonWriter jsonWriter;
+    private Writer writer;
 
 
-
-    public JacksonMapleSink() {
-        Thread timestampTicker = ThreadCreator.newThread("maple-timestamp-ticker", () -> {
-            while (true) {
-                timestamp.set(System.currentTimeMillis());
-                LockSupport.parkNanos(1_000_000);
-            }
+    public GsonMapleSink() {
+        timestampTicker = ThreadCreator.newThread("maple-timestamp-ticker", () -> {
+          while (true)  {
+              timestamp.set(System.currentTimeMillis());
+              LockSupport.parkNanos(1_000_000);
+          }
         });
         timestampTicker.start();
 
@@ -87,75 +85,67 @@ public final class JacksonMapleSink implements SinkImpl {
     }
 
     @Override
-    public void init(final Writer writer) throws IOException {
-        JsonFactory factory = JsonFactory.builder()
-                .enable(JsonWriteFeature.ESCAPE_NON_ASCII)
-                .build();
-
-        jsonGenerator = factory.createGenerator(writer);
-        jsonGenerator.setPrettyPrinter(NOPPrettyPrinter.getInstance());
-        jsonGenerator.enable(Feature.FLUSH_PASSED_TO_STREAM);
-        jsonGenerator.disable(Feature.AUTO_CLOSE_TARGET);
-        jsonGenerator.disable(Feature.STRICT_DUPLICATE_DETECTION);
-        jsonGenerator.disable(Feature.AUTO_CLOSE_JSON_CONTENT);
-        // Initialize with an empty line break
-        jsonGenerator.writeRaw(LINE_BREAK);
+    public void init(Writer writer) throws IOException {
+        this.writer = writer;
+        jsonWriter = new JsonWriter(writer);
+        jsonWriter.setLenient(true);
+        jsonWriter.setIndent("");
     }
 
-    private void writeThrowable(final Throwable throwable) throws IOException {
-        final String message;
+    private void writeThrowable(Throwable throwable) throws IOException {
+        String message;
         StackTraceElement[] frames;
         Throwable cause;
 
         if((message = throwable.getMessage()) != null) {
-            jsonGenerator.writeStringField("message", message);
+            jsonWriter.name("message").value(message);
         }
 
         if ((frames = throwable.getStackTrace()) != null) {
-            jsonGenerator.writeArrayFieldStart("stacktrace");
+            jsonWriter.name("stacktrace").beginArray();
             for (int index = 0; index < Math.min(frames.length, MAX_STACK_DEPTH); index++) {
-                jsonGenerator.writeString(frames[index].toString());
+                jsonWriter.value(frames[index].toString());
             }
 
             if (frames.length > MAX_STACK_DEPTH) {
-                jsonGenerator.writeString("...");
+                jsonWriter.value("...");
             }
-            jsonGenerator.writeEndArray();
+            jsonWriter.endArray();
         }
 
         if ((cause = throwable.getCause()) != null) {
-            jsonGenerator.writeObjectFieldStart("cause");
+            jsonWriter.name("cause").beginObject();
             writeThrowable(cause);
-            jsonGenerator.writeEndObject();
+            jsonWriter.endObject();
         }
     }
 
-    private void writeMap(final Map map) throws IOException {
-        jsonGenerator.writeStartObject();
+    private void writeMap(Map map) throws IOException {
+        jsonWriter.beginObject();
         for (var key : map.keySet()) {
-            jsonGenerator.writeFieldName(key.toString());
+            jsonWriter.name(key.toString());
             writeObject(map.get(key));
         }
-        jsonGenerator.writeEndObject();
+        jsonWriter.endObject();
     }
 
-    private void writeArray(final List lst) throws IOException {
-        jsonGenerator.writeStartArray();
+    private void writeArray(List lst) throws IOException {
+        jsonWriter.beginArray();
         for(var value : lst){
             writeObject(value);
         }
-        jsonGenerator.writeEndArray();
+        jsonWriter.endArray();
     }
 
-    private void writeArray(final Object... lst) throws IOException {
-        jsonGenerator.writeStartArray();
+    private void writeArray(Object... lst) throws IOException {
+        jsonWriter.beginArray();
         for (var value : lst) {
             writeObject(value);
         }
-        jsonGenerator.writeEndArray();
+        jsonWriter.endArray();
     }
 
-    private void writeObject(final Object object) throws IOException {
+    private void writeObject(Object object) throws IOException {
         if (object instanceof Throwable throwable) {
             writeThrowable(throwable);
         } else if (object instanceof Map map) {
@@ -165,97 +155,106 @@ public final class JacksonMapleSink implements SinkImpl {
         } else if (object instanceof Object[] lst) {
             writeArray(lst);
         } else {
-            jsonGenerator.writeObject(object);
+            if (object == null) {
+                jsonWriter.nullValue();
+            } else if (object instanceof String s) {
+                jsonWriter.value(s);
+            } else if (object instanceof Number n) {
+                jsonWriter.value(n);
+            } else if (object instanceof Boolean b) {
+                jsonWriter.value(b);
+            } else {
+                jsonWriter.value(object.toString());
+            }
         }
     }
 
-    private void emitMessage(final MapleLogEvent logEvent) throws IOException {
-        jsonGenerator.writeStringField(LogField.Message.fieldName, logEvent.message);
-    }
-
-
-    // The method must conform to the functional interface, so we should ignore this rule here.
-    @SuppressWarnings("PMD.UnusedFormalParameter")
-    private void emitTimestamp(final MapleLogEvent logEvent) throws IOException {
-        jsonGenerator.writeNumberField(LogField.Timestamp.fieldName, timestamp.get());
+    private void emitMessage(MapleLogEvent logEvent) throws IOException {
+        jsonWriter.name(LogField.Message.fieldName).value(logEvent.message);
     }
 
     // The method must conform to the functional interface, so we should ignore this rule here.
     @SuppressWarnings("PMD.UnusedFormalParameter")
-    private void emitMDC(final MapleLogEvent logEvent) throws IOException {
+    private void emitTimestamp(MapleLogEvent logEvent) throws IOException {
+        jsonWriter.name(LogField.Timestamp.fieldName).value(timestamp.get());
+    }
+
+    // The method must conform to the functional interface, so we should ignore this rule here.
+    @SuppressWarnings("PMD.UnusedFormalParameter")
+    private void emitMDC(MapleLogEvent logEvent) throws IOException {
         var mdc = MDC.getCopyOfContextMap();
         if (mdc != null) {
-            jsonGenerator.writeObjectFieldStart(LogField.MDC.fieldName);
+            jsonWriter.name(LogField.MDC.fieldName).beginObject();
             for (var kv : mdc.entrySet()) {
-                jsonGenerator.writeStringField(kv.getKey(), kv.getValue());
+                jsonWriter.name(kv.getKey()).value(kv.getValue());
             }
-            jsonGenerator.writeEndObject();
+            jsonWriter.endObject();
         }
     }
 
-    private void emitLogger(final MapleLogEvent logEvent) throws IOException {
-        jsonGenerator.writeStringField(LogField.LoggerName.fieldName, logEvent.getLoggerName());
+    private void emitLogger(MapleLogEvent logEvent) throws IOException {
+        jsonWriter.name(LogField.LoggerName.fieldName).value(logEvent.getLoggerName());
     }
 
-    private void emitLevel(final MapleLogEvent logEvent) throws IOException {
-        jsonGenerator.writeStringField(LogField.Level.fieldName, LEVEL_MAPPING[logEvent.level.ordinal()]);
+    private void emitLevel(MapleLogEvent logEvent) throws IOException {
+        jsonWriter.name(LogField.Level.fieldName).value(LEVEL_MAPPING[logEvent.level.ordinal()]);
     }
 
-    private void emitThreadName(final MapleLogEvent logEvent) throws IOException {
-        jsonGenerator.writeStringField(LogField.ThreadName.fieldName, logEvent.getThreadName());
+    private void emitThreadName(MapleLogEvent logEvent) throws IOException {
+        jsonWriter.name(LogField.ThreadName.fieldName).value(logEvent.getThreadName());
     }
 
     // The method must conform to the functional interface, so we should ignore this rule here.
     @SuppressWarnings("PMD.UnusedFormalParameter")
-    private void emitCounter(final MapleLogEvent logEvent) throws IOException {
-        jsonGenerator.writeNumberField(LogField.Counter.fieldName, counter.getAndIncrement());
+    private void emitCounter(MapleLogEvent logEvent) throws IOException {
+        jsonWriter.name(LogField.Counter.fieldName).value(counter.getAndIncrement());
     }
 
-    private void emitMarkers(final MapleLogEvent logEvent) throws IOException {
+    private void emitMarkers(MapleLogEvent logEvent) throws IOException {
         if (!logEvent.markers.isEmpty()) {
-            jsonGenerator.writeArrayFieldStart(LogField.Markers.fieldName);
+            jsonWriter.name(LogField.Markers.fieldName).beginArray();
             for (int i = 0; i < logEvent.markers.size(); i++) {
-                jsonGenerator.writeString(logEvent.markers.get(i).getName());
+                jsonWriter.value(logEvent.markers.get(i).getName());
             }
-            jsonGenerator.writeEndArray();
+            jsonWriter.endArray();
         }
     }
 
-    private void emitThrowable(final MapleLogEvent logEvent) throws IOException {
+    private void emitThrowable(MapleLogEvent logEvent) throws IOException {
         if (logEvent.throwable != null) {
-            jsonGenerator.writeObjectFieldStart(LogField.Throwable.fieldName);
+            jsonWriter.name(LogField.Throwable.fieldName).endObject();
             writeThrowable(logEvent.throwable);
-            jsonGenerator.writeEndObject();
+            jsonWriter.endObject();
         }
     }
 
-    private void emitKeyValuePair(final MapleLogEvent logEvent) throws IOException {
+    private void emitKeyValuePair(MapleLogEvent logEvent) throws IOException {
         if (!logEvent.keyValuePairs.isEmpty()) {
-            jsonGenerator.writeObjectFieldStart(LogField.KeyValuePairs.fieldName);
+            jsonWriter.name(LogField.KeyValuePairs.fieldName).beginObject();
             for (int i = 0; i < logEvent.keyValuePairs.size(); i++) {
                 var kvp = logEvent.keyValuePairs.get(i);
-                jsonGenerator.writeFieldName(kvp.key);
+                jsonWriter.name(kvp.key);
                 writeObject(kvp.value);
             }
-            jsonGenerator.writeEndObject();
+            jsonWriter.endObject();
         }
     }
 
-    private void emitExtra (final MapleLogEvent logEvent) throws IOException {
+    private void emitExtra (MapleLogEvent logEvent) throws IOException {
         if (logEvent.extra != null) {
-            jsonGenerator.writeObjectFieldStart(LogField.Throwable.fieldName);
-            writeObject(logEvent.throwable);
-            jsonGenerator.writeEndObject();
+            jsonWriter.name(LogField.Extra.fieldName).beginObject();
+            jsonWriter.endObject();
         }
     }
 
     @Override
-    public void write(final MapleLogEvent logEvent) throws IOException {
-        jsonGenerator.writeStartObject();
+    public void write(MapleLogEvent logEvent) throws IOException {
+        jsonWriter.beginObject();
         for (int i = 0; i < logEvent.fieldsToLog.length; i++){
             emitters[logEvent.fieldsToLog[i].ordinal()].apply(logEvent);
         }
-        jsonGenerator.writeEndObject();
-        jsonGenerator.flush();
+        jsonWriter.endObject();
+        writer.write(LINE_BREAK);
+        jsonWriter.flush();
     }
 }
