@@ -21,11 +21,10 @@ public class Main {
         Instant target = Instant.now().plus(time, ChronoUnit.MILLIS);
 
         for (int i = 0; i < threads; i++) {
-            int finalI = i;
             new Thread(() -> {
-            while (Instant.now().isBefore(target)) {
-                logger.atInfo().log("some message");
-            }
+                while (Instant.now().isBefore(target)) {
+                    logger.atInfo().log("some message");
+                }
             }).start();
         }
     }
