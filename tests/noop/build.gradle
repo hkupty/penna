@@ -1,0 +1,80 @@
+plugins {
+    id 'java'
+}
+
+group 'maple'
+version '0.1'
+
+repositories {
+    mavenCentral()
+}
+
+configurations {
+    sharedRuntime
+    runtimeMaple
+    runtimeLogback
+}
+
+task runMaple(type: JavaExec) {
+    classpath sourceSets.main.runtimeClasspath
+    classpath configurations.runtimeMaple
+    mainClass = "maple.throughput.Main"
+}
+
+task buildMapleJar(type: Jar) {
+    from sourceSets.main.output
+    dependsOn sourceSets.main.runtimeClasspath
+    dependsOn configurations.runtimeMaple
+    manifest{
+        attributes 'Main-Class': "maple.throughput.Main"
+    }
+    archiveBaseName = "mapleJar"
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from {
+        configurations.runtimeMaple.collect { it.isDirectory() ? it : zipTree(it) } +
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    with jar
+}
+
+task runLogback(type: JavaExec) {
+    classpath sourceSets.main.runtimeClasspath
+    classpath configurations.sharedRuntime
+    classpath configurations.runtimeLogback
+    mainClass = "maple.throughput.Main"
+}
+
+task buildLogbackJar(type: Jar) {
+    from sourceSets.main.output
+    dependsOn sourceSets.main.runtimeClasspath
+    dependsOn configurations.runtimeLogback
+    manifest{
+        attributes 'Main-Class': "maple.throughput.Main"
+    }
+    archiveBaseName = "logbackJar"
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from {
+        configurations.runtimeLogback.collect { it.isDirectory() ? it : zipTree(it) } +
+                configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    with jar
+}
+
+dependencies {
+    implementation 'org.slf4j:slf4j-api:2.0.6'
+    implementation 'com.fasterxml.jackson.core:jackson-core:2.14.2'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+
+    runtimeMaple project(":maple-core")
+
+    runtimeLogback 'ch.qos.logback:logback-classic:1.4.5'
+    runtimeLogback 'ch.qos.logback.contrib:logback-jackson:0.1.5'
+    runtimeLogback 'ch.qos.logback.contrib:logback-json-core:0.1.5'
+    runtimeLogback 'ch.qos.logback.contrib:logback-json-classic:0.1.5'
+    runtimeLogback 'com.fasterxml.jackson.core:jackson-databind:2.14.2'
+}
+
+test {
+    useJUnitPlatform()
+}
