@@ -5,6 +5,7 @@ import maple.core.minilog.MiniLogger;
 import maple.core.sink.impl.GsonMapleSink;
 import maple.core.sink.impl.JakartaMapleSink;
 import maple.core.sink.impl.JacksonMapleSink;
+import maple.core.sink.impl.NOPSink;
 
 import java.io.*;
 import java.util.function.Supplier;
@@ -16,15 +17,15 @@ public final class MapleSink {
 
         private Factory() {}
 
-        // From the same ticket that PMD references, https://bugs.openjdk.org/browse/JDK-8080225, it is noted that
-        // in JDK 10 the problem was solved. We are targeting JDK 17+, so the problem won't affect us.
-        // Plus, any other alternative is significantly slower.
         private static final Supplier<Supplier<SinkImpl>>[] candidates = new Supplier[]{
                 Factory::tryJackson,
                 Factory::tryGson,
                 Factory::tryJakarta
         };
 
+        // From the same ticket that PMD references, https://bugs.openjdk.org/browse/JDK-8080225, it is noted that
+        // in JDK 10 the problem was solved. We are targeting JDK 17+, so the problem won't affect us.
+        // Plus, any other alternative is significantly slower.
         @SuppressWarnings("PMD.AvoidFileStream")
         public static MapleSink getSink() {
             Supplier<SinkImpl> impl;
@@ -35,7 +36,11 @@ public final class MapleSink {
             } while (counter < candidates.length && impl == null);
 
             if (impl == null) {
-                return null;
+                MiniLogger.error("""
+                           No implementation found.
+                           Please add jackson, gson or a jakarta-compatible json library.
+                           No log messages will be written because we can't format them.""");
+                impl = NOPSink::new;
             }
 
             try {
