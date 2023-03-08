@@ -14,8 +14,16 @@ public final class NOPSink implements SinkImpl {
 
     public static NOPSink getInstance() { return singleton; }
     @Override
-    public void init(Writer writer) throws IOException { }
+    public void init(Writer writer) throws IOException {
+        // this method should, intentionally, do nothing.
+        // this class only exists to fill in a compliant instance
+        // in case no implementation is found
+    }
 
     @Override
-    public void write(MapleLogEvent logEvent) throws IOException { }
+    public void write(MapleLogEvent logEvent) throws IOException {
+        // this method should, intentionally, do nothing.
+        // this class only exists to fill in a compliant instance
+        // in case no implementation is found
+    }
 }

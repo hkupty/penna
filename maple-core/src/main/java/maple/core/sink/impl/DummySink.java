@@ -16,7 +16,11 @@ public final class DummySink implements SinkImpl {
     }
 
     @Override
-    public void init(Writer writer) throws IOException { }
+    public void init(Writer writer) throws IOException {
+        // There's no usage for writer in this implementation
+        // as this class exists for testing purposes, and we're not
+        // writing it to STDOUT anyway, at least not through the writer instance.
+    }
 
     @Override
     public void write(MapleLogEvent logEvent) throws IOException {
