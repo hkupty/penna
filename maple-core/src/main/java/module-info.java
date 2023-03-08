@@ -4,7 +4,7 @@ module maple.core {
     uses maple.api.config.ConfigManager;
     // Depends explicitly on the SLF4J api
     requires org.slf4j;
-    requires maple.api;
+    requires transitive maple.api;
 
     // Optionally depends on the following json libraries
     requires static com.fasterxml.jackson.core;
