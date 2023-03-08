@@ -1,5 +1,6 @@
 package maple.core.logger;
 
+import maple.api.config.Config;
 import maple.api.config.ConfigManager.ConfigItem.LoggerConfigItem;
 import maple.core.logger.guard.*;
 import maple.core.sink.SinkImpl;
@@ -15,48 +16,44 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.atomic.AtomicReferenceArray;
 
-public class LoggerTests {
+class LoggerTests {
 
     @Test
-    public void log_levels_are_respected() {
-        var factory = MapleLoggerFactory.getInstance();
-        if (!(factory.getLogger("test") instanceof MapleLogger mapleLogger)) {
-            Assertions.fail("MapleLoggerFactory is not returning an MapleLogger");
-            return;
-        }
+    void log_levels_are_respected() {
+        var cache = new TreeCache(Config.getDefault());
+        MapleLogger mapleLogger = cache.getLoggerAt("test");
+        String[] ref = new String[] {"test"};
 
         // null-level, no logs
-        factory.configure(new LoggerConfigItem("test", config -> config.replaceLevel(null)));
+        cache.updateConfig(ref, config -> config.replaceLevel(null));
         Assertions.assertEquals(NOPGuard.singleton(), mapleLogger.levelGuard);
 
         // Trace
-        factory.configure(new LoggerConfigItem("test", config -> config.replaceLevel(Level.TRACE)));
+        cache.updateConfig(ref, config -> config.replaceLevel(Level.TRACE));
         Assertions.assertEquals(TraceLevelGuard.singleton(), mapleLogger.levelGuard);
 
         // Debug
-        factory.configure(new LoggerConfigItem("test", config -> config.replaceLevel(Level.DEBUG)));
+        cache.updateConfig(ref, config -> config.replaceLevel(Level.DEBUG));
         Assertions.assertEquals(DebugLevelGuard.singleton(), mapleLogger.levelGuard);
 
         // Info
-        factory.configure(new LoggerConfigItem("test", config -> config.replaceLevel(Level.INFO)));
+        cache.updateConfig(ref, config -> config.replaceLevel(Level.INFO));
         Assertions.assertEquals(InfoLevelGuard.singleton(), mapleLogger.levelGuard);
 
         // Warn
-        factory.configure(new LoggerConfigItem("test", config -> config.replaceLevel(Level.WARN)));
+        cache.updateConfig(ref, config -> config.replaceLevel(Level.WARN));
         Assertions.assertEquals(WarnLevelGuard.singleton(), mapleLogger.levelGuard);
 
         // Error
-        factory.configure(new LoggerConfigItem("test", config -> config.replaceLevel(Level.ERROR)));
+        cache.updateConfig(ref, config -> config.replaceLevel(Level.ERROR));
         Assertions.assertEquals(ErrorLevelGuard.singleton(), mapleLogger.levelGuard);
     }
 
     @Test
-    public void can_write_log_messages() {
-        var factory = MapleLoggerFactory.getInstance();
-        if (!(factory.getLogger("test") instanceof MapleLogger mapleLogger)) {
-            Assertions.fail("MapleLoggerFactory is not returning an MapleLogger");
-            return;
-        }
+    void can_write_log_messages() {
+        var cache = new TreeCache(Config.getDefault());
+        MapleLogger mapleLogger = cache.getLoggerAt("test");
+
         AtomicInteger counter = new AtomicInteger(0);
         SinkImpl checker = new DummySink(mle -> counter.getAndIncrement());
 
@@ -82,12 +79,9 @@ public class LoggerTests {
 
 
     @Test
-    public void markers_are_kept() {
-        var factory = MapleLoggerFactory.getInstance();
-        if (!(factory.getLogger("test") instanceof MapleLogger mapleLogger)) {
-            Assertions.fail("MapleLoggerFactory is not returning an MapleLogger");
-            return;
-        }
+    void markers_are_kept() {
+        var cache = new TreeCache(Config.getDefault());
+        MapleLogger mapleLogger = cache.getLoggerAt("test");
 
         AtomicReference<Marker> usedMarker = new AtomicReference<>(null);
         SinkImpl checker = new DummySink(mle -> {
