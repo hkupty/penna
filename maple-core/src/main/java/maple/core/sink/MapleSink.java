@@ -17,6 +17,8 @@ public final class MapleSink {
 
         private Factory() {}
 
+        // The methods below are correctly typed.
+        @SuppressWarnings("unchecked")
         private static final Supplier<Supplier<SinkImpl>>[] candidates = new Supplier[]{
                 Factory::tryJackson,
                 Factory::tryGson,
