@@ -2,13 +2,17 @@ package maple.core.logger;
 
 import maple.api.config.Config;
 import maple.api.models.LogField;
+import maple.core.minilog.MiniLogger;
 import maple.core.models.MapleLogEvent;
 import maple.core.logger.guard.LevelGuard;
 import maple.core.logger.event.MapleLogEventBuilder;
 import maple.core.sink.MapleSink;
+import maple.core.sink.SinkImpl;
 import org.slf4j.Marker;
 import org.slf4j.event.LoggingEvent;
 import org.slf4j.spi.LoggingEventBuilder;
+
+import java.io.IOException;
 
 
 public final class MapleLogger implements IMapleLogger {
@@ -16,7 +20,7 @@ public final class MapleLogger implements IMapleLogger {
     private transient final String name;
     transient LevelGuard levelGuard;
     private transient Config config;
-    private final ThreadLocal<MapleSink> sink;
+    final ThreadLocal<SinkImpl> sink;
 
     public MapleLogger(String name, Config config) {
         this.name = name;
@@ -360,7 +364,11 @@ public final class MapleLogger implements IMapleLogger {
 
     @Override
     public void log(MapleLogEvent log) {
-        sink.get().write(log);
+        try {
+            sink.get().write(log);
+        } catch (IOException e) {
+            MiniLogger.error("Unable to write log.", e);
+        }
     }
 
     // Please excuse my friend, he's drunk, and he doesn't know *we are the logging framework*.

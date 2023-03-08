@@ -1,6 +1,5 @@
 package maple.core.sink;
 
-import maple.core.models.MapleLogEvent;
 import maple.core.minilog.MiniLogger;
 import maple.core.sink.impl.GsonMapleSink;
 import maple.core.sink.impl.JakartaMapleSink;
@@ -11,9 +10,9 @@ import java.io.*;
 import java.util.function.Supplier;
 
 public final class MapleSink {
-    private transient final SinkImpl impl;
 
     public static final class Factory {
+        private static Supplier<SinkImpl> defaultImplementation;
 
         private Factory() {}
 
@@ -25,35 +24,41 @@ public final class MapleSink {
                 Factory::tryJakarta
         };
 
-        // From the same ticket that PMD references, https://bugs.openjdk.org/browse/JDK-8080225, it is noted that
-        // in JDK 10 the problem was solved. We are targeting JDK 17+, so the problem won't affect us.
-        // Plus, any other alternative is significantly slower.
-        @SuppressWarnings("PMD.AvoidFileStream")
-        public static MapleSink getSink() {
-            Supplier<SinkImpl> impl;
+        private static void pickDefaultImplementation() {
             int counter = 0;
             do {
-                impl = candidates[counter].get();
+                defaultImplementation = candidates[counter].get();
                 counter++;
-            } while (counter < candidates.length && impl == null);
+            } while (counter < candidates.length && defaultImplementation == null);
 
-            if (impl == null) {
+            if (defaultImplementation == null) {
                 MiniLogger.error("""
                            No implementation found.
                            Please add jackson, gson or a jakarta-compatible json library.
                            No log messages will be written because we can't format them.""");
-                impl = NOPSink::new;
+                defaultImplementation = NOPSink::getInstance;
+            }
+        }
+
+        // From the same ticket that PMD references, https://bugs.openjdk.org/browse/JDK-8080225, it is noted that
+        // in JDK 10 the problem was solved. We are targeting JDK 17+, so the problem won't affect us.
+        // Plus, any other alternative is significantly slower.
+        @SuppressWarnings("PMD.AvoidFileStream")
+        public static SinkImpl getSink() {
+            if (defaultImplementation == null){
+                pickDefaultImplementation();
             }
 
             try {
-                SinkImpl sinkImpl = impl.get();
+                SinkImpl sinkImpl = defaultImplementation.get();
                 sinkImpl.init(new FileWriter(FileDescriptor.out));
-                return new MapleSink(sinkImpl);
+                return sinkImpl;
             } catch (IOException e) {
                 MiniLogger.error("Unable to create logger", e);
             }
             return null;
         }
+
 
         private static Supplier<SinkImpl> tryJackson() {
             try {
@@ -80,18 +85,6 @@ public final class MapleSink {
             } catch (ClassNotFoundException e) {
                 return null;
             }
-        }
-    }
-
-    private MapleSink(SinkImpl impl) throws IOException {
-        this.impl = impl;
-    }
-
-    public void write(MapleLogEvent log) {
-        try {
-            impl.write(log);
-        } catch (IOException e) {
-            MiniLogger.error("Unable to log", e);
         }
     }
 }
