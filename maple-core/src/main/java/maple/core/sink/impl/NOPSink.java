@@ -7,6 +7,12 @@ import java.io.IOException;
 import java.io.Writer;
 
 public final class NOPSink implements SinkImpl {
+
+    private NOPSink() {}
+
+    private static final NOPSink singleton = new NOPSink();
+
+    public static NOPSink getInstance() { return singleton; }
     @Override
     public void init(Writer writer) throws IOException { }
 
