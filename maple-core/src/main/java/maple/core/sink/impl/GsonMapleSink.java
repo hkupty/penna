@@ -2,6 +2,7 @@ package maple.core.sink.impl;
 
 import com.google.gson.stream.JsonWriter;
 import maple.api.models.LogField;
+import maple.core.internals.Clock;
 import maple.core.internals.ThreadCreator;
 import maple.core.models.MapleLogEvent;
 import maple.core.sink.SinkImpl;
@@ -52,21 +53,12 @@ public final class GsonMapleSink implements SinkImpl {
     private static final int MAX_STACK_DEPTH = 15;
 
     private final AtomicLong counter = new AtomicLong(0L);
-    private final AtomicLong timestamp = new AtomicLong(0L);
 
     private JsonWriter jsonWriter;
     private Writer writer;
 
 
     public GsonMapleSink() {
-        Thread timestampTicker = ThreadCreator.newThread("maple-timestamp-ticker", () -> {
-            while (true) {
-                timestamp.set(System.currentTimeMillis());
-                LockSupport.parkNanos(1_000_000);
-            }
-        });
-        timestampTicker.start();
-
         // WARNING! Introducing new log fields requires this array to be updated.
         emitters = new Emitter[LogField.values().length];
         emitters[LogField.Counter.ordinal()] = this::emitCounter;
@@ -174,7 +166,7 @@ public final class GsonMapleSink implements SinkImpl {
     // The method must conform to the functional interface, so we should ignore this rule here.
     @SuppressWarnings("PMD.UnusedFormalParameter")
     private void emitTimestamp(MapleLogEvent logEvent) throws IOException {
-        jsonWriter.name(LogField.Timestamp.fieldName).value(timestamp.get());
+        jsonWriter.name(LogField.Timestamp.fieldName).value(Clock.getTimestamp());
     }
 
     // The method must conform to the functional interface, so we should ignore this rule here.
