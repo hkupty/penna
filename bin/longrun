@@ -2,7 +2,11 @@
 
 MAPLE_JAR="tests/throughput/build/libs/mapleJar-0.1.jar"
 
-TIME="${1:-180}"
+TIME="${1:-180000}"
 THREADS="${2:-1}"
 
-perf record -a java -XX:+UnlockDiagnosticVMOptions -XX:+DumpPerfMapAtExit "${MAPLE_JAR}" "${TIME}" "${THREADS}"
+localdir=$(dirname "$0")
+cd "${localdir}/.." && {
+  gradle -q :throughput:buildMapleJar
+  java -XX:+UnlockDiagnosticVMOptions -XX:+DumpPerfMapAtExit -jar "${MAPLE_JAR}" "${TIME}" "${THREADS}" > /dev/null
+}
