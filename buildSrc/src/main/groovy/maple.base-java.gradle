@@ -20,4 +20,9 @@ tasks.withType(AbstractArchiveTask) {
 
 tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
+    options.compilerArgs += [
+            "-Xlint:all",
+            // TODO Eventually we should enable -Werror here
+            //"-Werror"
+    ]
 }

@@ -33,7 +33,7 @@ public record Config(
      * @param level the new level which this configuration will consider to be minimum.
      * @return a new Config with this value applied and the same {@link Config#fields} as the original.
      */
-    public Config copy(Level level) {
+    public Config replaceLevel(Level level) {
         return new Config(level, this.fields);
     }
 
@@ -42,7 +42,7 @@ public record Config(
      * @param fields a new array of fields to replace the ones in the existing Config.
      * @return a new Config with the same {@link Config#level} as the original, replacing the fields.
      */
-    public Config copy(LogField[] fields) {
+    public Config replaceFields(LogField[] fields) {
         return new Config(this.level, fields);
     }
 
@@ -73,7 +73,7 @@ public record Config(
      * @return A new config copy, with the default level and the supplied fields applied
      * @see Config#getDefault()
      */
-    public static Config withFields(LogField... fields) { return getDefault().copy(fields); }
+    public static Config withFields(LogField... fields) { return getDefault().replaceFields(fields); }
 
     /**
      * A convenience builder that returns a Config with the supplied values applied to it.

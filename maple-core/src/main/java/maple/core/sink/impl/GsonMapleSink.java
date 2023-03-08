@@ -54,18 +54,16 @@ public final class GsonMapleSink implements SinkImpl {
     private final AtomicLong counter = new AtomicLong(0L);
     private final AtomicLong timestamp = new AtomicLong(0L);
 
-    private final Thread timestampTicker;
-
     private JsonWriter jsonWriter;
     private Writer writer;
 
 
     public GsonMapleSink() {
-        timestampTicker = ThreadCreator.newThread("maple-timestamp-ticker", () -> {
-          while (true)  {
-              timestamp.set(System.currentTimeMillis());
-              LockSupport.parkNanos(1_000_000);
-          }
+        Thread timestampTicker = ThreadCreator.newThread("maple-timestamp-ticker", () -> {
+            while (true) {
+                timestamp.set(System.currentTimeMillis());
+                LockSupport.parkNanos(1_000_000);
+            }
         });
         timestampTicker.start();
 

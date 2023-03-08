@@ -11,7 +11,7 @@
  * {@link maple.api.config.Configurable} instance.
  */
 module maple.api {
-    requires org.slf4j;
+    requires transitive org.slf4j;
 
     exports maple.api.models;
     exports maple.api.config;

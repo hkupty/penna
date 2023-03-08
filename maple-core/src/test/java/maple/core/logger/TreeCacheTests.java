@@ -111,7 +111,7 @@ public class TreeCacheTests {
                 "testing"
         });
         assertEquals(Level.INFO, logger.getConfig().level());
-        cache.updateConfig(new String[]{"com", "for"}, cfg -> cfg.copy(Level.DEBUG));
+        cache.updateConfig(new String[]{"com", "for"}, cfg -> cfg.replaceLevel(Level.DEBUG));
         assertEquals(Level.DEBUG, logger.getConfig().level());
         assertEquals(DebugLevelGuard.singleton(), logger.levelGuard);
     }
@@ -125,7 +125,7 @@ public class TreeCacheTests {
                 "for",
                 "testing"
         });
-        cache.updateConfig(new String[]{"com", "for"}, cfg -> cfg.copy(Level.DEBUG));
+        cache.updateConfig(new String[]{"com", "for"}, cfg -> cfg.replaceLevel(Level.DEBUG));
         AtomicInteger loggers = new AtomicInteger();
         cache.traverse(cache.ROOT, data -> {
             if(data.logger != null) {
@@ -140,7 +140,7 @@ public class TreeCacheTests {
     public void updating_uninitialized_config_will_recursively_create_the_entries_but_not_loggers(){
         var config = Config.getDefault();
         var cache = new TreeCache(config);
-        cache.updateConfig(new String[]{"com", "for", "testing"}, cfg -> cfg.copy(Level.DEBUG));
+        cache.updateConfig(new String[]{"com", "for", "testing"}, cfg -> cfg.replaceLevel(Level.DEBUG));
         AtomicInteger depth = new AtomicInteger();
         cache.traverse(cache.ROOT, ignored -> depth.getAndIncrement());
 
