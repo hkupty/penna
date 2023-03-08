@@ -24,7 +24,7 @@ public final class MapleLogger implements IMapleLogger {
 
     public MapleLogger(String name, Config config) {
         this.name = name;
-        sink = ThreadLocal.withInitial(MapleSink.Factory::getSink);
+        sink = ThreadLocal.withInitial(MapleSink::getSink);
         this.updateConfig(config);
     }
 
