@@ -1,11 +1,11 @@
 plugins {
     id 'maple.base-java'
-    id 'maven-publish'
-    id 'signing'
+    id 'maple.publishing'
 }
 
 group 'com.hkupty.maple'
 version '0.4'
+description "An opinionated slf4j backend for structured logging"
 
 repositories {
     mavenCentral()
@@ -29,61 +29,3 @@ test {
     useJUnitPlatform()
 }
 
-java {
-    withJavadocJar()
-    withSourcesJar()
-}
-
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-          artifactId = 'maple-yaml-config'
-            from components.java
-            versionMapping {
-                usage('java-api') {
-                    fromResolutionOf('runtimeClasspath')
-                }
-                usage('java-runtime') {
-                    fromResolutionResult()
-                }
-            }
-          pom {
-            name = "maple-yaml-config"
-            description = "An opinionated slf4j backend for structured logging"
-            url = 'https://github.com/hkupty/maple'
-            licenses {
-                    license {
-                        name = 'MIT License'
-                        url = 'https://github.com/hkupty/maple/blob/main/LICENSE'
-                    }
-                }
-                developers {
-                    developer {
-                        id = 'hkupty'
-                        name = 'Henry John Kupty'
-                        email = 'hkupty@gmail.com'
-                    }
-                }
-            scm {
-                    connection = 'scm:git:git://github.com/hkupty/maple'
-                    developerConnection = 'scm:git:ssh://github.com/hkupty/maple'
-                    url = 'https://github.com/hkupty/maple'
-                }
-            }
-        }
-    }
-    repositories {
-        maven {
-            url = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
-            credentials {
-              username ossrhUsername
-              password ossrhPassword
-            }
-        }
-    }
-}
-
-signing {
-    sign configurations.archives
-    sign publishing.publications.mavenJava
-}
