@@ -77,4 +77,15 @@ public enum LogField {
     LogField(String fieldName) {
         this.fieldName = fieldName;
     }
+
+    public static LogField fromFieldName(String fieldName) {
+        var values = values();
+        for (int i = 0; i < values.length; i++) {
+            if (values[i].fieldName.equals(fieldName)){
+                return values[i];
+            }
+        }
+
+        return null;
+    }
 }
