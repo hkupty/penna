@@ -24,6 +24,4 @@ project(":throughput").projectDir = file("tests/throughput")
 project(":noop").projectDir = file("tests/noop")
 project(":count").projectDir = file("tests/count")
 include 'playground'
-include 'maple-yaml-config:main'
-findProject(':maple-yaml-config:main')?.name = 'main'
 
