@@ -18,7 +18,7 @@ This might be a common use-case for jvm apps running in kubernetes.
 If that is your use case, you might prefer maple over logback because:
 
 - Maple is specialized for this use-case, working out of the box with sane defaults;
-- If you already have jackson, guava or any jakarta/json-p compliant library, maple will use it to write json logs, so no extra dependencies needed;
+- If you already have jackson, gson or any jakarta/json-p compliant library, maple will use it to write json logs, so no extra dependencies needed;
 - It is very optimized, with impressive performance when compared to logback;
 - It is also designed not consume almost any memory, so it won't cause GC pressure;
 - If you want to configure, the extension config library [maple-yaml-config](maple-yaml-config/README.md) allows you to configure maple in yaml, 
