@@ -7,7 +7,6 @@ plugins {
 
 group 'com.hkupty.maple'
 version '0.4'
-description "An opinionated slf4j backend for structured logging"
 
 repositories {
     mavenCentral()
