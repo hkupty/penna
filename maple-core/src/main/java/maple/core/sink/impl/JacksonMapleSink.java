@@ -7,7 +7,6 @@ import com.fasterxml.jackson.core.json.JsonWriteFeature;
 import maple.api.models.LogField;
 import maple.core.internals.Clock;
 import maple.core.models.MapleLogEvent;
-import maple.core.internals.ThreadCreator;
 import maple.core.sink.SinkImpl;
 import maple.core.sink.impl.jackson.NOPPrettyPrinter;
 import org.slf4j.MDC;
@@ -18,7 +17,6 @@ import java.io.Writer;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.locks.LockSupport;
 
 public final class JacksonMapleSink implements SinkImpl {
     private static final String LINE_BREAK = System.getProperty("line.separator");
