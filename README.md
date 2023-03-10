@@ -122,7 +122,7 @@ both makes sense for humans and is easy for machines to process.
 
 Instead, we should embrace the notion that logs are effectively data and should be treated as such.
 
-## Lightweight configuration
+### Lightweight configuration
 
 Maple comes packed with a sane defaults configuration that allows one to plug it and start using immediately.
 Although configuration is possible, by rolling with the shipped defaults one can already reap the benefits of structured
