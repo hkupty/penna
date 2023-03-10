@@ -10,6 +10,23 @@ Maple is currently in alpha and, while usable, *has not been tested in productio
 
 Please use with caution. Feedback, however, is very welcome.
 
+## Why use maple?
+
+Maple presents itself as an alternative to [logback](https://logback.qos.ch/).
+It is designed for a specific use case: When you want to have [structured logging](https://stackify.com/what-is-structured-logging-and-why-developers-need-it/), straight to the console.
+This might be a common use-case for jvm apps running in kubernetes.
+If that is your use case, you might prefer maple over logback because:
+
+- Maple is specialized for this use-case, working out of the box with sane defaults;
+- If you already have jackson, guava or any jakarta/json-p compliant library, maple will use it to write json logs, so no extra dependencies needed;
+- It is very optimized, with impressive performance when compared to logback;
+- It is also designed not consume almost any memory, so it won't cause GC pressure;
+- If you want to configure, the extension config library [maple-yaml-config](maple-yaml-config/README.md) allows you to configure maple in yaml, 
+which might be a more native configuration format for its runtime environment (i.e. kubernetes);
+
+However, maple doesn't try to replace logback for all its use cases. If you have to log in multiple formats, to a file or any other target, logback might still be your tool of choice.
+
+
 ## Usage
 
 Maple is a backend for slf4j, so you don't need to interact with it directly.
@@ -30,6 +47,8 @@ implementation 'org.slf4j:slf4j-api:2.0.6'
 // runtimeOnly 'com.fasterxml.jackson.core:jackson-core:2.12.0'
 ```
 
+:warning: Note that maple is built targeting JVM 17+.
+
 By default, you will get log level `INFO` enabled as well as the following fields:
 - `timestamp`
 - `level`
@@ -38,7 +57,7 @@ By default, you will get log level `INFO` enabled as well as the following field
 - `thread`
 - `mdc`
 - `markers`
-- `data` (slf4j's 2.0 `.addKeyValue`)
+- `data` (slf4j's 2.0 `.addKeyValue()`)
 - `throwable`
 
 Maple has support for logging also a `Counter` to each message, individually marking each message with a monotonically increasing
