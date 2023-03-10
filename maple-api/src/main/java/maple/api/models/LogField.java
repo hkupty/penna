@@ -77,4 +77,19 @@ public enum LogField {
     LogField(String fieldName) {
         this.fieldName = fieldName;
     }
+
+    /**
+     * This is a utility static method to allow clients, specially those implementing {@link maple.api.config.ConfigManager},
+     * to retrieve LogFields based on their string representation.
+     * @param fieldName the string representation of the field to be logged
+     * @return The respective enum value or null if none matched.
+     */
+    public static LogField fromFieldName(String fieldName) {
+        for (LogField value : values()) {
+            if (value.fieldName.equals(fieldName)) {
+                return value;
+            }
+        }
+        return null;
+    }
 }

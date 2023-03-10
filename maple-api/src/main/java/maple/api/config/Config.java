@@ -42,7 +42,7 @@ public record Config(
      * @param fields a new array of fields to replace the ones in the existing Config.
      * @return a new Config with the same {@link Config#level} as the original, replacing the fields.
      */
-    public Config replaceFields(LogField[] fields) {
+    public Config replaceFields(LogField... fields) {
         return new Config(this.level, fields);
     }
 

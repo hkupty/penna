@@ -1,0 +1,11 @@
+maple:
+  level: debug
+  loggers:
+    org.example:
+      fields:
+        - message
+        - mdc
+        - logger
+        - thread
+        - timestamp
+        - counter

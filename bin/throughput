@@ -47,6 +47,8 @@ function batch() {
 cd "${localdir}/.." && {
   batch 1 10000
   batch 2 10000
+  batch 3 5000
+  batch 4 5000
 }
 
 sudo umount out/

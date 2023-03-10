@@ -22,7 +22,7 @@ public final class MapleLogger implements IMapleLogger {
     private transient Config config;
     final ThreadLocal<SinkImpl> sink;
 
-    public MapleLogger(String name, Config config) {
+    MapleLogger(String name, Config config) {
         this.name = name;
         sink = ThreadLocal.withInitial(MapleSink::getSink);
         this.updateConfig(config);

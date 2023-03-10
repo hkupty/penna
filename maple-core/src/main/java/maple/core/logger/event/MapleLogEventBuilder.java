@@ -6,6 +6,7 @@ import org.slf4j.Marker;
 import org.slf4j.event.KeyValuePair;
 import org.slf4j.event.Level;
 import org.slf4j.event.LoggingEvent;
+import org.slf4j.helpers.MessageFormatter;
 import org.slf4j.spi.LoggingEventBuilder;
 
 import java.util.Arrays;
@@ -166,6 +167,9 @@ public final class MapleLogEventBuilder implements LoggingEventBuilder {
 
     @Override
     public void log() {
+        if (!this.current.arguments.isEmpty()) {
+            this.current.message = MessageFormatter.basicArrayFormat(this.current.message, this.current.getArgumentArray());
+        }
         this.current.logger.log(this.current);
     }
 

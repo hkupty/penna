@@ -104,4 +104,57 @@ class LoggerTests {
         mapleLogger.info(ref, "should not log");
         Assertions.assertEquals(ref, usedMarker.get());
     }
+
+    @Test
+    void messages_arrive_formatted_on_the_sink() {
+        var cache = new TreeCache(Config.getDefault());
+        MapleLogger mapleLogger = cache.getLoggerAt("test");
+
+        AtomicReference<String> message = new AtomicReference<>(null);
+        SinkImpl checker = new DummySink(mle -> {
+            message.set(mle.message);
+        });
+
+        Assertions.assertEquals(InfoLevelGuard.singleton(), mapleLogger.levelGuard);
+        mapleLogger.sink.set(checker);
+
+        mapleLogger.debug("should not log");
+        Assertions.assertNull(message.get());
+
+        mapleLogger.info("normal message");
+        Assertions.assertEquals("normal message", message.get());
+
+
+        mapleLogger.info("{} message", "formatted");
+        Assertions.assertEquals("formatted message", message.get());
+    }
+
+    @Test
+    void formatting_does_not_use_throwables() {
+        var cache = new TreeCache(Config.getDefault());
+        MapleLogger mapleLogger = cache.getLoggerAt("test");
+
+        AtomicReference<String> message = new AtomicReference<>(null);
+        SinkImpl checker = new DummySink(mle -> {
+            message.set(mle.message);
+        });
+
+        var exception = new Exception();
+
+        Assertions.assertEquals(InfoLevelGuard.singleton(), mapleLogger.levelGuard);
+        mapleLogger.sink.set(checker);
+
+        mapleLogger.info("normal message", exception);
+        Assertions.assertEquals("normal message", message.get());
+
+
+        mapleLogger.info("{} message", "formatted", exception);
+        Assertions.assertEquals("formatted message", message.get());
+
+        mapleLogger.info("with {} {} message", "two", "formatted", exception);
+        Assertions.assertEquals("with two formatted message", message.get());
+
+        mapleLogger.info("with {} {} {}", "three", "formatted", "message", exception);
+        Assertions.assertEquals("with three formatted message", message.get());
+    }
 }

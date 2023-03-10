@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonGenerator.Feature;
 import com.fasterxml.jackson.core.json.JsonWriteFeature;
 import maple.api.models.LogField;
+import maple.core.internals.Clock;
 import maple.core.models.MapleLogEvent;
 import maple.core.internals.ThreadCreator;
 import maple.core.sink.SinkImpl;
@@ -56,21 +57,12 @@ public final class JacksonMapleSink implements SinkImpl {
     private static final int MAX_STACK_DEPTH = 15;
 
     private final AtomicLong counter = new AtomicLong(0L);
-    private final AtomicLong timestamp = new AtomicLong(0L);
 
     private JsonGenerator jsonGenerator;
 
 
 
     public JacksonMapleSink() {
-        Thread timestampTicker = ThreadCreator.newThread("maple-timestamp-ticker", () -> {
-            while (true) {
-                timestamp.set(System.currentTimeMillis());
-                LockSupport.parkNanos(1_000_000);
-            }
-        });
-        timestampTicker.start();
-
         // WARNING! Introducing new log fields requires this array to be updated.
         emitters = new Emitter[LogField.values().length];
         emitters[LogField.Counter.ordinal()] = this::emitCounter;
@@ -177,7 +169,7 @@ public final class JacksonMapleSink implements SinkImpl {
     // The method must conform to the functional interface, so we should ignore this rule here.
     @SuppressWarnings("PMD.UnusedFormalParameter")
     private void emitTimestamp(final MapleLogEvent logEvent) throws IOException {
-        jsonGenerator.writeNumberField(LogField.Timestamp.fieldName, timestamp.get());
+        jsonGenerator.writeNumberField(LogField.Timestamp.fieldName, Clock.getTimestamp());
     }
 
     // The method must conform to the functional interface, so we should ignore this rule here.
