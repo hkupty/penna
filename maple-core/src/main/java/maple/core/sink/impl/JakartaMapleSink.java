@@ -5,7 +5,6 @@ import jakarta.json.stream.JsonGenerator;
 import jakarta.json.stream.JsonGeneratorFactory;
 import maple.api.models.LogField;
 import maple.core.internals.Clock;
-import maple.core.internals.ThreadCreator;
 import maple.core.models.MapleLogEvent;
 import maple.core.sink.SinkImpl;
 import org.slf4j.MDC;
@@ -18,7 +17,6 @@ import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.locks.LockSupport;
 
 public final class JakartaMapleSink implements SinkImpl {
     private static final String LINE_BREAK = System.getProperty("line.separator");

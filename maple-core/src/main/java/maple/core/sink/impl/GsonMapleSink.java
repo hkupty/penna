@@ -3,7 +3,6 @@ package maple.core.sink.impl;
 import com.google.gson.stream.JsonWriter;
 import maple.api.models.LogField;
 import maple.core.internals.Clock;
-import maple.core.internals.ThreadCreator;
 import maple.core.models.MapleLogEvent;
 import maple.core.sink.SinkImpl;
 import org.slf4j.MDC;
@@ -14,7 +13,6 @@ import java.io.Writer;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.locks.LockSupport;
 
 public final class GsonMapleSink implements SinkImpl {
     private static final String LINE_BREAK = System.getProperty("line.separator");
