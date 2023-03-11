@@ -49,6 +49,8 @@ cd "${localdir}/.." && {
   batch 2 10000
   batch 3 5000
   batch 4 5000
+  batch 16 5000
+  batch 32 5000
 }
 
 sudo umount out/
