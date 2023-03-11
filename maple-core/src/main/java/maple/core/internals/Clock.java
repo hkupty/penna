@@ -9,10 +9,10 @@ public final class Clock {
     private Clock() {}
 
     // This is the amount of time, in nanos, that we will wait before incrementing.
-    // Keeping this at 1 million ensure we tick at roughly 1ms;
+    // Keeping this at 1 million ensure we tick at roughly 1ms
     private static final long REFRESH_RATE = 1_000_000;
 
-    // This is how often, in ms, we should sync with System.currentTimeMillis();
+    // This is how often, in ms, we should sync with System.currentTimeMillis()
     private static final long PRECISION = 1_000;
     private static final Lock startThreadLock = new ReentrantLock();
 
