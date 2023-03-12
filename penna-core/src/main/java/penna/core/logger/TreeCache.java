@@ -41,6 +41,16 @@ public class TreeCache {
                 logger.updateConfig(config);
             }
         }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj instanceof EntryData data) {
+                return this == data ||
+                        ((data.logger == null && this.logger == null) || this.logger.equals(data.logger)) &&
+                                this.config.equals(data.config);
+            }
+            return false;
+        }
     }
 
     private record Entry(String[] identifier, EntryData data, ArrayList<Entry> children){
@@ -56,6 +66,30 @@ public class TreeCache {
 
         PennaLogger logger() {
             return data.logger;
+        }
+
+        @Override
+        public boolean equals(Object other) {
+            if (other instanceof Entry entry) {
+                return this == entry || Arrays.equals(this.identifier, entry.identifier) && this.data.equals(entry.data) && children.equals(entry.children);
+            }
+            return false;
+        }
+
+        @Override
+        public int hashCode() {
+            int base = 31;
+            base = base + 7 * Arrays.hashCode(identifier);
+            base = base + 7 * data.hashCode();
+            base = base + 7 * children.hashCode();
+
+
+            return base;
+        }
+
+        @Override
+        public String toString() {
+            return "Entry{identifier=" + Arrays.toString(identifier) + ", data=" + data.toString() + ", children=" + children.toString() + "}";
         }
     }
 

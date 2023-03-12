@@ -3,6 +3,8 @@ package penna.api.config;
 import penna.api.models.LogField;
 import org.slf4j.event.Level;
 
+import java.util.Arrays;
+
 /**
  * This is the Logger-level configuration object, that allows the user to set which log level that particular logger
  * will be able to log, as well as which fields it should log. By default, all loggers will inherit
@@ -84,5 +86,29 @@ public record Config(
      */
     public static Config withFields(Level level, LogField... fields) { return new Config(level, fields); }
 
+
+    @Override
+    public boolean equals(Object other) {
+        if (other instanceof Config config) {
+            return this == config || (
+                    this.level == config.level
+                    && Arrays.equals(this.fields, config.fields));
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        int base = 31;
+        base = base + 7 * this.level.hashCode();
+        base = base + 7 * Arrays.hashCode(this.fields);
+
+        return base;
+    }
+
+    @Override
+    public String toString() {
+        return "Config{level=" + this.level.toString() + ", fields=" + Arrays.toString(this.fields) + "}";
+    }
 
 }
