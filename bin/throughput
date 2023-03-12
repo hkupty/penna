@@ -23,7 +23,7 @@ function batch() {
   sleep 5
   echo "${TIME} / ${THREADS}"
   echo "Running penna"
-  gradle -q :throughput:buildMapleJar
+  gradle -q :throughput:buildPennaJar
   perf stat java ${FLAGS} -jar "${MAPLE_JAR}" ${TIME} ${THREADS} > out/penna.json
   echo "Running logback"
   gradle -q :throughput:buildLogbackJar

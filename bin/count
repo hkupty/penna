@@ -21,7 +21,7 @@ function batch() {
   THREADS="${2:-1}"
   echo "${COUNT} / ${THREADS}"
   echo "Running penna"
-  gradle -q :count:buildMapleJar
+  gradle -q :count:buildPennaJar
   perf stat java ${FLAGS} -jar "${MAPLE_JAR}" ${COUNT} ${THREADS} > out/penna.json
 
   echo ""
