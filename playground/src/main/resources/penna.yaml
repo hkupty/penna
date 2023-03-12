@@ -1,0 +1,8 @@
+penna:
+  fields:
+    - message
+    - mdc
+    - logger
+  loggers:
+    org.example:
+      level: debug

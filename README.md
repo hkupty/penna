@@ -1,53 +1,55 @@
-# Maple
+# Penna
+> a contour feather, a penna; a quill, a feather used for writing; a pen; a pencil.
 
-[![version](https://img.shields.io/maven-central/v/com.hkupty.maple/maple-core?style=flat-square)](https://mvnrepository.com/artifact/com.hkupty.maple)
+[![version](https://img.shields.io/maven-central/v/com.hkupty.penna/penna-core?style=flat-square)](https://mvnrepository.com/artifact/com.hkupty.penna)
 
-Maple is an opinionated backend for [slf4j](https://github.com/qos-ch/slf4j/) that focuses on doing one thing right: Logging structured logs in json format to the console.
+
+Penna is an opinionated backend for [slf4j](https://github.com/qos-ch/slf4j/) that focuses on doing one thing right: Logging structured logs in json format to the console.
 
 ## Warning!
 
-Maple is currently in alpha and, while usable, *has not been tested in production yet*.
+Penna is currently in alpha and, while usable, *has not been tested in production yet*.
 
 Please use with caution. Feedback, however, is very welcome.
 
-## Why use maple?
+## Why use penna?
 
-Maple presents itself as an alternative to [logback](https://logback.qos.ch/).
+Penna presents itself as an alternative to [logback](https://logback.qos.ch/).
 It is designed for a specific use case: When you want to have [structured logging](https://stackify.com/what-is-structured-logging-and-why-developers-need-it/), straight to the console.
 This might be a common use-case for jvm apps running in kubernetes.
-If that is your use case, you might prefer maple over logback because:
+If that is your use case, you might prefer penna over logback because:
 
-- Maple is specialized for this use-case, working out of the box with sane defaults;
-- If you already have [jackson](https://github.com/FasterXML/jackson-core/), [gson](https://github.com/google/gson) or any [jakarta/json-p](https://github.com/jakartaee/jsonp-api) compliant library, maple will use it to write json logs, so no extra dependencies needed;
+- Penna is specialized for this use-case, working out of the box with sane defaults;
+- If you already have [jackson](https://github.com/FasterXML/jackson-core/), [gson](https://github.com/google/gson) or any [jakarta/json-p](https://github.com/jakartaee/jsonp-api) compliant library, penna will use it to write json logs, so no extra dependencies needed;
 - It is very optimized, with impressive performance when compared to logback;
 - It is also designed not consume almost any runtime memory, so it won't cause GC pressure;
-- If you want to configure, the extension config library [maple-yaml-config](maple-yaml-config/README.md) allows you to configure maple in yaml,
+- If you want to configure, the extension config library [penna-yaml-config](penna-yaml-config/README.md) allows you to configure penna in yaml,
 which might be a more native configuration format for its runtime environment (i.e. kubernetes);
 
-However, maple doesn't try to replace logback for all its use cases. If you have to log in multiple formats, to a file or any other target, logback might still be your tool of choice.
+However, penna doesn't try to replace logback for all its use cases. If you have to log in multiple formats, to a file or any other target, logback might still be your tool of choice.
 
 
 ## Usage
 
-Maple is a backend for slf4j, so you don't need to interact with it directly.
+Penna is a backend for slf4j, so you don't need to interact with it directly.
 
-In order to use it, add it to the [build manager of your preference](https://mvnrepository.com/artifact/com.hkupty.maple/maple-core/0.4), for example:
+In order to use it, add it to the [build manager of your preference](https://mvnrepository.com/artifact/com.hkupty.penna/penna-core/0.4), for example:
 
 ```groovy
 // gradle
 
-runtimeOnly 'com.hkupty.maple:maple-core:0.4'
+runtimeOnly 'com.hkupty.penna:penna-core:0.4'
 
-// Maple doesn't have any strict dependencies aside from slf4j.
+// Penna doesn't have any strict dependencies aside from slf4j.
 implementation 'org.slf4j:slf4j-api:2.0.6'
 
 // But for rendering the json messages, you might be using jackson, gson or a JSON-P/JSR-353 compatible library.
-// If that's the case, you don't need to add any dependencies because maple will automatically select the one available.
+// If that's the case, you don't need to add any dependencies because penna will automatically select the one available.
 // If you don't have any, we recommend using jackson-core, at least version 2.12:
 // runtimeOnly 'com.fasterxml.jackson.core:jackson-core:2.12.0'
 ```
 
-:warning: Note that maple is built targeting JVM 17+.
+:warning: Note that penna is built targeting JVM 17+.
 
 By default, you will get log level `INFO` enabled as well as the following fields:
 - `timestamp`
@@ -60,15 +62,15 @@ By default, you will get log level `INFO` enabled as well as the following field
 - `data` (slf4j's 2.0 `.addKeyValue()`)
 - `throwable`
 
-Maple has support for logging also a `Counter` to each message, individually marking each message with a monotonically increasing
+Penna has support for logging also a `Counter` to each message, individually marking each message with a monotonically increasing
 `long` counting from process startup, but that is disabled by default.
 
-If you want to configure it, maple provides a separate convenience library for configuring your log levels in yaml files:
+If you want to configure it, penna provides a separate convenience library for configuring your log levels in yaml files:
 ```yaml
-# resources/maple.yaml
+# resources/penna.yaml
 
 # This is for configuring the root level
-maple:
+penna:
   # We don't need to set level because by default it is set to INFO
   fields:
     # Not that it matter for json, but the key-value pairs below will be rendered in this order.
@@ -100,12 +102,12 @@ maple:
         - counter
 ```
 
-If you want to use [maple-yaml-config](maple-yaml-config/README.md), you have to add it as a dependency:
+If you want to use [penna-yaml-config](penna-yaml-config/README.md), you have to add it as a dependency:
 
 ```groovy
-runtimeOnly 'com.hkupty.maple:maple-yaml-config:0.4'
+runtimeOnly 'com.hkupty.penna:penna-yaml-config:0.4'
 
-// We have to add a yaml parser to the classpath for `maple-yaml-config` to work properly.
+// We have to add a yaml parser to the classpath for `penna-yaml-config` to work properly.
 // Currently we only support `jackson-dataformat-yaml`, but we plan on adding support for other libraries.
 runtimeOnly 'com.fasterxml.jackson.core:jackson-core:2.14.2'
 runtimeOnly 'com.fasterxml.jackson.core:jackson-databind:2.14.2'
@@ -124,14 +126,14 @@ Instead, we should embrace the notion that logs are effectively data and should 
 
 ### Lightweight configuration
 
-Maple comes packed with a sane defaults configuration that allows one to plug it and start using immediately.
+Penna comes packed with a sane defaults configuration that allows one to plug it and start using immediately.
 Although configuration is possible, by rolling with the shipped defaults one can already reap the benefits of structured
 logging without having to set up any configuration.
 
 ### Unobtrusiveness
 
 The logging framework should not draw out much attention. It should just work.
-With that in mind, maple tries to be a simple yet effective component in your architecture.
+With that in mind, penna tries to be a simple yet effective component in your architecture.
 It should not require you to add in more dependencies. Instead, it should work with whatever you have available.
 Also, it should make its best effort to consume the fewer resources as possible, being efficient and sparing your app of GC pauses
 when under heavy load.
@@ -146,7 +148,7 @@ when under heavy load.
     - [x] Gson
     - [x] Jakarta
   - [ ] 40-50% Test coverage
-  - [maple-yaml-config's 1.0 goals](maple-yaml-config/README.md#roadmap)
+  - [penna-yaml-config's 1.0 goals](penna-yaml-config/README.md#roadmap)
 - 2.0
   - [ ] Tests
     - [ ] Add [arch unit](https://www.archunit.org/) tests

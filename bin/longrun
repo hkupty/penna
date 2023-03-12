@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 
-MAPLE_JAR="tests/throughput/build/libs/mapleJar-0.1.jar"
+MAPLE_JAR="tests/throughput/build/libs/pennaJar-0.1.jar"
 
 TIME="${1:-180000}"
 THREADS="${2:-1}"
 
 localdir=$(dirname "$0")
 cd "${localdir}/.." && {
-  gradle -q :throughput:buildMapleJar
+  gradle -q :throughput:buildPennaJar
   java -XX:+UnlockDiagnosticVMOptions -XX:+DumpPerfMapAtExit -jar "${MAPLE_JAR}" "${TIME}" "${THREADS}" > /dev/null
 }

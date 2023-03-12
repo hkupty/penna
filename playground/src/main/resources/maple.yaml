@@ -1,8 +1,0 @@
-maple:
-  fields:
-    - message
-    - mdc
-    - logger
-  loggers:
-    org.example:
-      level: debug

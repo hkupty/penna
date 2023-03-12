@@ -1,0 +1,68 @@
+plugins {
+    id 'penna.base-java'
+    id 'maven-publish'
+    id 'signing'
+}
+
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
+
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifactId = project.name
+            from components.java
+            versionMapping {
+                usage('java-api') {
+                    fromResolutionOf('runtimeClasspath')
+                }
+                usage('java-runtime') {
+                    fromResolutionResult()
+                }
+            }
+            pom {
+                name = project.name
+                description = "An opinionated slf4j backend for structured logging"
+                url = 'https://github.com/hkupty/penna'
+                licenses {
+                    license {
+                        name = 'MIT License'
+                        url = 'https://github.com/hkupty/penna/blob/main/LICENSE'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'hkupty'
+                        name = 'Henry John Kupty'
+                        email = 'hkupty@gmail.com'
+                    }
+                }
+                scm {
+                    connection = 'scm:git:git://github.com/hkupty/penna'
+                    developerConnection = 'scm:git:ssh://github.com/hkupty/penna'
+                    url = 'https://github.com/hkupty/penna'
+                }
+            }
+        }
+    }
+
+    if (project.hasProperty("ossrhUsername") && project.hasProperty("ossrhPassword")) {
+      repositories {
+          maven {
+              url = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
+              credentials {
+                  username ossrhUsername
+                  password ossrhPassword
+              }
+          }
+      }
+    }
+}
+
+signing {
+    sign configurations.archives
+    sign publishing.publications.mavenJava
+}
