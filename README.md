@@ -1,6 +1,8 @@
 # Penna
+> a contour feather, a penna; a quill, a feather used for writing; a pen; a pencil.
 
 [![version](https://img.shields.io/maven-central/v/com.hkupty.penna/penna-core?style=flat-square)](https://mvnrepository.com/artifact/com.hkupty.penna)
+
 
 Penna is an opinionated backend for [slf4j](https://github.com/qos-ch/slf4j/) that focuses on doing one thing right: Logging structured logs in json format to the console.
 
