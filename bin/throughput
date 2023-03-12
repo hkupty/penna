@@ -6,7 +6,7 @@ USER="$(whoami)"
 
 FLAGS="${@}"
 
-MAPLE_JAR="tests/throughput/build/libs/mapleJar-0.1.jar"
+MAPLE_JAR="tests/throughput/build/libs/pennaJar-0.1.jar"
 LOGBACK_JAR="tests/throughput/build/libs/logbackJar-0.1.jar"
 mkdir -p out
 sudo mount -t ramfs -o size=1G ramfs ./out
@@ -22,24 +22,24 @@ function batch() {
   echo "Waiting"
   sleep 5
   echo "${TIME} / ${THREADS}"
-  echo "Running maple"
+  echo "Running penna"
   gradle -q :throughput:buildMapleJar
-  perf stat java ${FLAGS} -jar "${MAPLE_JAR}" ${TIME} ${THREADS} > out/maple.json
+  perf stat java ${FLAGS} -jar "${MAPLE_JAR}" ${TIME} ${THREADS} > out/penna.json
   echo "Running logback"
   gradle -q :throughput:buildLogbackJar
   perf stat java ${FLAGS} -jar "${LOGBACK_JAR}" ${TIME} ${THREADS} > out/logback.json
 
   echo ""
 
-  MAPLE_TOTAL="$(wc -l out/maple.json | cut -d ' ' -f1)"
+  MAPLE_TOTAL="$(wc -l out/penna.json | cut -d ' ' -f1)"
   LOGBACK_TOTAL="$(wc -l out/logback.json | cut -d ' ' -f1)"
 
   echo ">> Total"
-  printf "%10s %10s\n" "maple" "${MAPLE_TOTAL}"
+  printf "%10s %10s\n" "penna" "${MAPLE_TOTAL}"
   printf "%10s %10s\n" "logback" "${LOGBACK_TOTAL}"
   echo ""
   echo ">> logs/ms"
-  printf "%10s %10s\n" "maple" $(python -c "print($MAPLE_TOTAL / $TIME)")
+  printf "%10s %10s\n" "penna" $(python -c "print($MAPLE_TOTAL / $TIME)")
   printf "%10s %10s\n" "logback" $(python -c "print($LOGBACK_TOTAL / $TIME)")
 }
 

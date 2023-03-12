@@ -6,7 +6,7 @@ USER="$(whoami)"
 
 FLAGS="${@}"
 
-MAPLE_JAR="tests/count/build/libs/mapleJar-0.1.jar"
+MAPLE_JAR="tests/count/build/libs/pennaJar-0.1.jar"
 LOGBACK_JAR="tests/count/build/libs/logbackJar-0.1.jar"
 mkdir -p out
 sudo mount -t ramfs -o size=1G ramfs ./out
@@ -20,14 +20,14 @@ function batch() {
   COUNT="${1:-10}"
   THREADS="${2:-1}"
   echo "${COUNT} / ${THREADS}"
-  echo "Running maple"
+  echo "Running penna"
   gradle -q :count:buildMapleJar
-  perf stat java ${FLAGS} -jar "${MAPLE_JAR}" ${COUNT} ${THREADS} > out/maple.json
+  perf stat java ${FLAGS} -jar "${MAPLE_JAR}" ${COUNT} ${THREADS} > out/penna.json
 
   echo ""
 
   for i in $(seq 0 $((THREADS - 1))); do
-    test $(jq -creM ". | select(.data.thread==$i)" out/maple.json | wc -l) -eq ${COUNT} || {
+    test $(jq -creM ". | select(.data.thread==$i)" out/penna.json | wc -l) -eq ${COUNT} || {
       echo "failed for ${THREADS} threads and ${COUNT} lines"
      exit 1
     }

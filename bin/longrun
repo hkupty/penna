@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-MAPLE_JAR="tests/throughput/build/libs/mapleJar-0.1.jar"
+MAPLE_JAR="tests/throughput/build/libs/pennaJar-0.1.jar"
 
 TIME="${1:-180000}"
 THREADS="${2:-1}"
