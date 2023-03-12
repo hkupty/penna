@@ -2,7 +2,7 @@ plugins {
     id 'java'
 }
 
-group 'maple'
+group 'penna'
 version '0.1'
 
 repositories {
@@ -18,7 +18,7 @@ configurations {
 task runMaple(type: JavaExec) {
     classpath sourceSets.main.runtimeClasspath
     classpath configurations.runtimeMaple
-    mainClass = "maple.throughput.Main"
+    mainClass = "penna.throughput.Main"
 }
 
 task buildMapleJar(type: Jar) {
@@ -26,9 +26,9 @@ task buildMapleJar(type: Jar) {
     dependsOn sourceSets.main.runtimeClasspath
     dependsOn configurations.runtimeMaple
     manifest{
-        attributes 'Main-Class': "maple.throughput.Main"
+        attributes 'Main-Class': "penna.throughput.Main"
     }
-    archiveBaseName = "mapleJar"
+    archiveBaseName = "pennaJar"
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     from {
         configurations.runtimeMaple.collect { it.isDirectory() ? it : zipTree(it) } +
@@ -41,7 +41,7 @@ task runLogback(type: JavaExec) {
     classpath sourceSets.main.runtimeClasspath
     classpath configurations.sharedRuntime
     classpath configurations.runtimeLogback
-    mainClass = "maple.throughput.Main"
+    mainClass = "penna.throughput.Main"
 }
 
 task buildLogbackJar(type: Jar) {
@@ -49,7 +49,7 @@ task buildLogbackJar(type: Jar) {
     dependsOn sourceSets.main.runtimeClasspath
     dependsOn configurations.runtimeLogback
     manifest{
-        attributes 'Main-Class': "maple.throughput.Main"
+        attributes 'Main-Class': "penna.throughput.Main"
     }
     archiveBaseName = "logbackJar"
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
@@ -66,7 +66,7 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
 
-    runtimeMaple project(":maple-core")
+    runtimeMaple project(":penna-core")
 
     runtimeLogback 'ch.qos.logback:logback-classic:1.4.5'
     runtimeLogback 'ch.qos.logback.contrib:logback-jackson:0.1.5'

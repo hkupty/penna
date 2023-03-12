@@ -10,15 +10,15 @@ buildscript {
     }
 }
 
-rootProject.name = 'maple'
-include "maple-api"
-include "maple-core"
+rootProject.name = 'penna'
+include "penna-api"
+include "penna-core"
 include 'sample'
 include 'direct-sample'
 include 'throughput'
 include 'noop'
 include 'count'
-include 'maple-yaml-config'
+include 'penna-yaml-config'
 
 project(":throughput").projectDir = file("tests/throughput")
 project(":noop").projectDir = file("tests/noop")

@@ -21,7 +21,7 @@ If that is your use case, you might prefer maple over logback because:
 - If you already have [jackson](https://github.com/FasterXML/jackson-core/), [gson](https://github.com/google/gson) or any [jakarta/json-p](https://github.com/jakartaee/jsonp-api) compliant library, maple will use it to write json logs, so no extra dependencies needed;
 - It is very optimized, with impressive performance when compared to logback;
 - It is also designed not consume almost any runtime memory, so it won't cause GC pressure;
-- If you want to configure, the extension config library [maple-yaml-config](maple-yaml-config/README.md) allows you to configure maple in yaml,
+- If you want to configure, the extension config library [maple-yaml-config](penna-yaml-config/README.md) allows you to configure maple in yaml,
 which might be a more native configuration format for its runtime environment (i.e. kubernetes);
 
 However, maple doesn't try to replace logback for all its use cases. If you have to log in multiple formats, to a file or any other target, logback might still be your tool of choice.
@@ -100,7 +100,7 @@ maple:
         - counter
 ```
 
-If you want to use [maple-yaml-config](maple-yaml-config/README.md), you have to add it as a dependency:
+If you want to use [maple-yaml-config](penna-yaml-config/README.md), you have to add it as a dependency:
 
 ```groovy
 runtimeOnly 'com.hkupty.maple:maple-yaml-config:0.4'
@@ -146,7 +146,7 @@ when under heavy load.
     - [x] Gson
     - [x] Jakarta
   - [ ] 40-50% Test coverage
-  - [maple-yaml-config's 1.0 goals](maple-yaml-config/README.md#roadmap)
+  - [maple-yaml-config's 1.0 goals](penna-yaml-config/README.md#roadmap)
 - 2.0
   - [ ] Tests
     - [ ] Add [arch unit](https://www.archunit.org/) tests
