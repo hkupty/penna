@@ -64,17 +64,17 @@ public final class JakartaPennaSink implements SinkImpl {
     public JakartaPennaSink() {
         // WARNING! Introducing new log fields requires this array to be updated.
         emitters = new Emitter[LogField.values().length];
-        emitters[LogField.Counter.ordinal()] = this::emitCounter;
-        emitters[LogField.Timestamp.ordinal()] = this::emitTimestamp;
-        emitters[LogField.Level.ordinal()] = this::emitLevel;
-        emitters[LogField.Message.ordinal()] = this::emitMessage;
-        emitters[LogField.LoggerName.ordinal()] = this::emitLogger;
-        emitters[LogField.ThreadName.ordinal()] = this::emitThreadName;
+        emitters[LogField.COUNTER.ordinal()] = this::emitCounter;
+        emitters[LogField.TIMESTAMP.ordinal()] = this::emitTimestamp;
+        emitters[LogField.LEVEL.ordinal()] = this::emitLevel;
+        emitters[LogField.MESSAGE.ordinal()] = this::emitMessage;
+        emitters[LogField.LOGGER_NAME.ordinal()] = this::emitLogger;
+        emitters[LogField.THREAD_NAME.ordinal()] = this::emitThreadName;
         emitters[LogField.MDC.ordinal()] = this::emitMDC;
-        emitters[LogField.Markers.ordinal()] = this::emitMarkers;
-        emitters[LogField.Throwable.ordinal()] = this::emitThrowable;
-        emitters[LogField.KeyValuePairs.ordinal()] = this::emitKeyValuePair;
-        emitters[LogField.Extra.ordinal()] = this::emitExtra;
+        emitters[LogField.MARKERS.ordinal()] = this::emitMarkers;
+        emitters[LogField.THROWABLE.ordinal()] = this::emitThrowable;
+        emitters[LogField.KEY_VALUE_PAIRS.ordinal()] = this::emitKeyValuePair;
+        emitters[LogField.EXTRA.ordinal()] = this::emitExtra;
     }
 
     @Override
@@ -174,13 +174,13 @@ public final class JakartaPennaSink implements SinkImpl {
     }
 
     private void emitMessage(PennaLogEvent logEvent)  {
-        jsonGenerator.write(LogField.Message.fieldName, logEvent.message);
+        jsonGenerator.write(LogField.MESSAGE.fieldName, logEvent.message);
     }
 
     // The method must conform to the functional interface, so we should ignore this rule here.
     @SuppressWarnings("PMD.UnusedFormalParameter")
     private void emitTimestamp(PennaLogEvent logEvent)  {
-        jsonGenerator.write(LogField.Timestamp.fieldName, Clock.getTimestamp());
+        jsonGenerator.write(LogField.TIMESTAMP.fieldName, Clock.getTimestamp());
     }
 
     // The method must conform to the functional interface, so we should ignore this rule here.
@@ -197,26 +197,26 @@ public final class JakartaPennaSink implements SinkImpl {
     }
 
     private void emitLogger(PennaLogEvent logEvent)  {
-        jsonGenerator.write(LogField.LoggerName.fieldName, logEvent.getLoggerName());
+        jsonGenerator.write(LogField.LOGGER_NAME.fieldName, logEvent.getLoggerName());
     }
 
     private void emitLevel(PennaLogEvent logEvent)  {
-        jsonGenerator.write(LogField.Level.fieldName, LEVEL_MAPPING[logEvent.level.ordinal()]);
+        jsonGenerator.write(LogField.LEVEL.fieldName, LEVEL_MAPPING[logEvent.level.ordinal()]);
     }
 
     private void emitThreadName(PennaLogEvent logEvent)  {
-        jsonGenerator.write(LogField.ThreadName.fieldName, logEvent.getThreadName());
+        jsonGenerator.write(LogField.THREAD_NAME.fieldName, logEvent.getThreadName());
     }
 
     // The method must conform to the functional interface, so we should ignore this rule here.
     @SuppressWarnings("PMD.UnusedFormalParameter")
     private void emitCounter(PennaLogEvent logEvent) {
-        jsonGenerator.write(LogField.Counter.fieldName, counter.getAndIncrement());
+        jsonGenerator.write(LogField.COUNTER.fieldName, counter.getAndIncrement());
     }
 
     private void emitMarkers(PennaLogEvent logEvent) {
         if (!logEvent.markers.isEmpty()) {
-            jsonGenerator.writeStartArray(LogField.Markers.fieldName);
+            jsonGenerator.writeStartArray(LogField.MARKERS.fieldName);
             for (int i = 0; i < logEvent.markers.size(); i++) {
                 jsonGenerator.write(logEvent.markers.get(i).getName());
             }
@@ -226,7 +226,7 @@ public final class JakartaPennaSink implements SinkImpl {
 
     private void emitThrowable(PennaLogEvent logEvent)  {
         if (logEvent.throwable != null) {
-            jsonGenerator.writeStartObject(LogField.Throwable.fieldName);
+            jsonGenerator.writeStartObject(LogField.THROWABLE.fieldName);
             writeThrowable(logEvent.throwable);
             jsonGenerator.writeEnd();
         }
@@ -234,7 +234,7 @@ public final class JakartaPennaSink implements SinkImpl {
 
     private void emitKeyValuePair(PennaLogEvent logEvent)  {
         if (!logEvent.keyValuePairs.isEmpty()) {
-            jsonGenerator.writeStartObject(LogField.KeyValuePairs.fieldName);
+            jsonGenerator.writeStartObject(LogField.KEY_VALUE_PAIRS.fieldName);
             for (int i = 0; i < logEvent.keyValuePairs.size(); i++) {
                 var kvp = logEvent.keyValuePairs.get(i);
                 jsonGenerator.write(kvp.key);
@@ -246,7 +246,7 @@ public final class JakartaPennaSink implements SinkImpl {
 
     private void emitExtra (PennaLogEvent logEvent)  {
         if (logEvent.extra != null) {
-            jsonGenerator.write(LogField.Throwable.fieldName);
+            jsonGenerator.write(LogField.THROWABLE.fieldName);
             writeObject(logEvent.throwable);
             jsonGenerator.writeEnd();
         }

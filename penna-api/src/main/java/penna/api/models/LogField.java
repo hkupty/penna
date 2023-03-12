@@ -9,22 +9,22 @@ public enum LogField {
     /**
      * String representation of the level of the message that is being logged.
      */
-    Level("level"),
+    LEVEL("level"),
 
     /**
      * Atomic long counter increasing at each message being logged.
      */
-    Counter("counter"),
+    COUNTER("counter"),
 
     /**
      * Name of the logger responsible for writing the message.
      */
-    LoggerName("logger"),
+    LOGGER_NAME("logger"),
 
     /**
      * The actual log message
      */
-    Message("message"),
+    MESSAGE("message"),
 
     /**
      * Markers are flexible pieces of data that somehow, depending on the usage and the interpretation
@@ -32,7 +32,7 @@ public enum LogField {
      *
      * @see org.slf4j.Marker
      */
-    Markers("tags"),
+    MARKERS("tags"),
 
     /**
      * For newer SLF4J versions, messages can be logged using their fluent API. When done so, one has the
@@ -40,22 +40,22 @@ public enum LogField {
      *
      * @see org.slf4j.event.KeyValuePair
      */
-    KeyValuePairs("data"),
+    KEY_VALUE_PAIRS("data"),
 
     /**
      * The name of the thread where the log originates
      */
-    ThreadName("thread"),
+    THREAD_NAME("thread"),
 
     /**
      * Timestamp, in unix time, of the log message's creation.
      */
-    Timestamp("timestamp"),
+    TIMESTAMP("timestamp"),
 
     /**
      * The log message can bear a throwable that will be logged as json data.
      */
-    Throwable("throwable"),
+    THROWABLE("throwable"),
 
     /**
      * MDC is contextual information that is hierarchically bound to the thread and is added to the log message
@@ -68,7 +68,7 @@ public enum LogField {
     /**
      * Placeholder for user-added information.
      */
-    Extra("extra");
+    EXTRA("extra");
 
     /**
      * String property that will be used to render the field in the final json message.

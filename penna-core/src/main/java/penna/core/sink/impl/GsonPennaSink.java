@@ -59,17 +59,17 @@ public final class GsonPennaSink implements SinkImpl {
     public GsonPennaSink() {
         // WARNING! Introducing new log fields requires this array to be updated.
         emitters = new Emitter[LogField.values().length];
-        emitters[LogField.Counter.ordinal()] = this::emitCounter;
-        emitters[LogField.Timestamp.ordinal()] = this::emitTimestamp;
-        emitters[LogField.Level.ordinal()] = this::emitLevel;
-        emitters[LogField.Message.ordinal()] = this::emitMessage;
-        emitters[LogField.LoggerName.ordinal()] = this::emitLogger;
-        emitters[LogField.ThreadName.ordinal()] = this::emitThreadName;
+        emitters[LogField.COUNTER.ordinal()] = this::emitCounter;
+        emitters[LogField.TIMESTAMP.ordinal()] = this::emitTimestamp;
+        emitters[LogField.LEVEL.ordinal()] = this::emitLevel;
+        emitters[LogField.MESSAGE.ordinal()] = this::emitMessage;
+        emitters[LogField.LOGGER_NAME.ordinal()] = this::emitLogger;
+        emitters[LogField.THREAD_NAME.ordinal()] = this::emitThreadName;
         emitters[LogField.MDC.ordinal()] = this::emitMDC;
-        emitters[LogField.Markers.ordinal()] = this::emitMarkers;
-        emitters[LogField.Throwable.ordinal()] = this::emitThrowable;
-        emitters[LogField.KeyValuePairs.ordinal()] = this::emitKeyValuePair;
-        emitters[LogField.Extra.ordinal()] = this::emitExtra;
+        emitters[LogField.MARKERS.ordinal()] = this::emitMarkers;
+        emitters[LogField.THROWABLE.ordinal()] = this::emitThrowable;
+        emitters[LogField.KEY_VALUE_PAIRS.ordinal()] = this::emitKeyValuePair;
+        emitters[LogField.EXTRA.ordinal()] = this::emitExtra;
     }
 
     @Override
@@ -158,13 +158,13 @@ public final class GsonPennaSink implements SinkImpl {
     }
 
     private void emitMessage(PennaLogEvent logEvent) throws IOException {
-        jsonWriter.name(LogField.Message.fieldName).value(logEvent.message);
+        jsonWriter.name(LogField.MESSAGE.fieldName).value(logEvent.message);
     }
 
     // The method must conform to the functional interface, so we should ignore this rule here.
     @SuppressWarnings("PMD.UnusedFormalParameter")
     private void emitTimestamp(PennaLogEvent logEvent) throws IOException {
-        jsonWriter.name(LogField.Timestamp.fieldName).value(Clock.getTimestamp());
+        jsonWriter.name(LogField.TIMESTAMP.fieldName).value(Clock.getTimestamp());
     }
 
     // The method must conform to the functional interface, so we should ignore this rule here.
@@ -181,26 +181,26 @@ public final class GsonPennaSink implements SinkImpl {
     }
 
     private void emitLogger(PennaLogEvent logEvent) throws IOException {
-        jsonWriter.name(LogField.LoggerName.fieldName).value(logEvent.getLoggerName());
+        jsonWriter.name(LogField.LOGGER_NAME.fieldName).value(logEvent.getLoggerName());
     }
 
     private void emitLevel(PennaLogEvent logEvent) throws IOException {
-        jsonWriter.name(LogField.Level.fieldName).value(LEVEL_MAPPING[logEvent.level.ordinal()]);
+        jsonWriter.name(LogField.LEVEL.fieldName).value(LEVEL_MAPPING[logEvent.level.ordinal()]);
     }
 
     private void emitThreadName(PennaLogEvent logEvent) throws IOException {
-        jsonWriter.name(LogField.ThreadName.fieldName).value(logEvent.getThreadName());
+        jsonWriter.name(LogField.THREAD_NAME.fieldName).value(logEvent.getThreadName());
     }
 
     // The method must conform to the functional interface, so we should ignore this rule here.
     @SuppressWarnings("PMD.UnusedFormalParameter")
     private void emitCounter(PennaLogEvent logEvent) throws IOException {
-        jsonWriter.name(LogField.Counter.fieldName).value(counter.getAndIncrement());
+        jsonWriter.name(LogField.COUNTER.fieldName).value(counter.getAndIncrement());
     }
 
     private void emitMarkers(PennaLogEvent logEvent) throws IOException {
         if (!logEvent.markers.isEmpty()) {
-            jsonWriter.name(LogField.Markers.fieldName).beginArray();
+            jsonWriter.name(LogField.MARKERS.fieldName).beginArray();
             for (int i = 0; i < logEvent.markers.size(); i++) {
                 jsonWriter.value(logEvent.markers.get(i).getName());
             }
@@ -210,7 +210,7 @@ public final class GsonPennaSink implements SinkImpl {
 
     private void emitThrowable(PennaLogEvent logEvent) throws IOException {
         if (logEvent.throwable != null) {
-            jsonWriter.name(LogField.Throwable.fieldName).endObject();
+            jsonWriter.name(LogField.THROWABLE.fieldName).endObject();
             writeThrowable(logEvent.throwable);
             jsonWriter.endObject();
         }
@@ -218,7 +218,7 @@ public final class GsonPennaSink implements SinkImpl {
 
     private void emitKeyValuePair(PennaLogEvent logEvent) throws IOException {
         if (!logEvent.keyValuePairs.isEmpty()) {
-            jsonWriter.name(LogField.KeyValuePairs.fieldName).beginObject();
+            jsonWriter.name(LogField.KEY_VALUE_PAIRS.fieldName).beginObject();
             for (int i = 0; i < logEvent.keyValuePairs.size(); i++) {
                 var kvp = logEvent.keyValuePairs.get(i);
                 jsonWriter.name(kvp.key);
@@ -230,7 +230,7 @@ public final class GsonPennaSink implements SinkImpl {
 
     private void emitExtra (PennaLogEvent logEvent) throws IOException {
         if (logEvent.extra != null) {
-            jsonWriter.name(LogField.Extra.fieldName).beginObject();
+            jsonWriter.name(LogField.EXTRA.fieldName).beginObject();
             jsonWriter.endObject();
         }
     }

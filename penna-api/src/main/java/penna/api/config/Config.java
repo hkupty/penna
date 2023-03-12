@@ -19,15 +19,15 @@ public record Config(
 
     private static final LogField[] defaultFields = new LogField[]{
             //LogField.Counter,
-            LogField.Timestamp,
-            LogField.Level,
-            LogField.Message,
-            LogField.LoggerName,
-            LogField.ThreadName,
+            LogField.TIMESTAMP,
+            LogField.LEVEL,
+            LogField.MESSAGE,
+            LogField.LOGGER_NAME,
+            LogField.THREAD_NAME,
             LogField.MDC,
-            LogField.Markers,
-            LogField.KeyValuePairs,
-            LogField.Throwable
+            LogField.MARKERS,
+            LogField.KEY_VALUE_PAIRS,
+            LogField.THROWABLE
     };
 
     /**
@@ -54,15 +54,15 @@ public record Config(
      * For default values, consider:
      * {@code level} to be {@link org.slf4j.event.Level#INFO}
      * {@code fields} to be (in this order):
-     *   - {@link LogField#Timestamp}
-     *   - {@link LogField#Level}
-     *   - {@link LogField#Message}
-     *   - {@link LogField#LoggerName}
-     *   - {@link LogField#ThreadName}
+     *   - {@link LogField#TIMESTAMP}
+     *   - {@link LogField#LEVEL}
+     *   - {@link LogField#MESSAGE}
+     *   - {@link LogField#LOGGER_NAME}
+     *   - {@link LogField#THREAD_NAME}
      *   - {@link LogField#MDC}
-     *   - {@link LogField#Markers}
-     *   - {@link LogField#KeyValuePairs}
-     *   - {@link LogField#Throwable}
+     *   - {@link LogField#MARKERS}
+     *   - {@link LogField#KEY_VALUE_PAIRS}
+     *   - {@link LogField#THROWABLE}
      * @return a new Config copy with the default values applied.
      */
     public static Config getDefault() {
