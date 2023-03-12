@@ -1,23 +1,23 @@
-# Maple
+# Penna
 
 [![version](https://img.shields.io/maven-central/v/com.hkupty.penna/penna-core?style=flat-square)](https://mvnrepository.com/artifact/com.hkupty.penna)
 
-Maple is an opinionated backend for [slf4j](https://github.com/qos-ch/slf4j/) that focuses on doing one thing right: Logging structured logs in json format to the console.
+Penna is an opinionated backend for [slf4j](https://github.com/qos-ch/slf4j/) that focuses on doing one thing right: Logging structured logs in json format to the console.
 
 ## Warning!
 
-Maple is currently in alpha and, while usable, *has not been tested in production yet*.
+Penna is currently in alpha and, while usable, *has not been tested in production yet*.
 
 Please use with caution. Feedback, however, is very welcome.
 
 ## Why use penna?
 
-Maple presents itself as an alternative to [logback](https://logback.qos.ch/).
+Penna presents itself as an alternative to [logback](https://logback.qos.ch/).
 It is designed for a specific use case: When you want to have [structured logging](https://stackify.com/what-is-structured-logging-and-why-developers-need-it/), straight to the console.
 This might be a common use-case for jvm apps running in kubernetes.
 If that is your use case, you might prefer penna over logback because:
 
-- Maple is specialized for this use-case, working out of the box with sane defaults;
+- Penna is specialized for this use-case, working out of the box with sane defaults;
 - If you already have [jackson](https://github.com/FasterXML/jackson-core/), [gson](https://github.com/google/gson) or any [jakarta/json-p](https://github.com/jakartaee/jsonp-api) compliant library, penna will use it to write json logs, so no extra dependencies needed;
 - It is very optimized, with impressive performance when compared to logback;
 - It is also designed not consume almost any runtime memory, so it won't cause GC pressure;
@@ -29,7 +29,7 @@ However, penna doesn't try to replace logback for all its use cases. If you have
 
 ## Usage
 
-Maple is a backend for slf4j, so you don't need to interact with it directly.
+Penna is a backend for slf4j, so you don't need to interact with it directly.
 
 In order to use it, add it to the [build manager of your preference](https://mvnrepository.com/artifact/com.hkupty.penna/penna-core/0.4), for example:
 
@@ -38,7 +38,7 @@ In order to use it, add it to the [build manager of your preference](https://mvn
 
 runtimeOnly 'com.hkupty.penna:penna-core:0.4'
 
-// Maple doesn't have any strict dependencies aside from slf4j.
+// Penna doesn't have any strict dependencies aside from slf4j.
 implementation 'org.slf4j:slf4j-api:2.0.6'
 
 // But for rendering the json messages, you might be using jackson, gson or a JSON-P/JSR-353 compatible library.
@@ -60,7 +60,7 @@ By default, you will get log level `INFO` enabled as well as the following field
 - `data` (slf4j's 2.0 `.addKeyValue()`)
 - `throwable`
 
-Maple has support for logging also a `Counter` to each message, individually marking each message with a monotonically increasing
+Penna has support for logging also a `Counter` to each message, individually marking each message with a monotonically increasing
 `long` counting from process startup, but that is disabled by default.
 
 If you want to configure it, penna provides a separate convenience library for configuring your log levels in yaml files:
@@ -124,7 +124,7 @@ Instead, we should embrace the notion that logs are effectively data and should 
 
 ### Lightweight configuration
 
-Maple comes packed with a sane defaults configuration that allows one to plug it and start using immediately.
+Penna comes packed with a sane defaults configuration that allows one to plug it and start using immediately.
 Although configuration is possible, by rolling with the shipped defaults one can already reap the benefits of structured
 logging without having to set up any configuration.
 
