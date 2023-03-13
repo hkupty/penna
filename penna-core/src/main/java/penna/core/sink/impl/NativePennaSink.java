@@ -209,6 +209,7 @@ public final class NativePennaSink implements SinkImpl {
                 jsonGenerator.writeString(logEvent.markers.get(i).getName());
             }
             jsonGenerator.closeArray();
+            jsonGenerator.writeSep();
         }
     }
 
@@ -217,6 +218,7 @@ public final class NativePennaSink implements SinkImpl {
             jsonGenerator.openObject(LogField.THROWABLE.fieldName);
             writeThrowable(logEvent.throwable);
             jsonGenerator.closeObject();
+            jsonGenerator.writeSep();
         }
     }
 
@@ -230,6 +232,7 @@ public final class NativePennaSink implements SinkImpl {
                 writeObject(kvp.value);
             }
             jsonGenerator.closeObject();
+            jsonGenerator.writeSep();
         }
     }
 
@@ -238,6 +241,7 @@ public final class NativePennaSink implements SinkImpl {
             jsonGenerator.openObject(LogField.THROWABLE.fieldName);
             writeObject(logEvent.throwable);
             jsonGenerator.closeObject();
+            jsonGenerator.writeSep();
         }
     }
 
