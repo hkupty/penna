@@ -1,16 +1,31 @@
 package penna.core.internals;
 
+
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.regex.Pattern;
 
 public final class DirectJson {
 
-    private static final byte[] LINE_BREAK = System.getProperty("line.separator").getBytes(StandardCharsets.UTF_8);
+    private static final Pattern ESCAPES = Pattern.compile("([\\n\\t\\r\"])");
+    private static final Map<String, String> ESCAPE_MAPPING = new HashMap<>();
+    static {
+        ESCAPE_MAPPING.put("\n", "\\\\n");
+        ESCAPE_MAPPING.put("\t", "\\\\t");
+        ESCAPE_MAPPING.put("\r", "\\\\r");
+        ESCAPE_MAPPING.put("\"", "\\\\\"");
+    }
+
+    private static final Charset charset = StandardCharsets.UTF_8;
+    private static final byte[] LINE_BREAK = System.getProperty("line.separator").getBytes(charset);
     private static final byte QUOTE = '"';
     private static final byte ENTRY_SEP = ':';
     private static final byte KV_SEP = ',';
@@ -41,7 +56,7 @@ public final class DirectJson {
     };
 
     private final FileChannel channel;
-    final ByteBuffer buffer = ByteBuffer.allocateDirect(32 * 1024); // 32KB should be enough for a *single* json message
+    final ByteBuffer buffer = ByteBuffer.allocateDirect(32 * 1024);
 
     public DirectJson(FileChannel channel) {
         this.channel = channel;
@@ -87,17 +102,53 @@ public final class DirectJson {
         }
     }
 
-    public void writeString(CharSequence str) {
+    public void writeRaw(String str) {
+        byte[] bytes = str.getBytes(charset);
+        buffer.put(bytes);
+    }
+
+    public void writeRaw(char chr) {
+        buffer.put((byte) chr);
+    }
+
+    public void writeQuote() {
         buffer.put(QUOTE);
-        for (int i = 0; i < str.length(); i ++ ) {
-            buffer.put((byte) str.charAt(i));
-        }
+    }
+
+    public void writeString(String str) {
+        buffer.put(QUOTE);
+        writeRaw(str);
         buffer.put(QUOTE);
         buffer.put(KV_SEP);
     }
 
+    public void writeStringValue(String value) {
+
+        var matcher = ESCAPES.matcher(value);
+        if (matcher.find()) {
+            writeString(matcher.replaceAll(result -> ESCAPE_MAPPING.get(result.group())));
+        } else {
+            writeString(value);
+        }
+
+    }
+
     public void writeSep() {
         buffer.put(KV_SEP);
+    }
+
+    public void writeNumberRaw(long data) {
+        final int pos = buffer.position();
+        final int sz = (int) Math.log10(data) + 1;
+
+        for (int i = sz - 1; i >= 0; i--) {
+            byte chr = (byte) (data % 10);
+            data = data / 10;
+            chr += 48;
+            buffer.put(pos + i, chr);
+        }
+
+        buffer.position(pos + sz);
     }
 
     public void writeNumber(long data) {
@@ -150,7 +201,7 @@ public final class DirectJson {
     public void writeStringValue(String key, String value) {
         writeString(key);
         writeEntrySep();
-        writeString(value);
+        writeStringValue(value);
     }
 
     public void writeNumberValue(String key, long value) {
