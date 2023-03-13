@@ -5,6 +5,7 @@ plugins {
 }
 
 group 'com.hkupty.penna'
+
 version '0.5.1'
 
 repositories {
