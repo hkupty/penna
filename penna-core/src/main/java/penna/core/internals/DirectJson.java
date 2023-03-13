@@ -66,7 +66,7 @@ public final class DirectJson {
     public void openArray(String str) {
         writeString(str);
         writeEntrySep();
-        buffer.put(OPEN_OBJ);
+        buffer.put(OPEN_ARR);
     }
 
     public void closeObject() {
@@ -105,10 +105,10 @@ public final class DirectJson {
         final int sz = (int) Math.log10(data) + 1;
 
         for (int i = sz - 1; i >= 0; i--) {
-            char chr = (char) (data % 10);
+            byte chr = (byte) (data % 10);
             data = data / 10;
             chr += 48;
-            buffer.put(pos + i, (byte) chr);
+            buffer.put(pos + i, chr);
         }
 
         buffer.position(pos + sz);
@@ -121,10 +121,10 @@ public final class DirectJson {
         final int sz = (int) Math.log10(whole) + 1;
 
         for (int i = sz - 1; i >= 0; i--) {
-            char chr = (char) (whole % 10);
+            byte chr = (byte) (whole % 10);
             whole = whole / 10;
             chr += 48;
-            buffer.put(pos + i, (byte) chr);
+            buffer.put(pos + i, chr);
         }
         buffer.position(pos + sz);
         buffer.put(DOT);
