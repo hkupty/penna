@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonGenerator.Feature;
 import com.fasterxml.jackson.core.json.JsonWriteFeature;
 import penna.api.models.LogField;
+import penna.core.internals.ByteBufferWriter;
 import penna.core.internals.Clock;
 import penna.core.models.PennaLogEvent;
 import penna.core.sink.SinkImpl;
@@ -14,6 +15,9 @@ import org.slf4j.event.Level;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.nio.ByteBuffer;
+import java.nio.channels.Channel;
+import java.nio.channels.FileChannel;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
@@ -77,10 +81,13 @@ public final class JacksonPennaSink implements SinkImpl {
     }
 
     @Override
-    public void init(final Writer writer) throws IOException {
+    public void init(final FileChannel channel) throws IOException {
         JsonFactory factory = JsonFactory.builder()
                 .enable(JsonWriteFeature.ESCAPE_NON_ASCII)
                 .build();
+
+        ByteBuffer buffer = ByteBuffer.allocateDirect(16 * 1024);
+        ByteBufferWriter writer = new ByteBufferWriter(buffer, channel);
 
         jsonGenerator = factory.createGenerator(writer);
         jsonGenerator.setPrettyPrinter(NOPPrettyPrinter.getInstance());
