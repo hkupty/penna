@@ -4,8 +4,6 @@ import penna.core.models.PennaLogEvent;
 import penna.core.sink.SinkImpl;
 
 import java.io.IOException;
-import java.io.Writer;
-import java.nio.channels.Channel;
 import java.nio.channels.FileChannel;
 
 public final class NOPSink implements SinkImpl {

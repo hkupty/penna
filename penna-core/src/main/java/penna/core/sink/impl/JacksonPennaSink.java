@@ -14,9 +14,7 @@ import org.slf4j.MDC;
 import org.slf4j.event.Level;
 
 import java.io.IOException;
-import java.io.Writer;
 import java.nio.ByteBuffer;
-import java.nio.channels.Channel;
 import java.nio.channels.FileChannel;
 import java.util.List;
 import java.util.Map;
