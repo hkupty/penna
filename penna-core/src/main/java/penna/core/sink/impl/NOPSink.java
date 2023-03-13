@@ -4,7 +4,7 @@ import penna.core.models.PennaLogEvent;
 import penna.core.sink.SinkImpl;
 
 import java.io.IOException;
-import java.io.Writer;
+import java.nio.channels.FileChannel;
 
 public final class NOPSink implements SinkImpl {
 
@@ -14,7 +14,7 @@ public final class NOPSink implements SinkImpl {
 
     public static NOPSink getInstance() { return singleton; }
     @Override
-    public void init(Writer writer) throws IOException {
+    public void init(FileChannel channel) throws IOException {
         // this method should, intentionally, do nothing.
         // this class only exists to fill in a compliant instance
         // in case no implementation is found

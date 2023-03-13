@@ -4,6 +4,7 @@ import jakarta.json.Json;
 import jakarta.json.stream.JsonGenerator;
 import jakarta.json.stream.JsonGeneratorFactory;
 import penna.api.models.LogField;
+import penna.core.internals.ByteBufferWriter;
 import penna.core.internals.Clock;
 import penna.core.models.PennaLogEvent;
 import penna.core.sink.SinkImpl;
@@ -14,6 +15,8 @@ import java.io.IOException;
 import java.io.Writer;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
@@ -78,9 +81,11 @@ public final class JakartaPennaSink implements SinkImpl {
     }
 
     @Override
-    public void init(Writer writer) {
+    public void init(FileChannel channel) {
+        ByteBuffer buffer = ByteBuffer.allocateDirect(16 * 1024);
+        this.writer = new ByteBufferWriter(buffer, channel);
+
         factory = Json.createGeneratorFactory(null);
-        this.writer = writer;
     }
 
     private void newJsonGenerator(){

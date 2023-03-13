@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.concurrent.Executors;
 
 public class Main {
     public static void main(String[] args) {
@@ -20,9 +21,22 @@ public class Main {
         Instant target = Instant.now().plus(time, ChronoUnit.MILLIS);
 
         for (int i = 0; i < threads; i++) {
+            int finalI = i;
             new Thread(() -> {
                 while (Instant.now().isBefore(target)) {
-                    logger.atInfo().log("some message");
+
+                    try {
+                        var ex = new IllegalArgumentException("wrong type!!!\nok???", new RuntimeException("hello", new ArrayIndexOutOfBoundsException(5)));
+                        ex.addSuppressed(new RuntimeException());
+                        throw ex;
+                    } catch(Exception e) {
+                        logger.atInfo()
+                                .addKeyValue("version", 5)
+                                .addKeyValue("hello", "a\ncouple\nlines")
+                                .setCause(e)
+                                .addKeyValue("blah", ("[" + finalI + "]").repeat(1000))
+                                .log("Hello \n{}!", "world");
+                    }
                 }
             }).start();
         }

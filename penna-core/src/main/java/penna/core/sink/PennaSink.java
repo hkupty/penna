@@ -49,7 +49,8 @@ public final class PennaSink {
 
         try {
             SinkImpl sinkImpl = defaultImplementation.get();
-            sinkImpl.init(new FileWriter(FileDescriptor.out));
+
+            sinkImpl.init(new FileOutputStream(FileDescriptor.out).getChannel());
             return sinkImpl;
         } catch (IOException e) {
             MiniLogger.error("Unable to create logger", e);
