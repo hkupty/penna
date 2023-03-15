@@ -33,12 +33,12 @@ However, penna doesn't try to replace logback for all its use cases. If you have
 
 Penna is a backend for slf4j, so you don't need to interact with it directly.
 
-In order to use it, add it to the [build manager of your preference](https://mvnrepository.com/artifact/com.hkupty.penna/penna-core/0.5), for example:
+In order to use it, add it to the [build manager of your preference](https://mvnrepository.com/artifact/com.hkupty.penna/penna-core/0.5.1), for example:
 
 ```groovy
 // gradle
 
-runtimeOnly 'com.hkupty.penna:penna-core:0.5'
+runtimeOnly 'com.hkupty.penna:penna-core:0.5.1'
 
 // Penna doesn't have any strict dependencies aside from slf4j.
 implementation 'org.slf4j:slf4j-api:2.0.6'
@@ -105,7 +105,7 @@ penna:
 If you want to use [penna-yaml-config](penna-yaml-config/README.md), you have to add it as a dependency:
 
 ```groovy
-runtimeOnly 'com.hkupty.penna:penna-yaml-config:0.5'
+runtimeOnly 'com.hkupty.penna:penna-yaml-config:0.5.1'
 
 // We have to add a yaml parser to the classpath for `penna-yaml-config` to work properly.
 // Currently we only support `jackson-dataformat-yaml`, but we plan on adding support for other libraries.
