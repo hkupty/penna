@@ -9,6 +9,22 @@ import java.util.concurrent.Executors;
 
 public class Main {
     public static void main(String[] args) {
+
+        class Inner {
+            Exception data;
+            Exception getSuppressed() {
+                return new RuntimeException("WTH!!");
+            }
+            void setData() {
+                data = new IllegalArgumentException("wrong '\"type!!!\nok???", new RuntimeException("inner", new ArrayIndexOutOfBoundsException(5)));
+                data.addSuppressed(getSuppressed());
+            }
+
+            Exception getData() {
+                setData();
+                return data;
+            }
+        }
         int time = 10;
         int threads = 1;
         if (args.length > 0) {
@@ -17,26 +33,21 @@ public class Main {
         if (args.length > 1) {
             threads = Integer.parseInt(args[1]);
         }
-        Logger logger = LoggerFactory.getLogger(Main.class);
+        Logger logger =  LoggerFactory.getLogger(Main.class);
         Instant target = Instant.now().plus(time, ChronoUnit.MILLIS);
+        var ex = new Inner().getData();
 
         for (int i = 0; i < threads; i++) {
             int finalI = i;
             var thread = new Thread(() -> {
+                var val = ("[" + finalI + "]").repeat(3000);
                 while (Instant.now().isBefore(target)) {
-
-                    try {
-                        var ex = new IllegalArgumentException("wrong type!!!\nok???", new RuntimeException("hello", new ArrayIndexOutOfBoundsException(5)));
-                        ex.addSuppressed(new RuntimeException());
-                        throw ex;
-                    } catch(Exception e) {
-                        logger.atInfo()
-                                .addKeyValue("version", 5)
-                                .addKeyValue("hello", "a\ncouple\nlines")
-                                .setCause(e)
-                                .addKeyValue("blah", ("[" + finalI + "]").repeat(1000))
-                                .log("Hello \n{}!", "world");
-                    }
+                    logger.info("hello");
+//                    logger.atInfo()
+//                            .setMessage("hello")
+////                            .setCause(ex)
+////                            .addKeyValue("key", val)
+//                            .log();
                 }
             });
             thread.setName("penna-" + i);
