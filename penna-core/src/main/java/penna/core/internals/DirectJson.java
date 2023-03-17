@@ -6,26 +6,13 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.regex.Pattern;
 
 public final class DirectJson {
-
-    private static final Pattern ESCAPES = Pattern.compile("([\\n\\t\\r\"])");
-    private static final Map<String, String> ESCAPE_MAPPING = new HashMap<>();
-    static {
-        ESCAPE_MAPPING.put("\n", "\\\\n");
-        ESCAPE_MAPPING.put("\t", "\\\\t");
-        ESCAPE_MAPPING.put("\r", "\\\\r");
-        ESCAPE_MAPPING.put("\"", "\\\\\"");
-    }
-
-    private static final Charset charset = StandardCharsets.UTF_8;
-    private static final byte[] LINE_BREAK = System.getProperty("line.separator").getBytes(charset);
+    private static final byte[] LINE_BREAK = System.getProperty("line.separator").getBytes(StandardCharsets.UTF_8);
     private static final byte QUOTE = '"';
     private static final byte ENTRY_SEP = ':';
     private static final byte KV_SEP = ',';
@@ -34,6 +21,27 @@ public final class DirectJson {
     private static final byte CLOSE_OBJ = '}';
     private static final byte OPEN_ARR = '[';
     private static final byte CLOSE_ARR = ']';
+
+    private static final byte[] NEWLINE = new byte[] {
+            '\\',
+            'n',
+    };
+
+    private static final byte[] ESCAPE = new byte[] {
+            '\\',
+            '\\',
+    };
+
+
+    private static final byte[] LINEBREAK = new byte[] {
+            '\\',
+            'r',
+    };
+
+    private static final byte[] TAB = new byte[] {
+            '\\',
+            't',
+    };
     private static final byte[] TRUE = new byte[] {
             't',
             'r',
@@ -103,12 +111,28 @@ public final class DirectJson {
     }
 
     public void writeRaw(String str) {
-        byte[] bytes = str.getBytes(charset);
-        buffer.put(bytes);
+        for(int i = 0; i < str.length(); i++ ){
+            var chr = str.codePointAt(i);
+            switch (chr) {
+                case '\\' -> buffer.put(ESCAPE);
+                case '\n' -> buffer.put(NEWLINE);
+                case '\r' -> buffer.put(LINEBREAK);
+                case '\t' -> buffer.put(TAB);
+                default -> {
+                    if (chr >= 0x80 && chr <= 0x10FFFF) {
+                        buffer.put(String.valueOf(str.charAt(i)).getBytes());
+                    } else if (chr > 0x1F) buffer.put((byte) chr);
+                }
+            }
+        }
     }
 
     public void writeRaw(char chr) {
         buffer.put((byte) chr);
+    }
+
+    public void writeRaw(byte[] chr) {
+        buffer.put(chr);
     }
 
     public void writeQuote() {
@@ -120,17 +144,6 @@ public final class DirectJson {
         writeRaw(str);
         buffer.put(QUOTE);
         buffer.put(KV_SEP);
-    }
-
-    public void writeStringValue(String value) {
-
-        var matcher = ESCAPES.matcher(value);
-        if (matcher.find()) {
-            writeString(matcher.replaceAll(result -> ESCAPE_MAPPING.get(result.group())));
-        } else {
-            writeString(value);
-        }
-
     }
 
     public void writeSep() {
@@ -201,7 +214,7 @@ public final class DirectJson {
     public void writeStringValue(String key, String value) {
         writeString(key);
         writeEntrySep();
-        writeStringValue(value);
+        writeString(value);
     }
 
     public void writeNumberValue(String key, long value) {
@@ -214,6 +227,11 @@ public final class DirectJson {
         writeString(key);
         writeEntrySep();
         writeNumber(value);
+    }
+
+    public void writeBoolean(boolean value) {
+        buffer.put(value ? TRUE : FALSE);
+        buffer.put(KV_SEP);
     }
 
     public void writeNull() {
