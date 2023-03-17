@@ -5,6 +5,7 @@ import org.slf4j.event.Level;
 import penna.api.models.LogField;
 import penna.core.internals.Clock;
 import penna.core.internals.DirectJson;
+import penna.core.internals.StackTraceFilter;
 import penna.core.models.PennaLogEvent;
 import penna.core.sink.SinkImpl;
 
@@ -76,10 +77,49 @@ public final class NativePennaSink implements SinkImpl {
         jsonGenerator = new DirectJson(channel);
     }
 
-    private void writeThrowable(final Throwable throwable) throws IOException {
+    // Hand-crafted based on from StackTraceElement::toString
+    // ClassLoader is intentionally removed
+    private void writeStackFrame(StackTraceElement frame) {
+        String module;
+        String fileName;
+
+        jsonGenerator.writeQuote();
+
+        if ((module = frame.getModuleName()) != null && !module.isEmpty()) {
+            jsonGenerator.writeRaw(module);
+            jsonGenerator.writeRaw('@');
+            jsonGenerator.writeRaw(frame.getModuleVersion());
+            jsonGenerator.writeRaw('/');
+        }
+
+        jsonGenerator.writeRaw(frame.getClassName());
+        jsonGenerator.writeRaw('.');
+        jsonGenerator.writeRaw(frame.getMethodName());
+        jsonGenerator.writeRaw('(');
+
+        if (frame.isNativeMethod()) {
+            jsonGenerator.writeRaw("Native Method");
+        } else if ((fileName = frame.getFileName()) != null && !fileName.isEmpty()) {
+                jsonGenerator.writeRaw(fileName);
+                if (frame.getLineNumber() > 0){
+                    jsonGenerator.writeRaw(':');
+                    jsonGenerator.writeNumberRaw(frame.getLineNumber());
+                }
+        } else {
+            jsonGenerator.writeRaw("Unknown Source");
+        }
+
+        jsonGenerator.writeRaw(')');
+        jsonGenerator.writeQuote();
+
+    }
+
+    private void writeThrowable(final Throwable throwable, StackTraceFilter filter) throws IOException {
         final String message;
         StackTraceElement[] frames;
         Throwable cause;
+
+        jsonGenerator.writeStringValue("throwable", throwable.getClass().getName());
 
         if((message = throwable.getMessage()) != null) {
             jsonGenerator.writeStringValue("message", message);
@@ -90,7 +130,14 @@ public final class NativePennaSink implements SinkImpl {
             jsonGenerator.writeEntrySep();
             jsonGenerator.openArray();
             for (int index = 0; index < Math.min(frames.length, MAX_STACK_DEPTH); index++) {
-                jsonGenerator.writeString(frames[index].toString());
+                //jsonGenerator.writeString(frames[index].toString());
+                writeStackFrame(frames[index]);
+                jsonGenerator.writeRaw(',');
+                if (filter.check(frames[index])) {
+                    jsonGenerator.writeString("... repeated frames omitted");
+                    break;
+                }
+                filter.mark(frames[index]);
             }
 
             if (frames.length > MAX_STACK_DEPTH) {
@@ -100,11 +147,23 @@ public final class NativePennaSink implements SinkImpl {
             jsonGenerator.writeSep();
         }
 
+        if (throwable.getSuppressed().length > 0) {
+            jsonGenerator.openArray("suppressed");
+            for (var suppressed : throwable.getSuppressed()) {
+                jsonGenerator.openObject();
+                writeThrowable(suppressed, filter);
+                jsonGenerator.closeObject();
+                jsonGenerator.writeSep();
+            }
+            jsonGenerator.closeArray();
+            jsonGenerator.writeSep();
+        }
+
         if ((cause = throwable.getCause()) != null) {
             jsonGenerator.writeString("cause");
             jsonGenerator.writeEntrySep();
             jsonGenerator.openObject();
-            writeThrowable(cause);
+            writeThrowable(cause, filter);
             jsonGenerator.closeObject();
             jsonGenerator.writeSep();
         }
@@ -142,7 +201,7 @@ public final class NativePennaSink implements SinkImpl {
 
     private void writeObject(final Object object) throws IOException {
         if (object instanceof Throwable throwable) {
-            writeThrowable(throwable);
+            writeThrowable(throwable, StackTraceFilter.create());
         } else if (object instanceof Map map) {
             writeMap(map);
         } else if (object instanceof List lst) {
@@ -163,7 +222,6 @@ public final class NativePennaSink implements SinkImpl {
     private void emitMessage(final PennaLogEvent logEvent) throws IOException {
         jsonGenerator.writeStringValue(LogField.MESSAGE.fieldName, logEvent.message);
     }
-
 
     // The method must conform to the functional interface, so we should ignore this rule here.
     @SuppressWarnings("PMD.UnusedFormalParameter")
@@ -216,7 +274,7 @@ public final class NativePennaSink implements SinkImpl {
     private void emitThrowable(final PennaLogEvent logEvent) throws IOException {
         if (logEvent.throwable != null) {
             jsonGenerator.openObject(LogField.THROWABLE.fieldName);
-            writeThrowable(logEvent.throwable);
+            writeThrowable(logEvent.throwable, StackTraceFilter.create());
             jsonGenerator.closeObject();
             jsonGenerator.writeSep();
         }
