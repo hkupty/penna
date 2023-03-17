@@ -166,7 +166,7 @@ public final class DirectJson {
 
     public void writeNumber(long data) {
         final int pos = buffer.position();
-        final int sz = (int) Math.log10(data) + 1;
+        final int sz = data == 0 ? 1 : (int) Math.log10(data) + 1;
 
         for (int i = sz - 1; i >= 0; i--) {
             byte chr = (byte) (data % 10);
