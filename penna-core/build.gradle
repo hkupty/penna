@@ -1,13 +1,15 @@
+import org.gradle.api.plugins.jvm.JvmTestSuite
+
 plugins {
     id 'penna.base-java'
     id 'penna.publishing'
     id 'signing'
     id 'pmd'
+    id 'jvm-test-suite'
 }
 
 group 'com.hkupty.penna'
 version '0.5.1'
-
 
 repositories {
     mavenCentral()
@@ -16,6 +18,40 @@ repositories {
 pmd {
     sourceSets = [sourceSets.main]
     ruleSets("category/java/performance.xml", "category/java/bestpractices.xml")
+}
+
+testing {
+    suites {
+        test {
+            useJUnitJupiter()
+        }
+
+        propertyTesting(JvmTestSuite) {
+            testType = "PropertyBasedTesting"
+
+            dependencies {
+                implementation project(":penna-api")
+                implementation project(":penna-core")
+                implementation 'org.slf4j:slf4j-api:2.0.6'
+                implementation 'net.jqwik:jqwik:1.7.2'
+                implementation 'com.fasterxml.jackson.core:jackson-core:2.14.2'
+                implementation 'com.fasterxml.jackson.core:jackson-databind:2.14.2'
+                compileOnly 'org.jetbrains:annotations:23.0.0'
+            }
+
+            targets {
+                all {
+                    testTask.configure {
+                        shouldRunAfter(test)
+                    }
+                }
+            }
+        }
+    }
+}
+
+tasks.named("check") {
+    dependsOn(testing.suites.propertyTesting)
 }
 
 dependencies {
@@ -28,11 +64,9 @@ dependencies {
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
-//    testRuntimeOnly 'com.fasterxml.jackson.core:jackson-core:2.14.2'
+    testRuntimeOnly 'com.fasterxml.jackson.core:jackson-core:2.14.2'
+    testRuntimeOnly 'com.fasterxml.jackson.core:jackson-databind:2.14.2'
     testRuntimeOnly 'jakarta.json:jakarta.json-api:2.0.0'
     testRuntimeOnly 'org.glassfish:jakarta.json:2.0.1'
-}
 
-test {
-    useJUnitPlatform()
 }
