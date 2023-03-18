@@ -7,7 +7,7 @@ import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class DirectJsonTests {
+class DirectJsonTests {
 
     @Test
     void can_write_longs_to_buffer() {
@@ -70,18 +70,5 @@ public class DirectJsonTests {
         var charset = StandardCharsets.UTF_8;
         var chars = charset.decode(directJson.buffer).toString();
         assertEquals("{\"hello\":1337}", chars);
-    }
-
-    @Test
-    void write_to_stdout() {
-        DirectJson directJson = new DirectJson();
-        directJson.openObject();
-        directJson.writeNumberValue("hello", 1337.1);
-        directJson.closeObject();
-        try {
-            directJson.flush();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
     }
 }

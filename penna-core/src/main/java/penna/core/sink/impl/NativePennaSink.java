@@ -73,7 +73,7 @@ public final class NativePennaSink implements SinkImpl {
     }
 
     @Override
-    public void init(final FileChannel channel) throws IOException {
+    public void init(final FileChannel channel) {
         jsonGenerator = new DirectJson(channel);
     }
 
@@ -114,7 +114,7 @@ public final class NativePennaSink implements SinkImpl {
 
     }
 
-    private void writeThrowable(final Throwable throwable, StackTraceFilter filter) throws IOException {
+    private void writeThrowable(final Throwable throwable, StackTraceFilter filter) {
         final String message;
         StackTraceElement[] frames;
         Throwable cause;
@@ -130,7 +130,6 @@ public final class NativePennaSink implements SinkImpl {
             jsonGenerator.writeEntrySep();
             jsonGenerator.openArray();
             for (int index = 0; index < Math.min(frames.length, MAX_STACK_DEPTH); index++) {
-                //jsonGenerator.writeString(frames[index].toString());
                 writeStackFrame(frames[index]);
                 jsonGenerator.writeRaw(',');
                 if (filter.check(frames[index])) {
@@ -219,19 +218,19 @@ public final class NativePennaSink implements SinkImpl {
         }
     }
 
-    private void emitMessage(final PennaLogEvent logEvent) throws IOException {
+    private void emitMessage(final PennaLogEvent logEvent) {
         jsonGenerator.writeStringValue(LogField.MESSAGE.fieldName, logEvent.message);
     }
 
     // The method must conform to the functional interface, so we should ignore this rule here.
     @SuppressWarnings("PMD.UnusedFormalParameter")
-    private void emitTimestamp(final PennaLogEvent logEvent) throws IOException {
+    private void emitTimestamp(final PennaLogEvent logEvent) {
         jsonGenerator.writeNumberValue(LogField.TIMESTAMP.fieldName, Clock.getTimestamp());
     }
 
     // The method must conform to the functional interface, so we should ignore this rule here.
     @SuppressWarnings("PMD.UnusedFormalParameter")
-    private void emitMDC(final PennaLogEvent logEvent) throws IOException {
+    private void emitMDC(final PennaLogEvent logEvent) {
         var mdc = MDC.getCopyOfContextMap();
         if (mdc != null) {
             jsonGenerator.openObject(LogField.MDC.fieldName);
@@ -242,25 +241,25 @@ public final class NativePennaSink implements SinkImpl {
         }
     }
 
-    private void emitLogger(final PennaLogEvent logEvent) throws IOException {
+    private void emitLogger(final PennaLogEvent logEvent) {
         jsonGenerator.writeStringValue(LogField.LOGGER_NAME.fieldName, logEvent.getLoggerName());
     }
 
-    private void emitLevel(final PennaLogEvent logEvent) throws IOException {
+    private void emitLevel(final PennaLogEvent logEvent) {
         jsonGenerator.writeStringValue(LogField.LEVEL.fieldName, LEVEL_MAPPING[logEvent.level.ordinal()]);
     }
 
-    private void emitThreadName(final PennaLogEvent logEvent) throws IOException {
+    private void emitThreadName(final PennaLogEvent logEvent) {
         jsonGenerator.writeStringValue(LogField.THREAD_NAME.fieldName, logEvent.getThreadName());
     }
 
     // The method must conform to the functional interface, so we should ignore this rule here.
     @SuppressWarnings("PMD.UnusedFormalParameter")
-    private void emitCounter(final PennaLogEvent logEvent) throws IOException {
+    private void emitCounter(final PennaLogEvent logEvent) {
         jsonGenerator.writeNumberValue(LogField.COUNTER.fieldName, counter.getAndIncrement());
     }
 
-    private void emitMarkers(final PennaLogEvent logEvent) throws IOException {
+    private void emitMarkers(final PennaLogEvent logEvent) {
         if (!logEvent.markers.isEmpty()) {
             jsonGenerator.openArray(LogField.MARKERS.fieldName);
             for (int i = 0; i < logEvent.markers.size(); i++) {
@@ -271,7 +270,7 @@ public final class NativePennaSink implements SinkImpl {
         }
     }
 
-    private void emitThrowable(final PennaLogEvent logEvent) throws IOException {
+    private void emitThrowable(final PennaLogEvent logEvent) {
         if (logEvent.throwable != null) {
             jsonGenerator.openObject(LogField.THROWABLE.fieldName);
             writeThrowable(logEvent.throwable, StackTraceFilter.create());

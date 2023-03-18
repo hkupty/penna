@@ -94,14 +94,7 @@ public class NativePennaSinkTests {
                 .flatMap(parent -> msg.map(m -> new RuntimeException(m, parent)));
 
         return Arbitraries.oneOf(withMessage, withoutMessage, withParentWithMessage, withParentWithoutMessage);
-
-
     }
-//
-//    @Provide
-//    Arbitrary<PennaLogEvent> eventPossiblyWithThrowables() {
-//
-//    }
 
     @Property
     void validJsonMessage(@ForAll("fields") LogField[] fields) throws IOException {
