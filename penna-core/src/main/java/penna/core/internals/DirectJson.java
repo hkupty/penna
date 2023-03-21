@@ -11,6 +11,7 @@ import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
 
 public final class DirectJson implements Closeable {
+    private static final int INITIAL_BUFFER_SIZE = 32 * 1024;
     private static final byte[] LINE_BREAK = System.getProperty("line.separator").getBytes(StandardCharsets.UTF_8);
     private static final byte QUOTE = '"';
     private static final byte ENTRY_SEP = ':';
@@ -60,7 +61,7 @@ public final class DirectJson implements Closeable {
     private final FileOutputStream backingOs;
     private final FileChannel channel;
     // This is not private only for the sake of testing
-    final ByteBuffer buffer = ByteBuffer.allocateDirect(32 * 1024);
+    ByteBuffer buffer = ByteBuffer.allocateDirect(INITIAL_BUFFER_SIZE);
 
     public DirectJson(FileChannel channel) {
         this.backingOs = null;
@@ -72,7 +73,8 @@ public final class DirectJson implements Closeable {
     @SuppressWarnings("PMD.AvoidFileStream")
     public DirectJson() {
         this.backingOs = new FileOutputStream(FileDescriptor.out);
-        this.channel = backingOs.getChannel(); }
+        this.channel = backingOs.getChannel();
+    }
 
     public void openObject() { buffer.put(OPEN_OBJ); }
     public void openArray() { buffer.put(OPEN_ARR); }
@@ -223,6 +225,16 @@ public final class DirectJson implements Closeable {
     public void writeNull() {
         buffer.put(NULL);
         buffer.put(KV_SEP);
+    }
+
+    public void checkSpace() {
+        // buffer at ~80% of the capacity
+        if (buffer.position() * 5 >= buffer.capacity() * 4) {
+            ByteBuffer newBuffer = ByteBuffer.allocateDirect(buffer.capacity() * 2);
+            buffer.flip();
+            newBuffer.put(buffer);
+            buffer = newBuffer;
+        }
     }
 
     public void flush() throws IOException {
