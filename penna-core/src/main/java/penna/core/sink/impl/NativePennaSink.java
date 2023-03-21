@@ -121,6 +121,7 @@ public final class NativePennaSink implements SinkImpl {
         StackTraceElement[] frames;
         Throwable cause;
 
+        jsonGenerator.checkSpace();
         jsonGenerator.writeStringValue("throwable", throwable.getClass().getName());
 
         if((message = throwable.getMessage()) != null) {
@@ -170,6 +171,7 @@ public final class NativePennaSink implements SinkImpl {
             jsonGenerator.closeObject();
             jsonGenerator.writeSep();
         }
+        jsonGenerator.checkSpace();
     }
 
     private void writeMap(final Map map) throws IOException {
@@ -186,8 +188,8 @@ public final class NativePennaSink implements SinkImpl {
 
     private void writeArray(final List lst) throws IOException {
         jsonGenerator.openArray();
-        for(var value : lst){
-            writeObject(value);
+        for(int i = 0; i < lst.size(); i++){
+            writeObject(lst.get(i));
         }
         jsonGenerator.closeArray();
         jsonGenerator.writeSep();
@@ -195,8 +197,8 @@ public final class NativePennaSink implements SinkImpl {
 
     private void writeArray(final Object... lst) throws IOException {
         jsonGenerator.openArray();
-        for (var value : lst) {
-            writeObject(value);
+        for (int i = 0; i < lst.length; i++) {
+            writeObject(lst[i]);
         }
         jsonGenerator.closeArray();
         jsonGenerator.writeSep();
@@ -288,6 +290,7 @@ public final class NativePennaSink implements SinkImpl {
             jsonGenerator.openObject(LogField.KEY_VALUE_PAIRS.fieldName);
             for (int i = 0; i < logEvent.keyValuePairs.size(); i++) {
                 var kvp = logEvent.keyValuePairs.get(i);
+                jsonGenerator.checkSpace();
                 jsonGenerator.writeString(kvp.key);
                 jsonGenerator.writeEntrySep();
                 writeObject(kvp.value);
