@@ -3,13 +3,20 @@ package penna.core.logger;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.pattern.ThrowableProxyConverter;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.contrib.jackson.JacksonJsonFormatter;
-import ch.qos.logback.contrib.json.JsonFormatter;
 import ch.qos.logback.contrib.json.classic.JsonLayout;
+import ch.qos.logback.core.Appender;
+import ch.qos.logback.core.ConsoleAppender;
+import ch.qos.logback.core.OutputStreamAppender;
 import ch.qos.logback.core.encoder.Encoder;
 import ch.qos.logback.core.encoder.LayoutWrappingEncoder;
+import net.logstash.logback.composite.JsonProviders;
+import net.logstash.logback.composite.loggingevent.*;
+import net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder;
 import net.logstash.logback.encoder.LogstashEncoder;
+import net.logstash.logback.stacktrace.ShortenedThrowableConverter;
 import org.junit.jupiter.api.Test;
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.runner.Runner;
@@ -26,7 +33,6 @@ import penna.core.sink.impl.NativePennaSink;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -34,8 +40,14 @@ public class LoggerPerformanceTest {
 
     @State(Scope.Thread)
     public static class TestBehavior {
-        @Param({"simple", "modest", "moderate", "large"})
+        @Param({
+                "simple",
+                "modest",
+                "moderate",
+                "large"
+        })
         String behavior;
+        Throwable exception = new RuntimeException("with an exception");
 
         public void log(org.slf4j.Logger logger) {
             switch (behavior) {
@@ -59,7 +71,7 @@ public class LoggerPerformanceTest {
                             .atInfo()
                             .addMarker(MarkerFactory.getMarker("For the win!"))
                             .addArgument(UUID::randomUUID)
-                            .log("Some event: {}", new RuntimeException("with an exception"));
+                            .log("Some event: {}", exception);
                     MDC.remove("SomeKey");
                 }
                 default -> {
@@ -75,7 +87,10 @@ public class LoggerPerformanceTest {
     public static class LogbackState {
         LoggerContext context = new LoggerContext();
         Logger logger;
-        @Param({"contrib", "logstash"})
+        @Param({
+                "contrib",
+                "logstash"
+        })
         String encoder;
 
         private Encoder<ILoggingEvent> getContribEncoder() {
@@ -91,15 +106,16 @@ public class LoggerPerformanceTest {
             layout.setAppendLineSeparator(true);
             encoder.setLayout(layout);
 
+            layout.start();
+            encoder.start();
+
             return encoder;
         }
 
         private Encoder<ILoggingEvent> getLogstashEncoder() {
             var encoder = new LogstashEncoder();
             encoder.setContext(context);
-            encoder.setIncludeMdc(true);
-            encoder.setIncludeTags(true);
-
+            encoder.start();
             return encoder;
         }
 
@@ -108,8 +124,8 @@ public class LoggerPerformanceTest {
             context.setName("JMH");
             logger = context.getLogger("jmh.test.logback");
             logger.setLevel(Level.INFO);
-            var appender = new LogbackDevNullAppender();
-            appender.setContext(context);
+            OutputStreamAppender<ILoggingEvent> appender = new LogbackDevNullAppender();
+
 
             var encoder = switch (this.encoder) {
                 case "contrib" -> getContribEncoder();
@@ -117,10 +133,12 @@ public class LoggerPerformanceTest {
                 default -> throw new RuntimeException("Unable to match logger");
             };
 
+            appender.setContext(context);
             appender.setEncoder(encoder);
             logger.addAppender(appender);
 
             appender.start();
+            context.start();
         }
 
     }
@@ -164,7 +182,7 @@ public class LoggerPerformanceTest {
         Options options = new OptionsBuilder()
                 .include(this.getClass().getName() + ".*")
                 .mode(Mode.AverageTime)
-                .warmupTime(TimeValue.seconds(15))
+                .warmupTime(TimeValue.seconds(20))
                 .warmupIterations(3)
                 .threads(1)
                 .measurementIterations(3)
