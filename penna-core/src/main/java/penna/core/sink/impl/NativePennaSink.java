@@ -26,6 +26,8 @@ public final class NativePennaSink implements SinkImpl {
         LEVEL_MAPPING[Level.ERROR.ordinal()] = "ERROR";
     }
 
+    private final StackTraceFilter filter = StackTraceFilter.create();
+
     /**
      * The Emitter functional interface allows us to define the specific
      * function signature `PennaLogEvent -> ()` that throws an exception without using generics.
@@ -48,7 +50,7 @@ public final class NativePennaSink implements SinkImpl {
     }
 
     private final Emitter[] emitters;
-    private static final int MAX_STACK_DEPTH = 15;
+    private static final int MAX_STACK_DEPTH = 64; // to be revisited.
 
     private final AtomicLong counter = new AtomicLong(0L);
 
@@ -130,13 +132,14 @@ public final class NativePennaSink implements SinkImpl {
             jsonGenerator.writeEntrySep();
             jsonGenerator.openArray();
             for (int index = 0; index < Math.min(frames.length, MAX_STACK_DEPTH); index++) {
+                int[] hashes = filter.hash(frames[index]);
                 writeStackFrame(frames[index]);
                 jsonGenerator.writeRaw(',');
-                if (filter.check(frames[index])) {
+                if (filter.check(hashes)) {
                     jsonGenerator.writeString("... repeated frames omitted");
                     break;
                 }
-                filter.mark(frames[index]);
+                filter.mark(hashes);
             }
 
             if (frames.length > MAX_STACK_DEPTH) {
@@ -148,9 +151,10 @@ public final class NativePennaSink implements SinkImpl {
 
         if (throwable.getSuppressed().length > 0) {
             jsonGenerator.openArray("suppressed");
-            for (var suppressed : throwable.getSuppressed()) {
+            var suppressed = throwable.getSuppressed();
+            for (int i = 0; i < suppressed.length; i++) {
                 jsonGenerator.openObject();
-                writeThrowable(suppressed, filter);
+                writeThrowable(suppressed[i], filter);
                 jsonGenerator.closeObject();
                 jsonGenerator.writeSep();
             }
@@ -200,7 +204,7 @@ public final class NativePennaSink implements SinkImpl {
 
     private void writeObject(final Object object) throws IOException {
         if (object instanceof Throwable throwable) {
-            writeThrowable(throwable, StackTraceFilter.create());
+            writeThrowable(throwable, filter.reset());
         } else if (object instanceof Map map) {
             writeMap(map);
         } else if (object instanceof List lst) {
@@ -273,7 +277,7 @@ public final class NativePennaSink implements SinkImpl {
     private void emitThrowable(final PennaLogEvent logEvent) {
         if (logEvent.throwable != null) {
             jsonGenerator.openObject(LogField.THROWABLE.fieldName);
-            writeThrowable(logEvent.throwable, StackTraceFilter.create());
+            writeThrowable(logEvent.throwable, filter.reset());
             jsonGenerator.closeObject();
             jsonGenerator.writeSep();
         }
