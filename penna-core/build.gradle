@@ -47,6 +47,39 @@ testing {
                 }
             }
         }
+        jmh(JvmTestSuite) {
+            testType = TestSuiteType.PERFORMANCE_TEST
+            dependencies {
+                implementation project(":penna-api")
+                implementation project(":penna-core")
+                implementation 'org.slf4j:slf4j-api:2.0.6'
+                implementation 'org.openjdk.jmh:jmh-core:1.36'
+                implementation 'org.openjdk.jmh:jmh-generator-annprocess:1.36'
+                implementation 'com.fasterxml.jackson.core:jackson-core:2.12.0'
+                implementation 'com.fasterxml.jackson.core:jackson-databind:2.12.0'
+                implementation 'jakarta.json:jakarta.json-api:2.0.0'
+                implementation 'org.glassfish:jakarta.json:2.0.1'
+                implementation 'com.google.code.gson:gson:2.9.0'
+                implementation 'ch.qos.logback:logback-core:1.4.6'
+                implementation 'ch.qos.logback:logback-classic:1.4.6'
+                implementation 'ch.qos.logback.contrib:logback-jackson:0.1.5'
+                implementation 'ch.qos.logback.contrib:logback-json-core:0.1.5'
+                implementation 'ch.qos.logback.contrib:logback-json-classic:0.1.5'
+                implementation 'ch.qos.logback.contrib:logback-jackson:0.1.5'
+                implementation 'net.logstash.logback:logstash-logback-encoder:7.3'
+
+                annotationProcessor 'org.openjdk.jmh:jmh-generator-annprocess:1.36'
+            }
+
+            targets {
+                all {
+                    testTask.configure {
+                        shouldRunAfter(test)
+                        shouldRunAfter(propertyTesting)
+                    }
+                }
+            }
+        }
     }
 }
 
