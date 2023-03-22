@@ -27,6 +27,7 @@ public final class NativePennaSink implements SinkImpl {
     }
 
     private final StackTraceFilter filter = StackTraceFilter.create();
+    private final int[] filterHashes = new int[StackTraceFilter.NUMBER_OF_HASHES];
 
     /**
      * The Emitter functional interface allows us to define the specific
@@ -133,14 +134,14 @@ public final class NativePennaSink implements SinkImpl {
             jsonGenerator.writeEntrySep();
             jsonGenerator.openArray();
             for (int index = 0; index < Math.min(frames.length, MAX_STACK_DEPTH); index++) {
-                int[] hashes = filter.hash(frames[index]);
+                filter.hash(frames[index], filterHashes);
                 writeStackFrame(frames[index]);
                 jsonGenerator.writeRaw(',');
-                if (filter.check(hashes)) {
+                if (filter.check(filterHashes)) {
                     jsonGenerator.writeString("... repeated frames omitted");
                     break;
                 }
-                filter.mark(hashes);
+                filter.mark(filterHashes);
             }
 
             if (frames.length > MAX_STACK_DEPTH) {

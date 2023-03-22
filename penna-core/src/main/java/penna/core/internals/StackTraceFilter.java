@@ -2,12 +2,10 @@ package penna.core.internals;
 
 import java.util.BitSet;
 
-public record StackTraceFilter(BitSet bitSet, int[] cursor) {
+public record StackTraceFilter(BitSet bitSet) {
 
     private static final int FILTER_SIZE = 8 * 1024;
-    private static final int NUMBER_OF_HASHES = 2;
-
-    private static final ThreadLocal<BitSet> BASE = ThreadLocal.withInitial(() -> new BitSet(FILTER_SIZE));
+    public static final int NUMBER_OF_HASHES = 2;
 
     public StackTraceFilter reset() {
         bitSet.clear();
@@ -15,10 +13,7 @@ public record StackTraceFilter(BitSet bitSet, int[] cursor) {
     }
 
     public static StackTraceFilter create() {
-        var bitset = BASE.get();
-        bitset.clear();
-
-        return new StackTraceFilter(bitset, new int[NUMBER_OF_HASHES]);
+        return new StackTraceFilter(new BitSet(FILTER_SIZE));
     }
 
     public void hash(StackTraceElement element, int[] positions) {
@@ -35,26 +30,12 @@ public record StackTraceFilter(BitSet bitSet, int[] cursor) {
         positions[1] = hash2 - 1;
 
     }
-
-    public int[] hash(StackTraceElement element) {
-        hash(element, this.cursor);
-
-        return this.cursor;
-    }
-
-    public void mark(StackTraceElement stackTraceElement) {
-        mark(hash(stackTraceElement));
-    }
-
     public void mark(int[] positions) {
         for (int position : positions) {
             bitSet.set(position);
         }
     }
 
-    public boolean check(StackTraceElement stackTraceElement) {
-        return check(hash(stackTraceElement));
-    }
 
     public boolean check(int[] positions) {
         for (int position : positions) {

@@ -59,12 +59,15 @@ public class STFilterPerformanceTest {
     public void markAndCheck(SimpleState state){
         StackTraceFilter filter = StackTraceFilter.create();
         StackTraceElement[] stackTrace = state.stacktrace;
+        int[] hashes = new int[StackTraceFilter.NUMBER_OF_HASHES];
         for (int index = 0; index < stackTrace.length; index++) {
-            filter.mark(stackTrace[index]);
+            filter.hash(stackTrace[index], hashes);
+            filter.mark(hashes);
         }
 
         for (int index = 0; index < stackTrace.length; index++) {
-            if(filter.check(stackTrace[state.random.nextInt(state.size)])) break;
+            filter.hash(stackTrace[state.random.nextInt(state.size)], hashes);
+            if(filter.check(hashes)) break;
         }
     }
 
