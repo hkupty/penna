@@ -35,10 +35,14 @@ public class STFilterPerformanceTest {
 
         StackTraceElement[] stacktrace;
 
+        Set<StackTraceElement> set = new HashSet<>();
+        int[] hashes = new int[StackTraceFilter.NUMBER_OF_HASHES];
+        StackTraceFilter filter;
         Random random;
 
         @Setup
         public void setup() {
+            filter = StackTraceFilter.create();
             random = new Random();
             stacktrace = new StackTraceElement[size];
             for (int i = 0; i < size; i++ ) {
@@ -57,31 +61,29 @@ public class STFilterPerformanceTest {
     @Benchmark
     @OutputTimeUnit(TimeUnit.NANOSECONDS)
     public void markAndCheck(SimpleState state){
-        StackTraceFilter filter = StackTraceFilter.create();
         StackTraceElement[] stackTrace = state.stacktrace;
-        int[] hashes = new int[StackTraceFilter.NUMBER_OF_HASHES];
+        int[] hashes = state.hashes;
         for (int index = 0; index < stackTrace.length; index++) {
-            filter.hash(stackTrace[index], hashes);
-            filter.mark(hashes);
+            state.filter.hash(stackTrace[index], hashes);
+            state.filter.mark(hashes);
         }
 
         for (int index = 0; index < stackTrace.length; index++) {
-            filter.hash(stackTrace[state.random.nextInt(state.size)], hashes);
-            if(filter.check(hashes)) break;
+            state.filter.hash(stackTrace[state.random.nextInt(state.size)], hashes);
+            if(state.filter.check(hashes)) break;
         }
     }
 
     @Benchmark
     @OutputTimeUnit(TimeUnit.NANOSECONDS)
     public void compareWithHashSet(SimpleState state){
-        Set<StackTraceElement> set = new HashSet<>();
         StackTraceElement[] stackTrace = state.stacktrace;
         for (int index = 0; index < stackTrace.length; index++) {
-            set.add(stackTrace[index]);
+            state.set.add(stackTrace[index]);
         }
 
         for (int index = 0; index < stackTrace.length; index++) {
-            if(set.contains(stackTrace[state.random.nextInt(state.size)])) break;
+            if(state.set.contains(stackTrace[state.random.nextInt(state.size)])) break;
         }
     }
 
@@ -98,7 +100,6 @@ public class STFilterPerformanceTest {
                 .forks(1)
                 .shouldFailOnError(true)
                 .shouldDoGC(true)
-                .addProfiler("gc")
                 .build();
 
         new Runner(options).run();
