@@ -1,10 +1,12 @@
 package penna.core.internals;
 
 import java.util.BitSet;
+import java.util.Objects;
 
 public record StackTraceFilter(BitSet bitSet) {
 
     private static final int FILTER_SIZE = 8 * 1024;
+    private static final int PRIME = 1048573;
     public static final int NUMBER_OF_HASHES = 2;
 
     public StackTraceFilter reset() {
@@ -17,19 +19,13 @@ public record StackTraceFilter(BitSet bitSet) {
     }
 
     public void hash(StackTraceElement element, int[] positions) {
-        int size = bitSet().size();
-        int prime = 1048573;
+        int hash1 = Objects.hash(element.getClassName(), element.getMethodName(), element.getLineNumber(), element.getFileName());
+        int hash2 = Objects.hash(PRIME, hash1);
 
-        // 32 - 13. 2^13 = 8 * 1024 = FILTER_SIZE
-        // So hash2 will be definitely smaller than
-        int hash1 = element.hashCode();
-        int hash2 = ((hash1 * prime) & Integer.MAX_VALUE) >> 19;
-
-        // To avoid off-by-one errors
-        positions[0] = ((hash1 & Integer.MAX_VALUE)  >> 19) - 1;
-        positions[1] = hash2 - 1;
-
+        positions[0] = hash1 & FILTER_SIZE - 1;
+        positions[1] = hash2 & FILTER_SIZE - 1;
     }
+
     public void mark(int[] positions) {
         for (int position : positions) {
             bitSet.set(position);
