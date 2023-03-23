@@ -18,7 +18,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-public class NativePennaSinkTests {
+class NativePennaSinkTests {
 
     private static final ObjectMapper om = new ObjectMapper();
     @Provide
@@ -141,7 +141,6 @@ public class NativePennaSinkTests {
         sink.init(fos.getChannel());
 
         logger.log(event);
-
 
         Assertions.assertDoesNotThrow(() -> om.readValue(testFile, Map.class));
         testFile.deleteOnExit();
