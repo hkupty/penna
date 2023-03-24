@@ -4,7 +4,6 @@
 
 [![version](https://img.shields.io/maven-central/v/com.hkupty.penna/penna-core?style=flat-square)](https://mvnrepository.com/artifact/com.hkupty.penna)
 
-
 Penna is an opinionated backend for [slf4j](https://github.com/qos-ch/slf4j/) that focuses on doing one thing right: Logging structured logs in json format to the console.
 
 ## Warning!
@@ -21,7 +20,7 @@ This might be a common use-case for jvm apps running in kubernetes.
 If that is your use case, you might prefer penna over logback because:
 
 - Penna is specialized for this use-case, working out of the box with sane defaults;
-- If you already have [jackson](https://github.com/FasterXML/jackson-core/), [gson](https://github.com/google/gson) or any [jakarta/json-p](https://github.com/jakartaee/jsonp-api) compliant library, penna will use it to write json logs, so no extra dependencies needed;
+- It does not require any json library (or any dependency other than slf4j);
 - It is very optimized, with impressive performance when compared to logback;
 - It is also designed not consume almost any runtime memory, so it won't cause GC pressure;
 - If you want to configure, the extension config library [penna-yaml-config](penna-yaml-config/README.md) allows you to configure penna in yaml,
@@ -38,16 +37,10 @@ In order to use it, add it to the [build manager of your preference](https://mvn
 
 ```groovy
 // gradle
-
 runtimeOnly 'com.hkupty.penna:penna-core:0.5.1'
 
 // Penna doesn't have any strict dependencies aside from slf4j.
 implementation 'org.slf4j:slf4j-api:2.0.6'
-
-// But for rendering the json messages, you might be using jackson, gson or a JSON-P/JSR-353 compatible library.
-// If that's the case, you don't need to add any dependencies because penna will automatically select the one available.
-// If you don't have any, we recommend using jackson-core, at least version 2.12:
-// runtimeOnly 'com.fasterxml.jackson.core:jackson-core:2.12.0'
 ```
 
 :warning: Note that penna is built targeting JVM 17+.
@@ -138,25 +131,3 @@ With that in mind, penna tries to be a simple yet effective component in your ar
 It should not require you to add in more dependencies. Instead, it should work with whatever you have available.
 Also, it should make its best effort to consume the fewer resources as possible, being efficient and sparing your app of GC pauses
 when under heavy load. [Read more on our performance tests.](performance/)
-
-## Roadmap
-
-- 1.0
-  - [x] Stable API
-  - [x] Configuration mechanism for fine-tuning logs based on logger name;
-  - [x] Json sinks:
-    - [x] Jackson
-    - [x] Gson
-    - [x] Jakarta
-  - [ ] 40-50% Test coverage
-  - [penna-yaml-config's 1.0 goals](penna-yaml-config/README.md#roadmap)
-- 2.0
-  - [ ] Tests
-    - [ ] Add [arch unit](https://www.archunit.org/) tests
-    - [ ] Add generative tests
-    - [ ] 70-80% test coverage
-  - [ ] Transform log messages:
-    - [ ] Allow for custom (through configuration) transformation of log before it is rendered
-  - [ ] Native implementation:
-    - [ ] MDC
-    - [ ] Markers

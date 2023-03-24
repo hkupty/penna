@@ -6,11 +6,6 @@ module penna.core {
     requires org.slf4j;
     requires transitive penna.api;
 
-    // Optionally depends on the following json libraries
-    requires static com.fasterxml.jackson.core;
-    requires static jakarta.json;
-    requires static com.google.gson;
-
     // Exposes a service provider for SLF4j
     provides org.slf4j.spi.SLF4JServiceProvider with PennaServiceProvider;
 

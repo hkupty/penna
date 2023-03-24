@@ -9,51 +9,15 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 import org.openjdk.jmh.runner.options.TimeValue;
 import org.slf4j.LoggerFactory;
 import penna.api.config.Config;
+import penna.core.sink.PennaSink;
 import penna.core.sink.SinkImpl;
-import penna.core.sink.impl.GsonPennaSink;
-import penna.core.sink.impl.JacksonPennaSink;
-import penna.core.sink.impl.JakartaPennaSink;
-import penna.core.sink.impl.NativePennaSink;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.channels.FileChannel;
-import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
 import java.util.concurrent.TimeUnit;
 
 public class SinkPerformanceTest {
-
-    @State(Scope.Thread)
-    public static class SinkState {
-        private final File dumpToNull = new File("/dev/null");
-        private FileOutputStream fos;
-        TreeCache cache = new TreeCache(Config.getDefault());
-        PennaLogger logger;
-        @Param({"native", "jackson", "gson", "jakarta"})
-        String sinkType;
-
-        @Setup
-        public void setup() throws IOException {
-            fos = new FileOutputStream(dumpToNull);
-            SinkImpl sink =  switch (sinkType) {
-                case "native" -> new NativePennaSink();
-                case "jackson" -> new JacksonPennaSink();
-                case "gson" -> new GsonPennaSink();
-                case "jakarta" -> new JakartaPennaSink();
-                default -> throw new RuntimeException("wth?");
-            };
-
-            sink.init(fos.getChannel());
-            logger = cache.getLoggerAt("jmh", "test", "penna");
-            logger.sink.set(sink);
-        }
-        @TearDown
-        public void tearDown() throws IOException {
-            fos.close();
-        }
-    }
 
     @State(Scope.Thread)
     public static class SimpleState {
@@ -62,24 +26,17 @@ public class SinkPerformanceTest {
         PennaLogger logger = cache.getLoggerAt("jmh", "test", "penna");
     }
 
-//    @Benchmark
-//    @OutputTimeUnit(TimeUnit.NANOSECONDS)
-//    public void initALogger(Blackhole bh) throws IOException {
-//        bh.consume(LoggerFactory.getLogger("com.pennacorp.lePennaApp.controller.TheGreatestController"));
-//    }
-//
-//    @Benchmark
-//    @OutputTimeUnit(TimeUnit.NANOSECONDS)
-//    public void detectLevelIsNotEnabled(SimpleState state) throws IOException {
-//        state.logger.trace("Should not log");
-//    }
+    @Benchmark
+    @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public void initALogger(Blackhole bh) throws IOException {
+        bh.consume(new TreeCache(Config.getDefault()).getLoggerAt("com", "pennacorp", "lePennaApp", "controller", "TheGreatestController"));
+    }
 
     @Benchmark
     @OutputTimeUnit(TimeUnit.NANOSECONDS)
-    public void implementations(SinkState state) throws IOException {
-        state.logger.atInfo().log("hello world");
+    public void detectLevelIsNotEnabled(SimpleState state) throws IOException {
+        state.logger.trace("Should not log");
     }
-
 
     @Test
     public void runBenchmarks() throws Exception {
