@@ -1,4 +1,5 @@
 # Penna
+![Penna](logo/logo_full.svg)
 > a contour feather, a penna; a quill, a feather used for writing; a pen; a pencil.
 
 [![version](https://img.shields.io/maven-central/v/com.hkupty.penna/penna-core?style=flat-square)](https://mvnrepository.com/artifact/com.hkupty.penna)
