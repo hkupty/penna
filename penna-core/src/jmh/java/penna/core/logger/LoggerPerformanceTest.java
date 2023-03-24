@@ -3,20 +3,13 @@ package penna.core.logger;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
-import ch.qos.logback.classic.pattern.ThrowableProxyConverter;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.contrib.jackson.JacksonJsonFormatter;
 import ch.qos.logback.contrib.json.classic.JsonLayout;
-import ch.qos.logback.core.Appender;
-import ch.qos.logback.core.ConsoleAppender;
 import ch.qos.logback.core.OutputStreamAppender;
 import ch.qos.logback.core.encoder.Encoder;
 import ch.qos.logback.core.encoder.LayoutWrappingEncoder;
-import net.logstash.logback.composite.JsonProviders;
-import net.logstash.logback.composite.loggingevent.*;
-import net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder;
 import net.logstash.logback.encoder.LogstashEncoder;
-import net.logstash.logback.stacktrace.ShortenedThrowableConverter;
 import org.junit.jupiter.api.Test;
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.runner.Runner;
@@ -27,8 +20,8 @@ import org.slf4j.MDC;
 import org.slf4j.MarkerFactory;
 import penna.api.config.Config;
 import penna.core.logger.utils.LogbackDevNullAppender;
+import penna.core.sink.PennaSink;
 import penna.core.sink.SinkImpl;
-import penna.core.sink.impl.NativePennaSink;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -153,7 +146,7 @@ public class LoggerPerformanceTest {
         @Setup
         public void setup() throws IOException {
             fos = new FileOutputStream(dumpToNull);
-            SinkImpl sink = new NativePennaSink();
+            SinkImpl sink = new PennaSink();
             sink.init(fos.getChannel());
             logger = cache.getLoggerAt("jmh", "test", "penna");
             logger.sink.set(sink);

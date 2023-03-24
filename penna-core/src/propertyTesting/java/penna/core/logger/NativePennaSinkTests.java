@@ -10,7 +10,8 @@ import org.slf4j.event.Level;
 import penna.api.config.Config;
 import penna.api.models.LogField;
 import penna.core.models.PennaLogEvent;
-import penna.core.sink.impl.NativePennaSink;
+import penna.core.sink.PennaSink;
+import penna.core.sink.SinkImpl;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -98,7 +99,7 @@ class NativePennaSinkTests {
 
     @Property
     void validJsonMessage(@ForAll("fields") LogField[] fields) throws IOException {
-        NativePennaSink sink = new NativePennaSink();
+        SinkImpl sink = new PennaSink();
         Config config = Config.getDefault().replaceFields(fields);
         TreeCache cache = new TreeCache(config);
         PennaLogger logger = cache.getLoggerAt("c", "est", "moi");
@@ -127,7 +128,7 @@ class NativePennaSinkTests {
             @ForAll("fields") LogField[] fields,
             @ForAll("simpleEvent") PennaLogEvent event
     ) throws IOException {
-        NativePennaSink sink = new NativePennaSink();
+        PennaSink sink = new PennaSink();
         Config config = Config.getDefault().replaceFields(fields);
         TreeCache cache = new TreeCache(config);
         PennaLogger logger = cache.getLoggerAt("c", "est", "moi");
