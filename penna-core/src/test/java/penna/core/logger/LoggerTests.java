@@ -135,8 +135,8 @@ class LoggerTests {
         PennaLogger pennaLogger = cache.getLoggerAt("test");
 
         AtomicReference<String> message = new AtomicReference<>(null);
-        SinkImpl checker = new DummySink(mle -> {
-            message.set(mle.message);
+        SinkImpl checker = new DummySink(ple -> {
+            message.set(ple.message);
         });
 
         var exception = new Exception();

@@ -9,8 +9,10 @@ FLAGS="${@}"
 MAPLE_JAR="tests/throughput/build/libs/pennaJar-0.1.jar"
 LOGBACK_JAR="tests/throughput/build/libs/logbackJar-0.1.jar"
 mkdir -p out
-sudo mount -t ramfs -o size=1G ramfs ./out
-sudo chown -R "${USER}:${USER}" ./out
+if ! mount | grep "$(git rev-parse --show-toplevel)" > /dev/null; then
+  sudo mount -t ramfs -o size=1G ramfs ./out
+  sudo chown -R "${USER}:${USER}" ./out
+fi
 
 # TODO Write to csv, plot the results
 
@@ -24,10 +26,10 @@ function batch() {
   echo "${TIME} / ${THREADS}"
   echo "Running penna"
   gradle -q :throughput:buildPennaJar
-  perf stat java ${FLAGS} -jar "${MAPLE_JAR}" ${TIME} ${THREADS} > out/penna.json
+  perf stat java ${FLAGS} -jar "${MAPLE_JAR}" "${TIME}" "${THREADS}" > out/penna.json
   echo "Running logback"
   gradle -q :throughput:buildLogbackJar
-  perf stat java ${FLAGS} -jar "${LOGBACK_JAR}" ${TIME} ${THREADS} > out/logback.json
+  perf stat java ${FLAGS} -jar "${LOGBACK_JAR}" "${TIME}" "${THREADS}" > out/logback.json
 
   echo ""
 
@@ -39,18 +41,15 @@ function batch() {
   printf "%10s %10s\n" "logback" "${LOGBACK_TOTAL}"
   echo ""
   echo ">> logs/ms"
-  printf "%10s %10s\n" "penna" $(python -c "print($MAPLE_TOTAL / $TIME)")
-  printf "%10s %10s\n" "logback" $(python -c "print($LOGBACK_TOTAL / $TIME)")
+  printf "%10s %10s\n" "penna" "$(python -c "print($MAPLE_TOTAL / $TIME)")"
+  printf "%10s %10s\n" "logback" "$(python -c "print($LOGBACK_TOTAL / $TIME)")"
 }
 
 
 cd "${localdir}/.." && {
   batch 1 10000
   batch 2 10000
-  batch 3 5000
-  batch 4 5000
-  batch 16 5000
-  batch 32 5000
+
+  sudo umount out
 }
 
-sudo umount out/

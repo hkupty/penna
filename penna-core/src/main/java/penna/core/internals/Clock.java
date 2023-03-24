@@ -17,7 +17,7 @@ public final class Clock {
     private static final Lock startThreadLock = new ReentrantLock();
 
     private static final AtomicLong timestamp = new AtomicLong(System.currentTimeMillis());
-    private static final Thread clockThread = ThreadCreator.newThread("maple-clock-ticker", () -> {
+    private static final Thread clockThread = ThreadCreator.newThread("penna-clock-ticker", () -> {
         while(true) {
             var ts = timestamp.incrementAndGet();
 
