@@ -134,7 +134,7 @@ public final class NativePennaSink implements SinkImpl {
             jsonGenerator.writeEntrySep();
             jsonGenerator.openArray();
             for (int index = 0; index < Math.min(frames.length, MAX_STACK_DEPTH); index++) {
-                filter.hash(frames[index], filterHashes);
+                filter.hash(filterHashes, frames[index]);
                 writeStackFrame(frames[index]);
                 jsonGenerator.writeRaw(',');
                 if (filter.check(filterHashes)) {
@@ -189,8 +189,8 @@ public final class NativePennaSink implements SinkImpl {
 
     private void writeArray(final List lst) throws IOException {
         jsonGenerator.openArray();
-        for(int i = 0; i < lst.size(); i++){
-            writeObject(lst.get(i));
+        for (Object o : lst) {
+            writeObject(o);
         }
         jsonGenerator.closeArray();
         jsonGenerator.writeSep();
@@ -198,8 +198,8 @@ public final class NativePennaSink implements SinkImpl {
 
     private void writeArray(final Object... lst) throws IOException {
         jsonGenerator.openArray();
-        for (int i = 0; i < lst.length; i++) {
-            writeObject(lst[i]);
+        for (Object o : lst) {
+            writeObject(o);
         }
         jsonGenerator.closeArray();
         jsonGenerator.writeSep();

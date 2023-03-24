@@ -18,7 +18,7 @@ public record StackTraceFilter(BitSet bitSet) {
         return new StackTraceFilter(new BitSet(FILTER_SIZE));
     }
 
-    public void hash(StackTraceElement element, int[] positions) {
+    public void hash(int[] positions, StackTraceElement element) {
         int hash1 = Objects.hash(element.getClassName(), element.getMethodName(), element.getLineNumber(), element.getFileName());
         int hash2 = Objects.hash(PRIME, hash1);
 
@@ -26,14 +26,14 @@ public record StackTraceFilter(BitSet bitSet) {
         positions[1] = hash2 & FILTER_SIZE - 1;
     }
 
-    public void mark(int[] positions) {
+    public void mark(int... positions) {
         for (int position : positions) {
             bitSet.set(position);
         }
     }
 
 
-    public boolean check(int[] positions) {
+    public boolean check(int... positions) {
         for (int position : positions) {
             if (bitSet.get(position)) return true;
         }

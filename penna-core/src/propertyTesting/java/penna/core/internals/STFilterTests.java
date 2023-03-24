@@ -3,13 +3,10 @@ package penna.core.internals;
 import net.jqwik.api.*;
 import net.jqwik.api.constraints.Size;
 import net.jqwik.api.constraints.UniqueElements;
-import net.jqwik.api.statistics.Histogram;
 import net.jqwik.api.statistics.Statistics;
-import net.jqwik.api.statistics.StatisticsReport;
 import org.apache.commons.math3.distribution.ChiSquaredDistribution;
 import org.junit.jupiter.api.Assertions;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,7 +43,7 @@ class STFilterTests {
         int[] hashes = new int[StackTraceFilter.NUMBER_OF_HASHES];
 
         for (int i = 0; i < stackTraces.size(); i ++ ) {
-            filter.hash(stackTraces.get(i), hashes);
+            filter.hash(hashes, stackTraces.get(i));
             int fst = Math.min(hashes[0], hashes[1]);
             int snd = Math.max(hashes[0], hashes[1]);
             var key = fst + ":" + snd;

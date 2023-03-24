@@ -2,26 +2,12 @@ package penna.core.internals;
 
 import org.junit.jupiter.api.Test;
 import org.openjdk.jmh.annotations.*;
-import org.openjdk.jmh.infra.Blackhole;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 import org.openjdk.jmh.runner.options.TimeValue;
-import penna.api.config.Config;
-import penna.core.logger.PennaLogger;
-import penna.core.logger.SinkPerformanceTest;
-import penna.core.logger.TreeCache;
-import penna.core.sink.SinkImpl;
-import penna.core.sink.impl.GsonPennaSink;
-import penna.core.sink.impl.JacksonPennaSink;
-import penna.core.sink.impl.JakartaPennaSink;
-import penna.core.sink.impl.NativePennaSink;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -64,12 +50,12 @@ public class STFilterPerformanceTest {
         StackTraceElement[] stackTrace = state.stacktrace;
         int[] hashes = state.hashes;
         for (int index = 0; index < stackTrace.length; index++) {
-            state.filter.hash(stackTrace[index], hashes);
+            state.filter.hash(hashes, stackTrace[index]);
             state.filter.mark(hashes);
         }
 
         for (int index = 0; index < stackTrace.length; index++) {
-            state.filter.hash(stackTrace[state.random.nextInt(state.size)], hashes);
+            state.filter.hash(hashes, stackTrace[state.random.nextInt(state.size)]);
             if(state.filter.check(hashes)) break;
         }
     }
