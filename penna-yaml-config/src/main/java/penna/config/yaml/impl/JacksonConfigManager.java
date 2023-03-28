@@ -1,4 +1,4 @@
-package penna.config.yaml;
+package penna.config.yaml.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
@@ -7,12 +7,12 @@ import penna.api.config.ConfigManager;
 import penna.api.config.Configurable;
 import penna.api.models.LogField;
 import org.slf4j.event.Level;
+import penna.config.yaml.models.Node;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Objects;
-import java.util.stream.Stream;
 
 public class JacksonConfigManager implements ConfigManager {
     private static final LogField[] reference = new LogField[]{};

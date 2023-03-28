@@ -2,6 +2,7 @@ package penna.config.yaml;
 
 import penna.api.config.ConfigManager;
 import penna.api.config.Configurable;
+import penna.config.yaml.impl.JacksonConfigManager;
 
 import java.net.URISyntaxException;
 import java.nio.file.Path;
