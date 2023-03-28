@@ -1,9 +1,9 @@
-package penna.config.yaml;
+package penna.config.yaml.models;
 
 import java.util.List;
 import java.util.Map;
 
-sealed interface Node {
+public sealed interface Node {
     String level();
     List<String> fields();
 

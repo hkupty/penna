@@ -13,7 +13,7 @@ repositories {
 dependencies {
     implementation 'org.slf4j:slf4j-api:2.0.6'
     runtimeOnly project(":penna-core")
-    runtimeOnly 'com.hkupty.penna:penna-yaml-config:0.4'
+    runtimeOnly project(":penna-yaml-config")
     runtimeOnly 'com.fasterxml.jackson.core:jackson-core:2.14.2'
     runtimeOnly 'com.fasterxml.jackson.core:jackson-databind:2.14.2'
     runtimeOnly 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.14.2'
@@ -27,4 +27,18 @@ test {
 
 application {
     mainClass = 'org.example.Main'
+}
+
+task buildPennaJar(type: Jar) {
+    from sourceSets.main.output
+    dependsOn sourceSets.main.runtimeClasspath
+    manifest{
+        attributes 'Main-Class': "org.example.Main"
+    }
+    archiveBaseName = "playground"
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    with jar
 }

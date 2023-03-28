@@ -1,4 +1,4 @@
-package penna.config.yaml;
+package penna.config.yaml.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
@@ -7,21 +7,21 @@ import penna.api.config.ConfigManager;
 import penna.api.config.Configurable;
 import penna.api.models.LogField;
 import org.slf4j.event.Level;
+import penna.config.yaml.models.Node;
 
 import java.io.IOException;
-import java.nio.file.Path;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.Objects;
-import java.util.stream.Stream;
 
 public class JacksonConfigManager implements ConfigManager {
     private static final LogField[] reference = new LogField[]{};
     private final ObjectMapper mapper;
-    private final Path file;
+    private final URL file;
     Configurable configurable;
     Node.RootNode config;
 
-    public JacksonConfigManager(Path file) {
+    public JacksonConfigManager(URL file) {
         this.mapper = new YAMLMapper();
         this.file = file;
     }
@@ -58,7 +58,7 @@ public class JacksonConfigManager implements ConfigManager {
     }
 
     public void read() throws IOException {
-        config = mapper.readValue(file.toFile(), Node.PennaConfig.class).penna();
+        config = mapper.readValue(file, Node.PennaConfig.class).penna();
     }
 
     @Override

@@ -31,3 +31,7 @@ the PATCH component is omitted when its value is `0`.
 - Clock thread name; ([#29](https://github.com/hkupty/penna/pull/29))
 
 ### `penna-yaml-config`
+
+#### Fixed
+
+- Fix reading yaml config from `penna.yaml` inside the jar; ([#38](https://github.com/hkupty/penna/pull/38))
