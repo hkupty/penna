@@ -1,0 +1,3 @@
+baseURL = 'https://hkupty.github.com/penna/'
+languageCode = 'en-us'
+title = 'penna - featherweight json logs'

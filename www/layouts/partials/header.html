@@ -1,0 +1,21 @@
+<nav class="level">
+  <p class="level-item has-text-centered">
+    <a class="link is-info" href="{{ .Site.BaseURL }}">Home</a>
+  </p>
+  <p class="level-item has-text-centered">
+    <a class="link is-info">Docs</a>
+  </p>
+  <p class="level-item has-text-centered">
+    <a href="{{ .Site.BaseURL }}">
+    {{ with resources.GetMatch "logo_full.svg" }}
+      <img src="{{ .RelPermalink }}" alt="penna: featherweight json logs" height="100">
+    {{ end }}
+    </a>
+  </p>
+  <p class="level-item has-text-centered">
+    <a class="link is-info" href="/penna/changelog">Changelog</a>
+  </p>
+  <p class="level-item has-text-centered">
+    <a class="link is-info">Contact</a>
+  </p>
+</nav>
