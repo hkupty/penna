@@ -82,18 +82,3 @@ public class JacksonConfigManager implements ConfigManager {
     }
 }
 
-/* The yaml should look something like this:
-
-- penna:
-    level: info // optional
-    fields:
-        - thread
-        - logger
-        - message
-        - mdc
-    loggers:
-        penna:
-            level: debug
-        penna.core.logger:
-            level: trace
-*/
