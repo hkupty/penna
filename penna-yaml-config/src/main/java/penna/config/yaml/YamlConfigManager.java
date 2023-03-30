@@ -9,7 +9,7 @@ import java.util.Objects;
 
 
 public class YamlConfigManager implements ConfigManager {
-    ConfigManager impl;
+    transient ConfigManager impl;
 
     private static ConfigManager tryJackson(URL configFile) throws ClassNotFoundException {
         Class.forName("com.fasterxml.jackson.dataformat.yaml.YAMLMapper");
@@ -18,9 +18,9 @@ public class YamlConfigManager implements ConfigManager {
 
     public YamlConfigManager(){
         try {
-            var url = Objects.requireNonNull(getClass().getClassLoader().getResource("penna.yaml"));
+            var url = Objects.requireNonNull(Thread.currentThread().getContextClassLoader().getResource("penna.yaml"));
             impl = tryJackson(url);
-        } catch (NullPointerException | ClassNotFoundException ignored) {
+        } catch (ClassNotFoundException ignored) {
             impl = new ConfigManager() {
                 private Configurable configurable;
 

@@ -13,26 +13,28 @@ import penna.core.minilog.MiniLogger;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.Objects;
 
 public class JacksonConfigManager implements ConfigManager {
     private static final LogField[] reference = new LogField[]{};
-    private final ObjectMapper mapper;
-    private final URL file;
-    Configurable configurable;
-    Node.RootNode config;
+    private transient final ObjectMapper mapper;
+    private transient final URL file;
+    transient Configurable configurable;
+    transient Node.RootNode config;
 
     public JacksonConfigManager(URL file) {
         this.mapper = new YAMLMapper();
         this.file = file;
     }
 
+    @SuppressWarnings("PMD.DataflowAnomalyAnalysis")
     private ConfigurationChange getUpdateFn(Node configNode) {
         var hasFields = (configNode.fields() != null) && (!configNode.fields().isEmpty());
         var hasLevel = configNode.level() != null;
 
         return ((Config base) -> base
-                .replaceLevel(hasLevel ? Level.valueOf(configNode.level().toUpperCase()) : base.level())
+                .replaceLevel(hasLevel ? Level.valueOf(configNode.level().toUpperCase(Locale.ENGLISH)) : base.level())
                 .replaceFields(hasFields ? configNode.fields().stream().map(LogField::fromFieldName).filter(Objects::nonNull).toArray(size -> Arrays.copyOf(reference, size)) : base.fields()));
     }
 

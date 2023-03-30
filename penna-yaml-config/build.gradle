@@ -9,7 +9,7 @@ version '0.5.1'
 
 pmd {
     sourceSets = [sourceSets.main]
-    ruleSets("category/java/performance.xml", "category/java/bestpractices.xml")
+    ruleSets("category/java/performance.xml", "category/java/bestpractices.xml", "category/java/errorprone.xml")
 }
 
 repositories {
