@@ -21,6 +21,7 @@ the PATCH component is omitted when its value is `0`.
 #### Changed
 
 - Added `suppressed` throwables to the logged exceptions; ([#29](https://github.com/hkupty/penna/pull/29))
+- Minilogger now logs in json; ([#39](https://github.com/hkupty/penna/pull/39))
 
 #### Removed
 
@@ -31,6 +32,10 @@ the PATCH component is omitted when its value is `0`.
 - Clock thread name; ([#29](https://github.com/hkupty/penna/pull/29))
 
 ### `penna-yaml-config`
+
+#### Changed
+
+- Added pmd and static analysis checks to `penna-yaml-config`; ([#39](https://github.com/hkupty/penna/pull/39))
 
 #### Fixed
 
