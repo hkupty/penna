@@ -4,11 +4,7 @@ import penna.api.config.ConfigManager;
 import penna.api.config.Configurable;
 import penna.config.yaml.impl.JacksonConfigManager;
 
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Objects;
 
 

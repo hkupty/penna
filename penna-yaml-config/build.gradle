@@ -1,11 +1,16 @@
 plugins {
     id 'penna.base-java'
     id 'penna.publishing'
+    id 'pmd'
 }
 
 group 'com.hkupty.penna'
 version '0.5.1'
 
+pmd {
+    sourceSets = [sourceSets.main]
+    ruleSets("category/java/performance.xml", "category/java/bestpractices.xml")
+}
 
 repositories {
     mavenCentral()
