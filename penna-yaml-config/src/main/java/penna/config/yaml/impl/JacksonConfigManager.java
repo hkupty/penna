@@ -8,6 +8,7 @@ import penna.api.config.Configurable;
 import penna.api.models.LogField;
 import org.slf4j.event.Level;
 import penna.config.yaml.models.Node;
+import penna.core.minilog.MiniLogger;
 
 import java.io.IOException;
 import java.net.URL;
@@ -72,7 +73,7 @@ public class JacksonConfigManager implements ConfigManager {
             read();
             configurable.configure(configItemsFromYaml());
         } catch (IOException ioe) {
-            System.err.println(ioe.getMessage());
+            MiniLogger.error("Unable to read configuration", ioe);
         }
     }
 

@@ -11,4 +11,8 @@ module penna.core {
 
     // The only user-facing namespace should be config.
     exports penna.core.config;
+
+    // Penna subprojects also have access to minilog
+    // when/if breaking apart from slf4j, expose the full logger
+    exports penna.core.minilog to penna.config.yaml;
 }
