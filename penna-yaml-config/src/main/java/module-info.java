@@ -6,6 +6,7 @@ module penna.config.yaml {
 
     requires static com.fasterxml.jackson.databind;
     requires static com.fasterxml.jackson.dataformat.yaml;
+    requires penna.core;
 
     provides penna.api.config.ConfigManager with YamlConfigManager;
 

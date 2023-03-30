@@ -8,30 +8,33 @@ import penna.api.config.Configurable;
 import penna.api.models.LogField;
 import org.slf4j.event.Level;
 import penna.config.yaml.models.Node;
+import penna.core.minilog.MiniLogger;
 
 import java.io.IOException;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.Objects;
 
 public class JacksonConfigManager implements ConfigManager {
     private static final LogField[] reference = new LogField[]{};
-    private final ObjectMapper mapper;
-    private final URL file;
-    Configurable configurable;
-    Node.RootNode config;
+    private transient final ObjectMapper mapper;
+    private transient final URL file;
+    transient Configurable configurable;
+    transient Node.RootNode config;
 
     public JacksonConfigManager(URL file) {
         this.mapper = new YAMLMapper();
         this.file = file;
     }
 
+    @SuppressWarnings("PMD.DataflowAnomalyAnalysis")
     private ConfigurationChange getUpdateFn(Node configNode) {
         var hasFields = (configNode.fields() != null) && (!configNode.fields().isEmpty());
         var hasLevel = configNode.level() != null;
 
         return ((Config base) -> base
-                .replaceLevel(hasLevel ? Level.valueOf(configNode.level().toUpperCase()) : base.level())
+                .replaceLevel(hasLevel ? Level.valueOf(configNode.level().toUpperCase(Locale.ENGLISH)) : base.level())
                 .replaceFields(hasFields ? configNode.fields().stream().map(LogField::fromFieldName).filter(Objects::nonNull).toArray(size -> Arrays.copyOf(reference, size)) : base.fields()));
     }
 
@@ -72,7 +75,7 @@ public class JacksonConfigManager implements ConfigManager {
             read();
             configurable.configure(configItemsFromYaml());
         } catch (IOException ioe) {
-            System.err.println(ioe.getMessage());
+            MiniLogger.error("Unable to read configuration", ioe);
         }
     }
 
@@ -82,18 +85,3 @@ public class JacksonConfigManager implements ConfigManager {
     }
 }
 
-/* The yaml should look something like this:
-
-- penna:
-    level: info // optional
-    fields:
-        - thread
-        - logger
-        - message
-        - mdc
-    loggers:
-        penna:
-            level: debug
-        penna.core.logger:
-            level: trace
-*/
