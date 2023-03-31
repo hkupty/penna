@@ -1,8 +1,11 @@
 package penna.core.logger;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.MDC;
 import penna.api.config.Config;
 import penna.api.config.ConfigManager.ConfigItem.LoggerConfigItem;
 import penna.core.logger.guard.*;
+import penna.core.sink.PennaSink;
 import penna.core.sink.SinkImpl;
 import penna.core.sink.impl.DummySink;
 import penna.core.slf4j.PennaLoggerFactory;
@@ -12,11 +15,35 @@ import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
 import org.slf4j.event.Level;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.atomic.AtomicReferenceArray;
 
 class LoggerTests {
+    record ThrowableLog(
+            String throwable,
+            String message,
+            List<String> stacktrace
+    ) {}
+
+    record LogMessage(
+            long timestamp,
+            String level,
+            String message,
+            String logger,
+            String thread,
+            Map<String, String> mdc,
+            List<String> tags,
+            Map<String, Object> data,
+            ThrowableLog throwable
+    ) {}
+
+    private static final ObjectMapper om = new ObjectMapper();
 
     @Test
     void log_levels_are_respected() {
@@ -156,5 +183,42 @@ class LoggerTests {
 
         pennaLogger.info("with {} {} {}", "three", "formatted", "message", exception);
         Assertions.assertEquals("with three formatted message", message.get());
+    }
+
+    @Test
+    void everything_added_to_the_log_is_present_in_the_message() throws IOException {
+        SinkImpl sink = new PennaSink();
+        Config config = Config.getDefault();
+        TreeCache cache = new TreeCache(config);
+        PennaLogger logger = cache.getLoggerAt("c", "est", "moi");
+
+        logger.sink.set(sink);
+
+        File testFile = File.createTempFile("valid-message", ".json");
+        FileOutputStream fos = new FileOutputStream(testFile);
+        sink.init(fos.getChannel());
+
+        MDC.put("key", "value");
+        logger.atInfo()
+                .addKeyValue("key", "kvp")
+                .addMarker(MarkerFactory.getMarker("marker"))
+                .setCause(new RuntimeException("exception"))
+                .log("formatted {}", "message");
+        MDC.clear();
+
+        Assertions.assertDoesNotThrow(() -> om.readValue(testFile, LogMessage.class));
+
+        var logMessage = om.readValue(testFile, LogMessage.class);
+
+        Assertions.assertEquals("kvp", logMessage.data().get("key"));
+        Assertions.assertEquals("value", logMessage.mdc().get("key"));
+        Assertions.assertEquals(1, logMessage.tags().size());
+        Assertions.assertEquals("marker", logMessage.tags().get(0));
+        Assertions.assertEquals("java.lang.RuntimeException", logMessage.throwable().throwable());
+        Assertions.assertEquals("exception", logMessage.throwable().message());
+
+        // Keep this line at the bottom, so we can inspect the file if the test breaks
+        testFile.deleteOnExit();
+        fos.close();
     }
 }

@@ -12,6 +12,14 @@ the PATCH component is omitted when its value is `0`.
 
 ### `penna-core`
 
+#### Changed
+
+- Remove unnecessary "..." from stacktrace if we break out of the loop due to repetition ([#41](https://github.com/hkupty/penna/pull/41))
+
+#### Fixed
+
+- MDC block was not outputting a comma after running, producing an invalid json ([#41](https://github.com/hkupty/penna/pull/41))
+
 ### `penna-yaml-config`
 
 ## 0.6 - 2023-03-30
