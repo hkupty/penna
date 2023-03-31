@@ -263,6 +263,7 @@ public final class PennaSink implements SinkImpl, Closeable {
                 jsonGenerator.writeStringValue(kv.getKey(), kv.getValue());
             }
             jsonGenerator.closeObject();
+            jsonGenerator.writeSep();
         }
     }
 
