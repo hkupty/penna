@@ -12,6 +12,14 @@ the PATCH component is omitted when its value is `0`.
 
 ### `penna-core`
 
+### `penna-yaml-config`
+
+## 0.6 - 2023-03-30
+
+### `penna-api`
+
+### `penna-core`
+
 #### Added
 
 - Internal json writer (no 3rd party dependency); ([#29](https://github.com/hkupty/penna/pull/29))
