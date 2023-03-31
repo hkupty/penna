@@ -5,7 +5,7 @@ plugins {
 }
 
 group 'com.hkupty.penna'
-version '0.6'
+version '0.6.1'
 
 pmd {
     sourceSets = [sourceSets.main]
