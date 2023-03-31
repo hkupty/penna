@@ -148,20 +148,23 @@ public final class PennaSink implements SinkImpl, Closeable {
             jsonGenerator.writeString("stacktrace");
             jsonGenerator.writeEntrySep();
             jsonGenerator.openArray();
+            var brokenOut = false;
             for (int index = 0; index < Math.min(frames.length, MAX_STACK_DEPTH); index++) {
                 filter.hash(filterHashes, frames[index]);
                 writeStackFrame(frames[index]);
                 jsonGenerator.writeRaw(',');
                 if (filter.check(filterHashes)) {
                     jsonGenerator.writeString("... repeated frames omitted");
+                    brokenOut = true;
                     break;
                 }
                 filter.mark(filterHashes);
             }
 
-            if (frames.length > MAX_STACK_DEPTH) {
+            if (!brokenOut && frames.length > MAX_STACK_DEPTH) {
                 jsonGenerator.writeString("...");
             }
+
             jsonGenerator.closeArray();
             jsonGenerator.writeSep();
         }
