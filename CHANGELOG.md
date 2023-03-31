@@ -12,6 +12,16 @@ the PATCH component is omitted when its value is `0`.
 
 ### `penna-core`
 
+### `penna-yaml-config`
+
+## 0.6.1 - 2023-03-31
+
+Hotfix release to fix the MDC writing issue.
+
+### `penna-api`
+
+### `penna-core`
+
 #### Changed
 
 - Remove unnecessary "..." from stacktrace if we break out of the loop due to repetition ([#41](https://github.com/hkupty/penna/pull/41))
