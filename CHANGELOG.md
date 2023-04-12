@@ -12,6 +12,10 @@ the PATCH component is omitted when its value is `0`.
 
 ### `penna-core`
 
+#### Changed
+
+- Refactor buffer expansion to avoid breaking on un-accounted for large strings ([#47](https://github.com/hkupty/penna/pull/47))
+
 ### `penna-yaml-config`
 
 ## 0.6.1 - 2023-03-31
