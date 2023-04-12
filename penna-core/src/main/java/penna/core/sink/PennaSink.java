@@ -137,7 +137,6 @@ public final class PennaSink implements SinkImpl, Closeable {
         StackTraceElement[] frames;
         Throwable cause;
 
-        jsonGenerator.checkSpace();
         jsonGenerator.writeStringValue("throwable", throwable.getClass().getName());
 
         if((message = throwable.getMessage()) != null) {
@@ -190,7 +189,6 @@ public final class PennaSink implements SinkImpl, Closeable {
             jsonGenerator.closeObject();
             jsonGenerator.writeSep();
         }
-        jsonGenerator.checkSpace();
     }
 
     private void writeMap(final Map map) throws IOException {
@@ -310,7 +308,6 @@ public final class PennaSink implements SinkImpl, Closeable {
             jsonGenerator.openObject(LogField.KEY_VALUE_PAIRS.fieldName);
             for (int i = 0; i < logEvent.keyValuePairs.size(); i++) {
                 var kvp = logEvent.keyValuePairs.get(i);
-                jsonGenerator.checkSpace();
                 jsonGenerator.writeString(kvp.key);
                 jsonGenerator.writeEntrySep();
                 writeObject(kvp.value);

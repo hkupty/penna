@@ -131,6 +131,7 @@ public final class DirectJson implements Closeable {
 
     public void writeQuote() { buffer.put(QUOTE); }
     public void writeString(String str) {
+        checkSpace(str.length() + 3);
         buffer.put(QUOTE);
         writeRaw(str);
         buffer.put(QUOTE);
@@ -227,10 +228,9 @@ public final class DirectJson implements Closeable {
         buffer.put(KV_SEP);
     }
 
-    public void checkSpace() {
-        // buffer at ~80% of the capacity
-        if (buffer.position() * 5 >= buffer.capacity() * 4) {
-            ByteBuffer newBuffer = ByteBuffer.allocateDirect(buffer.capacity() * 2);
+    private void checkSpace(int size) {
+        if ((buffer.position() + size) * 5 > buffer.capacity() * 4) {
+            ByteBuffer newBuffer = ByteBuffer.allocateDirect((buffer.capacity() + size) * 2);
             buffer.flip();
             newBuffer.put(buffer);
             buffer = newBuffer;
