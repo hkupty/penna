@@ -1,0 +1,10 @@
+@charset "utf-8";
+
+@import "bulma/utilities/initial-variables";
+
+$pennaMain: #162D50;
+
+$blue: $pennaMain;
+
+@import "bulma/base/_all";
+@import "bulma/utilities/_all";

@@ -1,24 +1,16 @@
-@charset "utf-8";
 
-@import "bulma/utilities/initial-variables";
-
-$pennaMain: #162D50;
-
-$blue: $pennaMain;
+@import "_base";
 
 // Cherry-picking what we need from bulma to make the CSS smaller
-@import "bulma/base/_all";
-@import "bulma/utilities/_all";
 @import "bulma/helpers/typography";
-
 @import "bulma/components/breadcrumb";
 @import "bulma/components/level";
 @import "bulma/elements/container";
 @import "bulma/elements/content";
-@import "bulma/elements/notification";
 @import "bulma/elements/title";
 @import "bulma/layout/footer";
 @import "bulma/layout/hero";
+@import "bulma/helpers/color";
 
 {{ $pennaBg :=  resources.Get "imgs/blue-feathers.avif" }}
 {{ $pattern :=  resources.Get "imgs/pattern.svg" | resources.Minify }}

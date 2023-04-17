@@ -27,5 +27,17 @@
 {{- end }}
 {{ $css := resources.Get "scss/main.scss" }}
 {{ $css = $css | resources.ExecuteAsTemplate "" . | toCSS | resources.Minify }}
- 
 <link rel="stylesheet" href="{{ $css.RelPermalink }}">
+
+{{ if .IsHome }}
+  {{ with resources.Get "scss/index.scss" }}
+    {{ $pageCss := . | toCSS | resources.Minify }}
+    <link rel="stylesheet" href="{{ $pageCss.RelPermalink }}">
+  {{ end }}
+
+{{ else }}
+  {{ with (.Page.File.BaseFileName | printf "scss/%s.scss" | resources.Get) }}
+    {{ $pageCss := . | toCSS | resources.Minify }}
+    <link rel="stylesheet" href="{{ $pageCss.RelPermalink }}">
+  {{ end }}
+{{ end }}
