@@ -3,13 +3,22 @@
 <head>
     {{- partial "head.html" . }}
 </head>
-
 <body>
     {{- partialCached "header.html" . .Page -}}
     <main class="main">
-        {{- block "main" . }}{{ end }}
+      <section class="hero is-link {{ if .IsHome }} is-medium {{ end }} penna-bg">
+        <div class="hero-body">
+          <p class="title">Penna</p>
+          <p class="subtitle">Featherweight JSON Logging for the JVM</p>
+        </div>
+      </section>
+      {{ if not .IsHome }}
+        {{- partial "breadcrumb.html" . -}}
+      {{ end }}
+      <section class="container">
+      {{- block "main" . }}{{ end }}
+      </section>
     </main>
     {{ partialCached "footer.html" . .Layout .Kind (.Param "hideFooter") (.Param "ShowCodeCopyButtons") -}}
 </body>
-
 </html>

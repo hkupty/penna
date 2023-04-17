@@ -7,94 +7,44 @@
    viewBox="0 0 800 158.5979"
    version="1.1"
    id="SVGRoot"
-   sodipodi:docname="logo_full.svg"
-   inkscape:version="1.2.2 (b0a8486541, 2022-12-01)"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns="http://www.w3.org/2000/svg"
    xmlns:svg="http://www.w3.org/2000/svg">
-  <sodipodi:namedview
-     id="namedview19498"
-     pagecolor="#ffffff"
-     bordercolor="#000000"
-     borderopacity="0.25"
-     inkscape:showpageshadow="2"
-     inkscape:pageopacity="0.0"
-     inkscape:pagecheckerboard="0"
-     inkscape:deskcolor="#d1d1d1"
-     inkscape:document-units="px"
-     showgrid="false"
-     inkscape:zoom="0.84096521"
-     inkscape:cx="-113.55999"
-     inkscape:cy="114.7491"
-     inkscape:window-width="2552"
-     inkscape:window-height="1408"
-     inkscape:window-x="0"
-     inkscape:window-y="0"
-     inkscape:window-maximized="1"
-     inkscape:current-layer="layer1"
-     inkscape:lockguides="true"
-     showguides="false">
-    <sodipodi:guide
-       position="31.028335,62.089033"
-       orientation="0,-1"
-       id="guide19585"
-       inkscape:locked="true" />
-    <sodipodi:guide
-       position="35.784774,4.6030042"
-       orientation="0,-1"
-       id="guide19637"
-       inkscape:locked="true" />
-  </sodipodi:namedview>
   <defs
      id="defs19493" />
   <g
-     inkscape:label="Logo"
-     inkscape:groupmode="layer"
      id="layer1"
      transform="translate(-0.34322843,-0.66510779)">
     <g
-       inkscape:groupmode="layer"
-       id="layer4"
-       inkscape:label="bg">
+       id="layer4">
       <rect
          style="fill:#ffffff;stroke-width:15.1581;stroke-linecap:round;stroke-linejoin:round"
          id="rect19897"
          width="800.84204"
          height="159.20367"
          x="0.34322843"
-         y="0.66510779"
-         inkscape:label="white_bg" />
+         y="0.66510779" />
     </g>
     <g
        id="g19703"
-       transform="matrix(1.797234,0,0,1.797234,174.48699,8.1065091)"
-       inkscape:label="logo">
+       transform="matrix(1.797234,0,0,1.797234,174.48699,8.1065091)">
       <g
          id="g15872-3"
-         transform="matrix(0.58182494,0,0,0.58182494,-62.465539,-0.42181538)"
-         inkscape:label="feather">
+         transform="matrix(0.58182494,0,0,0.58182494,-62.465539,-0.42181538)">
         <path
            style="fill:none;stroke:#162d50;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none"
            d="m 120.91536,112.72297 c 0,0 -14.8269,-7.57253 -17.91063,-27.404497 0,0 4.42946,4.7313 9.76088,3.81193 0.0161,0.008 -5.77391,-3.16165 -9.65274,-8.37054 0,0 -4.694545,-4.64725 1.80174,-40.67091 0,0 3.07926,8.07077 6.05985,8.95504 8.9e-4,0.007 -4.27734,-10.81752 -4.57376,-16.50454 2.21968,-18.74981 14.44482,-24.1412696 25.04034,-22.8462696 3.11646,0.29059 14.1224,3.6900996 16.37298,18.9614196 0,0 1.04151,8.7662 -0.0246,33.27324 0,0 -5.39472,2.39804 -10.19801,-0.2547 0,0 3.87897,5.80088 10.42343,5.02009 0,0 -0.3181,37.061857 -17.63437,46.008547"
-           id="path1017-6"
-           sodipodi:nodetypes="ccccccccccccc"
-           inkscape:label="barbs" />
+           id="path1017-6" />
         <path
            style="fill:none;stroke:#162d50;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none"
            d="m 125.99416,32.527083 c 0,0 -2.25599,67.000715 1.89105,96.849427"
-           id="path14416-7"
-           sodipodi:nodetypes="cc"
-           inkscape:label="rachis" />
+           id="path14416-7" />
       </g>
       <text
          xml:space="preserve"
          style="font-style:normal;font-variant:normal;font-weight:100;font-stretch:normal;font-size:78.1333px;font-family:Iosevka;-inkscape-font-specification:'Iosevka, Thin';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#162d50;stroke-width:7.55906;stroke-linecap:round;stroke-linejoin:round"
          x="65.638145"
          y="58.582672"
-         id="text19583"
-         inkscape:label="penna"><tspan
-           sodipodi:role="line"
+         id="text19583"><tspan
            id="tspan19581"
            x="65.638145"
            y="58.582672">penna</tspan></text>
