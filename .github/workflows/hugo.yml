@@ -31,7 +31,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      HUGO_VERSION: 0.108.0
+      HUGO_VERSION: 0.111.3
     steps:
       - name: Install Hugo CLI
         run: |
@@ -53,8 +53,8 @@ jobs:
           # For maximum backward compatibility with Hugo modules
           HUGO_ENVIRONMENT: production
           HUGO_ENV: production
+        working-directory: ./www
         run: |
-          cd www/
           hugo \
             --minify \
             --baseURL "${{ steps.pages.outputs.base_url }}/"
