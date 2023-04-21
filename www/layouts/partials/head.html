@@ -34,10 +34,11 @@
     {{ $pageCss := . | toCSS | resources.Minify }}
     <link rel="stylesheet" href="{{ $pageCss.RelPermalink }}">
   {{ end }}
-
 {{ else }}
-  {{ with (.Page.File.BaseFileName | printf "scss/%s.scss" | resources.Get) }}
-    {{ $pageCss := . | toCSS | resources.Minify }}
-    <link rel="stylesheet" href="{{ $pageCss.RelPermalink }}">
+  {{ with .Page.File }}
+    {{ with (.BaseFileName | printf "scss/%s.scss" | resources.Get) }}
+      {{ $pageCss := . | toCSS | resources.Minify }}
+      <link rel="stylesheet" href="{{ $pageCss.RelPermalink }}">
+    {{ end }}
   {{ end }}
 {{ end }}
