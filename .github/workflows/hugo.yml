@@ -53,7 +53,7 @@ jobs:
           # For maximum backward compatibility with Hugo modules
           HUGO_ENVIRONMENT: production
           HUGO_ENV: production
-        working-directory: www
+        working-directory: ./www
         run: |
           hugo \
             --minify \
