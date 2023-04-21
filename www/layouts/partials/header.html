@@ -1,21 +1,54 @@
-<nav class="level">
-  <p class="level-item has-text-centered">
-    <a class="link is-info" href="{{ .Site.BaseURL }}">Home</a>
-  </p>
-  <p class="level-item has-text-centered">
-    <a class="link is-info">News</a>
-  </p>
-  <p class="level-item has-text-centered">
-    <a href="{{ .Site.BaseURL }}">
+<nav class="navbar" role="navigation" aria-label="main navigation">
+  <div class="navbar-brand">
+    <a class="navbar-item" href="{{ .Site.BaseURL }}">
     {{ with resources.Get "imgs/logo_full.svg" | resources.Minify }}
-      <img src="{{ .RelPermalink }}" alt="penna: featherweight json logs" height="100">
+      <img src="{{ .RelPermalink }}" alt="penna: featherweight json logs" height="200">
     {{ end }}
     </a>
-  </p>
-  <p class="level-item has-text-centered">
-    <a class="link is-info" href="/penna/changelog">Changelog</a>
-  </p>
-  <p class="level-item has-text-centered">
-    <a class="link is-info">Contact</a>
-  </p>
+
+    <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarBasicExample">
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+    </a>
+  </div>
+
+  <div class="navbar-menu">
+    <div class="navbar-start">
+      <a class="navbar-item" href="{{ .Site.BaseURL }}">
+        Home
+      </a>
+      {{ range where .Site.RegularPages "File.Dir" "/" }}
+        <a class="navbar-item" href="{{.RelPermalink}}">
+          {{.Title}}
+        </a>
+      {{ end }}
+      {{ range where .Site.Sections "Type" "!=" "home"}}
+        <div id="{{ .RelPermalink | anchorize }}" class="navbar-item has-dropdown is-hoverable">
+          <a class="navbar-link" href="{{.RelPermalink}}">
+            {{ .Title }}
+          </a>
+
+          <div class="navbar-dropdown">
+            {{ range .Pages }}
+            <a class="navbar-item" href="{{ .RelPermalink }}">
+              {{ .Title }}
+            </a>
+            {{ end }}
+          </div>
+        </div>
+      {{ end }}
+    </div>
+
+    <div class="navbar-end">
+      <div class="navbar-item">
+        <div class="buttons">
+          <a class="button is-link" href="{{ .Site.Data.links.repoURL }}">
+          <ion-icon name="logo-github" class="icon has-text-link"></ion-icon>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
 </nav>
+
