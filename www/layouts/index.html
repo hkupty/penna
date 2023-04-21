@@ -1,0 +1,9 @@
+{{- define "main" }}
+<section class="columns py-5">
+   {{ range where (where .Site.RegularPages "Type" "home") "File.Dir" "home/bullets/" }}
+   <div class="column">
+    {{- partial "box.html" . }}
+    </div>
+   {{ end }}
+</section>
+{{ end }}

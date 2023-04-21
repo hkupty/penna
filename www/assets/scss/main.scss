@@ -1,0 +1,51 @@
+
+@import "_base";
+
+// Cherry-picking what we need from bulma to make the CSS smaller
+@import "bulma/components/breadcrumb";
+@import "bulma/components/navbar";
+
+@import "bulma/elements/container";
+@import "bulma/elements/content";
+@import "bulma/elements/icon";
+@import "bulma/elements/title";
+
+@import "bulma/helpers/color";
+@import "bulma/helpers/spacing";
+@import "bulma/helpers/typography";
+
+@import "bulma/layout/footer";
+@import "bulma/layout/hero";
+
+{{ $pennaBg :=  resources.Get "imgs/blue-feathers.avif" }}
+{{ $pattern :=  resources.Get "imgs/pattern.svg" | resources.Minify }}
+
+.hero {
+  &.penna-bg {
+    background-image: url("{{ $pennaBg.RelPermalink }}");
+    background-color: $penna-main;
+    background-size: cover;
+    background-position: center;
+  }
+}
+
+a {
+  font-weight: bold;
+}
+
+body {
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+}
+
+.main {
+  flex: 1;
+  background: rgb(22,45,80);
+  background: linear-gradient(135deg, rgba($penna-alt,0.1) 0%, rgba(255,255,255,1) 100%); 
+}
+
+.footer {
+  background-color: #ffffff;
+  background-image: url("{{ $pattern.RelPermalink }}");
+}

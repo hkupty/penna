@@ -1,0 +1,14 @@
+@charset "utf-8";
+
+@import "bulma/utilities/initial-variables";
+
+$penna-main: #162D50;
+$penna-alt: #013a8e;
+
+$blue: $penna-main;
+$cyan: $penna-alt;
+
+$shadow: 0 0.3em 0.075em -0.125em rgba($penna-main, 0.15), 2px 2px 0.3em rgba($penna-main, 0.05);
+
+@import "bulma/base/_all";
+@import "bulma/utilities/_all";

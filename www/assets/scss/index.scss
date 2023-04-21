@@ -1,0 +1,8 @@
+@import "_base";
+
+@import "bulma/elements/box";
+@import "bulma/grid/columns";
+
+.column {
+  display: flex;
+}

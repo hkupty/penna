@@ -1,0 +1,5 @@
+baseURL: https://hkupty.github.com/penna/
+languageCode: en-us
+title: Penna
+params:
+  description: "Fast and efficient SLF4J backend specialized for structured logs in json to stdout"
