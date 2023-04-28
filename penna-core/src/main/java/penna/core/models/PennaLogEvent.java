@@ -2,7 +2,6 @@ package penna.core.models;
 
 import penna.api.config.Config;
 import penna.core.logger.IPennaLogger;
-import penna.api.models.LogField;
 import org.slf4j.Marker;
 import org.slf4j.event.KeyValuePair;
 import org.slf4j.event.Level;
