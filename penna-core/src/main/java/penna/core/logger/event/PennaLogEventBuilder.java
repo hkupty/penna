@@ -59,7 +59,7 @@ public final class PennaLogEventBuilder implements LoggingEventBuilder {
 
             builder.current.level = event.getLevel();
             builder.current.logger = logger;
-            builder.current.fieldsToLog = logger.getFieldsToLog();
+            builder.current.config = logger.getConfig();
 
             return builder.current;
         }
@@ -75,7 +75,7 @@ public final class PennaLogEventBuilder implements LoggingEventBuilder {
             var builder = getBuilder();
             builder.current.logger = logger;
             builder.current.level = level;
-            builder.current.fieldsToLog = logger.getFieldsToLog();
+            builder.current.config = logger.getConfig();
 
             return builder;
         }

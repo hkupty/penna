@@ -1,13 +1,13 @@
 package penna.core.logger;
 
-import penna.api.models.LogField;
+import penna.api.config.Config;
 import penna.core.models.PennaLogEvent;
 import org.slf4j.Logger;
 import org.slf4j.spi.LoggingEventAware;
 
 public sealed interface IPennaLogger extends Logger, LoggingEventAware permits PennaLogger {
 
-    LogField[] getFieldsToLog();
+    Config getConfig();
 
     void log(PennaLogEvent log);
 }

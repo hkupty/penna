@@ -1,7 +1,7 @@
 package penna.core.models;
 
+import penna.api.config.Config;
 import penna.core.logger.IPennaLogger;
-import penna.api.models.LogField;
 import org.slf4j.Marker;
 import org.slf4j.event.KeyValuePair;
 import org.slf4j.event.Level;
@@ -15,13 +15,13 @@ public class PennaLogEvent implements LoggingEvent {
     public List<Object> arguments = new ArrayList<>();
     public List<Marker> markers = new ArrayList<>();
     public List<KeyValuePair> keyValuePairs = new ArrayList<>();
-    public LogField[] fieldsToLog;
     public Object extra;
     public Level level;
     public String message;
     public String threadName;
     public Throwable throwable;
     public IPennaLogger logger;
+    public Config config;
 
     /**
      * Resets all the fields that will change during log creation.
@@ -35,7 +35,6 @@ public class PennaLogEvent implements LoggingEvent {
         arguments.clear();
         keyValuePairs.clear();
 
-        fieldsToLog = null;
         extra = null;
         message = null;
         throwable = null;

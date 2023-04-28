@@ -33,7 +33,7 @@ public final class PennaSink implements SinkImpl, Closeable {
      * function signature `PennaLogEvent -> ()` that throws an exception without using generics.
      * This, in itself, is not a huge advantage, but allows us to go for a very straightforward
      * approach when writing the log messages, by picking the fields we want to write from the message
-     * based on {@link PennaLogEvent#fieldsToLog} and mapping to the appropriate function.
+     * based on {@link PennaLogEvent#config}'s {@link penna.api.config.Config#fields()} and mapping to the appropriate function.
      * <br />
      * In {@link PennaSink}, it is defined as a local reference to each emit* method in an
      * array, where each method is in the same position in the mapping array as the
@@ -329,9 +329,12 @@ public final class PennaSink implements SinkImpl, Closeable {
     @Override
     public void write(final PennaLogEvent logEvent) throws IOException {
         jsonGenerator.openObject();
-        for (int i = 0; i < logEvent.fieldsToLog.length; i++){
-            emitters[logEvent.fieldsToLog[i].ordinal()].apply(logEvent);
+        var fields = logEvent.config.fields();
+
+        for (int i = 0; i < fields.length; i++){
+            emitters[fields[i].ordinal()].apply(logEvent);
         }
+
         jsonGenerator.closeObject();
         jsonGenerator.flush();
     }

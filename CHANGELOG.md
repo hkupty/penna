@@ -12,6 +12,10 @@ the PATCH component is omitted when its value is `0`.
 
 ### `penna-core`
 
+#### Changed
+
+- Allow sinks to read config ([#51](https://github.com/hkupty/penna/pull/51))
+
 ### `penna-yaml-config`
 
 ## 0.6.2 - 2023-04-12

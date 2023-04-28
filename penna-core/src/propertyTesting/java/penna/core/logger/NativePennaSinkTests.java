@@ -134,7 +134,7 @@ class NativePennaSinkTests {
         PennaLogger logger = cache.getLoggerAt("c", "est", "moi");
 
         logger.sink.set(sink);
-        event.fieldsToLog = fields;
+        event.config = Config.withFields(fields);
         event.logger = logger;
 
         File testFile = File.createTempFile("valid-message", ".json");

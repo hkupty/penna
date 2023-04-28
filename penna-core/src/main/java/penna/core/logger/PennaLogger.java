@@ -1,7 +1,6 @@
 package penna.core.logger;
 
 import penna.api.config.Config;
-import penna.api.models.LogField;
 import penna.core.minilog.MiniLogger;
 import penna.core.models.PennaLogEvent;
 import penna.core.logger.guard.LevelGuard;
@@ -28,16 +27,13 @@ public final class PennaLogger implements IPennaLogger {
         this.updateConfig(config);
     }
 
-    @Override
-    public LogField[] getFieldsToLog() {
-        return config.fields();
-    }
-
     public void updateConfig(Config config) {
         levelGuard = LevelGuard.FromConfig.get(config);
         this.config = config;
     }
 
+
+    @Override
     public Config getConfig() {
         return config;
     }
