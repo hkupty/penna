@@ -1,7 +1,5 @@
 package penna.core.internals;
 
-import java.util.BitSet;
-
 public interface StackTraceFilter {
 
     StackTraceFilter reset();
