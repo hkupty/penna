@@ -22,13 +22,13 @@ public class STFilterPerformanceTest {
         StackTraceElement[] stacktrace;
 
         Set<StackTraceElement> set = new HashSet<>();
-        int[] hashes = new int[StackTraceFilter.NUMBER_OF_HASHES];
+        int[] hashes = new int[StackTraceBloomFilter.NUMBER_OF_HASHES];
         StackTraceFilter filter;
         Random random;
 
         @Setup
         public void setup() {
-            filter = StackTraceFilter.create();
+            filter = StackTraceBloomFilter.create();
             random = new Random();
             stacktrace = new StackTraceElement[size];
             for (int i = 0; i < size; i++ ) {

@@ -40,7 +40,7 @@ class STFilterTests {
     ) {
         StackTraceFilter filter = StackTraceFilter.create();
         Map<String, Integer> bucketCounts = new HashMap<>();
-        int[] hashes = new int[StackTraceFilter.NUMBER_OF_HASHES];
+        int[] hashes = new int[StackTraceBloomFilter.NUMBER_OF_HASHES];
 
         for (int i = 0; i < stackTraces.size(); i ++ ) {
             filter.hash(hashes, stackTraces.get(i));
