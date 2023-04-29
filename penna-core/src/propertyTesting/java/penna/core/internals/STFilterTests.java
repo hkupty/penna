@@ -38,7 +38,7 @@ class STFilterTests {
     void lessThan1PercentCollisionRate(
             @ForAll @Size(min = 128, max = 1024) List<@From("stackTraceElementArbitrary") @UniqueElements StackTraceElement> stackTraces
     ) {
-        StackTraceFilter filter = StackTraceFilter.create();
+        StackTraceFilter filter = StackTraceBloomFilter.create();
         Map<String, Integer> bucketCounts = new HashMap<>();
         int[] hashes = new int[StackTraceBloomFilter.NUMBER_OF_HASHES];
 
