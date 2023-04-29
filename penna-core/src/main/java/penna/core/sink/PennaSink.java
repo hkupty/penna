@@ -3,9 +3,7 @@ package penna.core.sink;
 import org.slf4j.MDC;
 import org.slf4j.event.Level;
 import penna.api.models.LogField;
-import penna.core.internals.Clock;
-import penna.core.internals.DirectJson;
-import penna.core.internals.StackTraceFilter;
+import penna.core.internals.*;
 import penna.core.models.PennaLogEvent;
 
 import java.io.*;
@@ -25,8 +23,11 @@ public final class PennaSink implements SinkImpl, Closeable {
         LEVEL_MAPPING[Level.ERROR.ordinal()] = "ERROR";
     }
 
-    private final StackTraceFilter filter = StackTraceFilter.create();
-    private final int[] filterHashes = new int[StackTraceFilter.NUMBER_OF_HASHES];
+    private final StackTraceFilter bloomFilter = StackTraceBloomFilter.create();
+    private final StackTraceFilter passthrough = new PassThroughFilter();
+
+    private StackTraceFilter filter = passthrough;
+    private final int[] filterHashes = new int[StackTraceBloomFilter.NUMBER_OF_HASHES];
 
     /**
      * The Emitter functional interface allows us to define the specific
@@ -50,7 +51,7 @@ public final class PennaSink implements SinkImpl, Closeable {
     }
 
     private final Emitter[] emitters;
-    private static final int MAX_STACK_DEPTH = 64; // to be revisited.
+    private int stacktraceMaxDepth = 1024; // to be revisited.
 
     private final AtomicLong counter = new AtomicLong(0L);
 
@@ -148,7 +149,7 @@ public final class PennaSink implements SinkImpl, Closeable {
             jsonGenerator.writeEntrySep();
             jsonGenerator.openArray();
             var brokenOut = false;
-            for (int index = 0; index < Math.min(frames.length, MAX_STACK_DEPTH); index++) {
+            for (int index = 0; index < Math.min(frames.length, stacktraceMaxDepth); index++) {
                 filter.hash(filterHashes, frames[index]);
                 writeStackFrame(frames[index]);
                 jsonGenerator.writeRaw(',');
@@ -160,7 +161,7 @@ public final class PennaSink implements SinkImpl, Closeable {
                 filter.mark(filterHashes);
             }
 
-            if (!brokenOut && frames.length > MAX_STACK_DEPTH) {
+            if (!brokenOut && frames.length > stacktraceMaxDepth) {
                 jsonGenerator.writeString("...");
             }
 
@@ -329,6 +330,11 @@ public final class PennaSink implements SinkImpl, Closeable {
     @Override
     public void write(final PennaLogEvent logEvent) throws IOException {
         jsonGenerator.openObject();
+
+        // This should be safe to do here since this is thread local
+        stacktraceMaxDepth = logEvent.config.exceptionHandling().maxDepth();
+        filter = logEvent.config.exceptionHandling().deduplication() ? bloomFilter : passthrough;
+
         var fields = logEvent.config.fields();
 
         for (int i = 0; i < fields.length; i++){

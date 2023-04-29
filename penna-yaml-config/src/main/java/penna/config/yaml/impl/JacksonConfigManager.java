@@ -5,6 +5,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import penna.api.config.Config;
 import penna.api.config.ConfigManager;
 import penna.api.config.Configurable;
+import penna.api.config.ExceptionHandling;
 import penna.api.models.LogField;
 import org.slf4j.event.Level;
 import penna.config.yaml.models.Node;
@@ -32,9 +33,11 @@ public class JacksonConfigManager implements ConfigManager {
     private ConfigurationChange getUpdateFn(Node configNode) {
         var hasFields = (configNode.fields() != null) && (!configNode.fields().isEmpty());
         var hasLevel = configNode.level() != null;
+        var hasException = configNode.exceptions() != null;
 
         return ((Config base) -> base
                 .replaceLevel(hasLevel ? Level.valueOf(configNode.level().toUpperCase(Locale.ENGLISH)) : base.level())
+                .replaceExceptionHandling(hasException ? new ExceptionHandling(configNode.exceptions().maxDepth(), configNode.exceptions().deduplicate()) : base.exceptionHandling())
                 .replaceFields(hasFields ? configNode.fields().stream().map(LogField::fromFieldName).filter(Objects::nonNull).toArray(size -> Arrays.copyOf(reference, size)) : base.fields()));
     }
 
@@ -84,4 +87,3 @@ public class JacksonConfigManager implements ConfigManager {
         configurable.configure(configItems);
     }
 }
-
