@@ -1,7 +1,7 @@
 package penna.core.logger.guard;
 
 import penna.core.logger.PennaLogger;
-import penna.core.logger.event.PennaLogEventBuilder;
+import penna.core.logger.PennaLogEventBuilder;
 import org.slf4j.event.Level;
 import org.slf4j.spi.LoggingEventBuilder;
 

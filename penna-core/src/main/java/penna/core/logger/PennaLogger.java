@@ -19,11 +19,9 @@ public final class PennaLogger implements IPennaLogger {
     private transient final String name;
     transient LevelGuard levelGuard;
     private transient Config config;
-    final ThreadLocal<SinkImpl> sink;
 
     PennaLogger(String name, Config config) {
         this.name = name;
-        sink = ThreadLocal.withInitial(PennaSink::getSink);
         this.updateConfig(config);
     }
 
@@ -358,19 +356,10 @@ public final class PennaLogger implements IPennaLogger {
         atError().addMarker(marker).setCause(t).log(msg);
     }
 
-    @Override
-    public void log(PennaLogEvent log) {
-        try {
-            sink.get().write(log);
-        } catch (IOException e) {
-            MiniLogger.error("Unable to write log.", e);
-        }
-    }
-
     // Please excuse my friend, he's drunk, and he doesn't know *we are the logging framework*.
     @SuppressWarnings("PMD.GuardLogStatement")
     @Override
     public void log(LoggingEvent event) {
-        log(PennaLogEventBuilder.Factory.fromLoggingEvent(this, event));
+        PennaLogEventBuilder.Factory.fromLoggingEvent(this, event);
     }
 }
