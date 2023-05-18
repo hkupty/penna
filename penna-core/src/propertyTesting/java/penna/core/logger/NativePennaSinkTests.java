@@ -104,7 +104,6 @@ class NativePennaSinkTests {
         TreeCache cache = new TreeCache(config);
         PennaLogger logger = cache.getLoggerAt("c", "est", "moi");
 
-        logger.sink.set(sink);
 
         File testFile = File.createTempFile("valid-message", ".json");
         FileOutputStream fos = new FileOutputStream(testFile);
@@ -133,7 +132,6 @@ class NativePennaSinkTests {
         TreeCache cache = new TreeCache(config);
         PennaLogger logger = cache.getLoggerAt("c", "est", "moi");
 
-        logger.sink.set(sink);
         event.config = Config.withFields(fields);
         event.logger = logger;
 

@@ -72,7 +72,6 @@ public class LoggerPerformanceTest {
 
                 }
             }
-
         }
     }
 
@@ -149,7 +148,7 @@ public class LoggerPerformanceTest {
             SinkImpl sink = new PennaSink();
             sink.init(fos.getChannel());
             logger = cache.getLoggerAt("jmh", "test", "penna");
-            logger.sink.set(sink);
+            PennaLogEventBuilder.Factory.get(logger, org.slf4j.event.Level.DEBUG).sink = sink;
         }
         @TearDown
         public void tearDown() throws IOException {
