@@ -95,17 +95,9 @@ public final class PennaSink implements SinkImpl, Closeable {
     // Hand-crafted based on from StackTraceElement::toString
     // ClassLoader is intentionally removed
     private void writeStackFrame(StackTraceElement frame) {
-        String module;
         String fileName;
 
         jsonGenerator.writeQuote();
-
-        if ((module = frame.getModuleName()) != null && !module.isEmpty()) {
-            jsonGenerator.writeRaw(module);
-            jsonGenerator.writeRaw('@');
-            jsonGenerator.writeRaw(frame.getModuleVersion());
-            jsonGenerator.writeRaw('/');
-        }
 
         jsonGenerator.writeRaw(frame.getClassName());
         jsonGenerator.writeRaw('.');
@@ -134,13 +126,13 @@ public final class PennaSink implements SinkImpl, Closeable {
         StackTraceElement[] frames;
         Throwable cause;
 
-        jsonGenerator.writeStringValue("throwable", throwable.getClass().getName());
+        jsonGenerator.writeStringValue("class", throwable.getClass().getName());
 
         if((message = throwable.getMessage()) != null) {
             jsonGenerator.writeStringValue("message", message);
         }
 
-        if ((frames = throwable.getStackTrace()) != null) {
+        if ((frames = throwable.getStackTrace()) != null && frames.length > 0) {
             jsonGenerator.writeString("stacktrace");
             jsonGenerator.writeEntrySep();
             jsonGenerator.openArray();
