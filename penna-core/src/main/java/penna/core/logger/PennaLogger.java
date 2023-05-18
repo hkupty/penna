@@ -1,24 +1,18 @@
 package penna.core.logger;
 
 import penna.api.config.Config;
-import penna.core.minilog.MiniLogger;
-import penna.core.models.PennaLogEvent;
 import penna.core.logger.guard.LevelGuard;
-import penna.core.logger.event.PennaLogEventBuilder;
-import penna.core.sink.PennaSink;
-import penna.core.sink.SinkImpl;
 import org.slf4j.Marker;
 import org.slf4j.event.LoggingEvent;
 import org.slf4j.spi.LoggingEventBuilder;
-
-import java.io.IOException;
+import penna.core.models.LogConfig;
 
 
 public final class PennaLogger implements IPennaLogger {
 
     private transient final String name;
     transient LevelGuard levelGuard;
-    private transient Config config;
+    transient LogConfig config;
 
     PennaLogger(String name, Config config) {
         this.name = name;
@@ -27,13 +21,7 @@ public final class PennaLogger implements IPennaLogger {
 
     public void updateConfig(Config config) {
         levelGuard = LevelGuard.FromConfig.get(config);
-        this.config = config;
-    }
-
-
-    @Override
-    public Config getConfig() {
-        return config;
+        this.config = LogConfig.fromConfig(config);
     }
 
     @Override

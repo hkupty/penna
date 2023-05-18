@@ -1,6 +1,5 @@
 package penna.core.models;
 
-import penna.api.config.Config;
 import penna.core.logger.IPennaLogger;
 import org.slf4j.Marker;
 import org.slf4j.event.KeyValuePair;
@@ -21,7 +20,7 @@ public class PennaLogEvent implements LoggingEvent {
     public String threadName;
     public Throwable throwable;
     public IPennaLogger logger;
-    public Config config;
+    public LogConfig config;
 
     /**
      * Resets all the fields that will change during log creation.
@@ -40,7 +39,6 @@ public class PennaLogEvent implements LoggingEvent {
         throwable = null;
         logger = null;
     }
-
 
     @Override
     public Level getLevel() {
