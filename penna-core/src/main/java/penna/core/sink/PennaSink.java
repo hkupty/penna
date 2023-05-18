@@ -52,14 +52,12 @@ public final class PennaSink implements SinkImpl, Closeable {
 
     private DirectJson jsonGenerator;
 
-    private final FileOutputStream fos;
 
     // From the same ticket that PMD references, https://bugs.openjdk.org/browse/JDK-8080225, it is noted that
     // in JDK 10 the problem was solved. We are targeting JDK 17+, so the problem won't affect us.
     // Plus, any other alternative is significantly slower.
     @SuppressWarnings("PMD.AvoidFileStream")
     public PennaSink() {
-        fos = new FileOutputStream(FileDescriptor.out);
 
         // WARNING! Introducing new log fields requires this array to be updated.
         emitters = new Emitter[LogField.values().length];
@@ -78,7 +76,7 @@ public final class PennaSink implements SinkImpl, Closeable {
 
     public static SinkImpl getSink() {
         PennaSink sinkImpl = new PennaSink();
-        sinkImpl.init(sinkImpl.fos.getChannel());
+        sinkImpl.init(OutputManager.Impl.get().getChannel());
         return sinkImpl;
     }
 
@@ -90,7 +88,6 @@ public final class PennaSink implements SinkImpl, Closeable {
     @Override
     public void close() throws IOException {
         jsonGenerator.close();
-        fos.close();
     }
     // Hand-crafted based on from StackTraceElement::toString
     // ClassLoader is intentionally removed

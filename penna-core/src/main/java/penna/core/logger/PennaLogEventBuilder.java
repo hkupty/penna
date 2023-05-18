@@ -78,6 +78,11 @@ public final class PennaLogEventBuilder implements LoggingEventBuilder {
 
             return builder;
         }
+
+        // DO NOT USE THIS METHOD.
+        static void replaceSinkLocally(SinkImpl sink) {
+            pool.get().sink = sink;
+        }
     }
 
     /**

@@ -9,7 +9,9 @@ import org.slf4j.event.KeyValuePair;
 import org.slf4j.event.Level;
 import penna.api.config.Config;
 import penna.api.models.LogField;
+import penna.core.models.LogConfig;
 import penna.core.models.PennaLogEvent;
+import penna.core.sink.OutputManager;
 import penna.core.sink.PennaSink;
 import penna.core.sink.SinkImpl;
 
@@ -99,15 +101,19 @@ class NativePennaSinkTests {
 
     @Property
     void validJsonMessage(@ForAll("fields") LogField[] fields) throws IOException {
-        SinkImpl sink = new PennaSink();
+        File testFile = File.createTempFile("valid-message", ".json");
+        var out = new OutputManager.ToFile(testFile);
+        OutputManager.Impl.set(() -> out);
+
+        // HACK currently, only for tests, it is necessary to replace the sink at each iteration
+        SinkImpl sink = PennaSink.getSink();
+        PennaLogEventBuilder.Factory.replaceSinkLocally(sink);
+
         Config config = Config.getDefault().replaceFields(fields);
         TreeCache cache = new TreeCache(config);
         PennaLogger logger = cache.getLoggerAt("c", "est", "moi");
 
 
-        File testFile = File.createTempFile("valid-message", ".json");
-        FileOutputStream fos = new FileOutputStream(testFile);
-        sink.init(fos.getChannel());
         Marker marker = MarkerFactory.getMarker("something");
 
         logger.atInfo()
@@ -118,7 +124,7 @@ class NativePennaSinkTests {
 
         Assertions.assertDoesNotThrow(() -> om.readValue(testFile, Map.class));
         testFile.deleteOnExit();
-        fos.close();
+        out.close();
     }
 
 
@@ -127,23 +133,26 @@ class NativePennaSinkTests {
             @ForAll("fields") LogField[] fields,
             @ForAll("simpleEvent") PennaLogEvent event
     ) throws IOException {
-        PennaSink sink = new PennaSink();
+        File testFile = File.createTempFile("valid-message", ".json");
+        var out = new OutputManager.ToFile(testFile);
+        OutputManager.Impl.set(() -> out);
+
+        // HACK currently, only for tests, it is necessary to replace the sink at each iteration
+        SinkImpl sink = PennaSink.getSink();
+        PennaLogEventBuilder.Factory.replaceSinkLocally(sink);
+
         Config config = Config.getDefault().replaceFields(fields);
         TreeCache cache = new TreeCache(config);
         PennaLogger logger = cache.getLoggerAt("c", "est", "moi");
 
-        event.config = Config.withFields(fields);
+        event.config = LogConfig.fromConfig(Config.withFields(fields));
         event.logger = logger;
-
-        File testFile = File.createTempFile("valid-message", ".json");
-        FileOutputStream fos = new FileOutputStream(testFile);
-        sink.init(fos.getChannel());
 
         logger.log(event);
 
         Assertions.assertDoesNotThrow(() -> om.readValue(testFile, Map.class));
         testFile.deleteOnExit();
-        fos.close();
+        out.close();
     }
 
 
