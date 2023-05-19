@@ -21,11 +21,8 @@ import org.slf4j.MarkerFactory;
 import penna.api.config.Config;
 import penna.core.logger.utils.LogbackDevNullAppender;
 import penna.core.sink.OutputManager;
-import penna.core.sink.PennaSink;
-import penna.core.sink.SinkImpl;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
