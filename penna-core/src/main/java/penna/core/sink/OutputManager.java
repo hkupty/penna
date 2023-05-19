@@ -4,6 +4,7 @@ import java.io.*;
 import java.nio.channels.FileChannel;
 import java.util.function.Supplier;
 
+@SuppressWarnings("PMD.AvoidFileStream")
 public sealed interface OutputManager extends Closeable {
 
     class Impl {
