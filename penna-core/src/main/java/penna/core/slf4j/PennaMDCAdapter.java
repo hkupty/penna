@@ -2,12 +2,30 @@ package penna.core.slf4j;
 
 import org.slf4j.spi.MDCAdapter;
 
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.function.BiConsumer;
 
-public class PennaMDCAdapter implements MDCAdapter {
-    private record Node(HashMap<String, String> data, Node parent) implements MDCAdapter{
+public final class PennaMDCAdapter implements MDCAdapter {
+    private record Node(Map<String, String> data, Node parent) implements MDCAdapter{
+
+        private void forEach(BiConsumer<String, String> action, Set<String> printedKeys) {
+            if (parent != null) {
+                parent.forEach(action, printedKeys);
+            }
+
+            var keys = data.keySet();
+            keys.removeAll(printedKeys);
+
+            for (var key : keys) {
+                action.accept(key, data.get(key));
+            }
+
+            printedKeys.addAll(keys);
+        }
+
+        public void forEach(BiConsumer<String, String> action) {
+            forEach(action, new HashSet<>());
+        }
 
         @Override
         public void put(String key, String val) {
@@ -72,6 +90,10 @@ public class PennaMDCAdapter implements MDCAdapter {
         public void clearDequeByKey(String key) {
             // Intentionally left black, not supported at the moment
         }
+
+        public boolean isNotEmpty() {
+            return (!data.isEmpty()) || (parent != null && parent().isNotEmpty());
+        }
     }
 
     private final InheritableThreadLocal<Node> threadLocalTree = new InheritableThreadLocal<>() {
@@ -86,6 +108,15 @@ public class PennaMDCAdapter implements MDCAdapter {
             return new Node(new HashMap<>(), parentValue);
         }
     };
+
+    public void forEach(BiConsumer<String, String> action) {
+        var node = threadLocalTree.get();
+        node.forEach(action);
+    }
+
+    public boolean isNotEmpty() {
+        return threadLocalTree.get().isNotEmpty();
+    }
 
     @Override
     public void put(String key, String val) {

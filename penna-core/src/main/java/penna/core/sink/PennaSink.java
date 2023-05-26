@@ -4,8 +4,10 @@ import org.slf4j.MDC;
 import org.slf4j.event.Level;
 import penna.api.models.LogField;
 import penna.core.internals.*;
+import penna.core.minilog.MiniLogger;
 import penna.core.models.LogConfig;
 import penna.core.models.PennaLogEvent;
+import penna.core.slf4j.PennaMDCAdapter;
 
 import java.io.*;
 import java.nio.channels.FileChannel;
