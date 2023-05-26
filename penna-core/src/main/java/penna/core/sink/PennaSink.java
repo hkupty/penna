@@ -130,8 +130,7 @@ public final class PennaSink implements SinkImpl, Closeable {
         }
 
         if ((frames = throwable.getStackTrace()) != null && frames.length > 0) {
-            jsonGenerator.writeString("stacktrace");
-            jsonGenerator.writeEntrySep();
+            jsonGenerator.writeKeyString("stacktrace");
             jsonGenerator.openArray();
             var brokenOut = false;
             var filter = config.filter();
@@ -140,7 +139,7 @@ public final class PennaSink implements SinkImpl, Closeable {
                 writeStackFrame(frames[index]);
                 jsonGenerator.writeRaw(',');
                 if (filter.check(filterHashes)) {
-                    jsonGenerator.writeString("... repeated frames omitted");
+                    jsonGenerator.writeUnsafeString("... repeated frames omitted");
                     brokenOut = true;
                     break;
                 }
@@ -148,7 +147,7 @@ public final class PennaSink implements SinkImpl, Closeable {
             }
 
             if (!brokenOut && frames.length > config.stacktraceDepth()) {
-                jsonGenerator.writeString("...");
+                jsonGenerator.writeUnsafeString("...");
             }
 
             jsonGenerator.closeArray();
@@ -169,8 +168,7 @@ public final class PennaSink implements SinkImpl, Closeable {
         }
 
         if ((cause = throwable.getCause()) != null) {
-            jsonGenerator.writeString("cause");
-            jsonGenerator.writeEntrySep();
+            jsonGenerator.writeKeyString("cause");
             jsonGenerator.openObject();
             writeThrowable(cause, config);
             jsonGenerator.closeObject();
@@ -258,7 +256,8 @@ public final class PennaSink implements SinkImpl, Closeable {
     }
 
     private void emitLevel(final PennaLogEvent logEvent) {
-        jsonGenerator.writeStringValue(LogField.LEVEL.fieldName, LEVEL_MAPPING[logEvent.level.ordinal()]);
+        jsonGenerator.writeKeyString(LogField.LEVEL.fieldName);
+        jsonGenerator.writeUnsafeString(LEVEL_MAPPING[logEvent.level.ordinal()]);
     }
 
     private void emitThreadName(final PennaLogEvent logEvent) {

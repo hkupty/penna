@@ -80,14 +80,12 @@ public final class DirectJson implements Closeable {
     public void openArray() { buffer.put(OPEN_ARR); }
 
     public void openObject(String str) {
-        writeString(str);
-        writeEntrySep();
+        writeKeyString(str);
         buffer.put(OPEN_OBJ);
     }
 
     public void openArray(String str) {
-        writeString(str);
-        writeEntrySep();
+        writeKeyString(str);
         buffer.put(OPEN_ARR);
     }
 
@@ -107,6 +105,13 @@ public final class DirectJson implements Closeable {
         } else {
             buffer.put(CLOSE_ARR);
         }
+    }
+
+    private void writeUnsafe(String str) {
+        for(int i = 0; i < str.length(); i++ ){
+            buffer.put((byte) str.codePointAt(i));
+        }
+
     }
 
     public void writeRaw(String str) {
@@ -130,6 +135,23 @@ public final class DirectJson implements Closeable {
     public void writeRaw(byte[] chr) { buffer.put(chr); }
 
     public void writeQuote() { buffer.put(QUOTE); }
+
+    public void writeKeyString(String str) {
+        checkSpace(str.length() + 3);
+        buffer.put(QUOTE);
+        writeUnsafe(str);
+        buffer.put(QUOTE);
+        buffer.put(ENTRY_SEP);
+    }
+
+    public void writeUnsafeString(String str) {
+        checkSpace(str.length() + 3);
+        buffer.put(QUOTE);
+        writeUnsafe(str);
+        buffer.put(QUOTE);
+        buffer.put(KV_SEP);
+    }
+
     public void writeString(String str) {
         checkSpace(str.length() + 3);
         buffer.put(QUOTE);
@@ -201,20 +223,17 @@ public final class DirectJson implements Closeable {
     public void writeEntrySep() { buffer.put(buffer.position() - 1, ENTRY_SEP); }
 
     public void writeStringValue(String key, String value) {
-        writeString(key);
-        writeEntrySep();
+        writeKeyString(key);
         writeString(value);
     }
 
     public void writeNumberValue(String key, long value) {
-        writeString(key);
-        writeEntrySep();
+        writeKeyString(key);
         writeNumber(value);
     }
 
     public void writeNumberValue(String key, double value) {
-        writeString(key);
-        writeEntrySep();
+        writeKeyString(key);
         writeNumber(value);
     }
 
