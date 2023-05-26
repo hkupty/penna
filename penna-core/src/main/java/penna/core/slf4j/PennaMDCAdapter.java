@@ -6,7 +6,7 @@ import java.util.*;
 import java.util.function.BiConsumer;
 
 public final class PennaMDCAdapter implements MDCAdapter {
-    private record Node(Map<String, String> data, Node parent) implements MDCAdapter{
+    private record Node(Map<String, String> data, Node parent, Set<String> printedKeys) implements MDCAdapter{
 
         private void forEach(BiConsumer<String, String> action, Set<String> printedKeys) {
             if (parent != null) {
@@ -24,7 +24,8 @@ public final class PennaMDCAdapter implements MDCAdapter {
         }
 
         public void forEach(BiConsumer<String, String> action) {
-            forEach(action, new HashSet<>());
+            printedKeys.clear();
+            forEach(action, printedKeys);
         }
 
         @Override
@@ -100,12 +101,12 @@ public final class PennaMDCAdapter implements MDCAdapter {
 
         @Override
         protected Node initialValue() {
-            return new Node(new HashMap<>(), null);
+            return new Node(new HashMap<>(), null, new HashSet<>());
         }
 
         @Override
         protected Node childValue(Node parentValue) {
-            return new Node(new HashMap<>(), parentValue);
+            return new Node(new HashMap<>(), parentValue, new HashSet<>());
         }
     };
 
