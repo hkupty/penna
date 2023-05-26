@@ -57,6 +57,8 @@ public final class DirectJson implements Closeable {
             'l',
             'l'
     };
+    static final byte DELIM_START = '{';
+    static final byte DELIM_STOP = '}';
 
     private final FileOutputStream backingOs;
     private final FileChannel channel;
@@ -131,6 +133,42 @@ public final class DirectJson implements Closeable {
         }
     }
 
+
+    public void writeRawFormatting(String str, Object... arguments) {
+        int cursor = 0;
+        for(int i = 0; i < str.length(); i++ ){
+            var chr = str.codePointAt(i);
+            switch (chr) {
+                case '\\' -> buffer.put(ESCAPE);
+                case '\n' -> buffer.put(NEWLINE);
+                case '\r' -> buffer.put(LINEBREAK);
+                case '\t' -> buffer.put(TAB);
+                case '{' -> {
+                    if (str.codePointAt(i+1) == '}') {
+                        if (str.codePointAt(i - 1) == '\\' && str.codePointAt(i - 2) != '\\') {
+                            buffer.put(buffer.position() - 1, DELIM_START);
+                        } else {
+                            // Warning! Mismatch in arguments/template might cause exception.
+                            writeRaw(arguments[cursor++].toString());
+                        }
+                    }
+                }
+                case DELIM_STOP -> {
+                    if (str.codePointAt(i-1) == '{' && str.codePointAt(i-2) == '\\' && str.codePointAt(i-3) != '\\') {
+                        buffer.put(DELIM_STOP);
+                    }
+                }
+                default -> {
+                    if (chr >= 0x80 && chr <= 0x10FFFF) {
+                        buffer.put(String.valueOf(str.charAt(i)).getBytes());
+                    } else if (chr > 0x1F) buffer.put((byte) chr);
+                }
+            }
+        }
+    }
+
+
+
     public void writeRaw(char chr) { buffer.put((byte) chr); }
     public void writeRaw(byte[] chr) { buffer.put(chr); }
 
@@ -159,6 +197,15 @@ public final class DirectJson implements Closeable {
         buffer.put(QUOTE);
         buffer.put(KV_SEP);
     }
+
+    public void writeStringFormatting(String str, Object... args) {
+        checkSpace(str.length() + 3);
+        buffer.put(QUOTE);
+        writeRawFormatting(str, args);
+        buffer.put(QUOTE);
+        buffer.put(KV_SEP);
+    }
+
     public void writeSep() { buffer.put(KV_SEP); }
 
     public void writeNumberRaw(final long data) {
@@ -225,6 +272,11 @@ public final class DirectJson implements Closeable {
     public void writeStringValue(String key, String value) {
         writeKeyString(key);
         writeString(value);
+    }
+
+    public void writeStringValueFormatting(String key, String value, Object... args) {
+        writeKeyString(key);
+        writeStringFormatting(value, args);
     }
 
     public void writeNumberValue(String key, long value) {

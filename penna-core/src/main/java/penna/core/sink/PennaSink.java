@@ -228,7 +228,7 @@ public final class PennaSink implements SinkImpl, Closeable {
     }
 
     private void emitMessage(final PennaLogEvent logEvent) {
-        jsonGenerator.writeStringValue(LogField.MESSAGE.fieldName, logEvent.message);
+        jsonGenerator.writeStringValueFormatting(LogField.MESSAGE.fieldName, logEvent.message, logEvent.arguments);
     }
 
     // The method must conform to the functional interface, so we should ignore this rule here.

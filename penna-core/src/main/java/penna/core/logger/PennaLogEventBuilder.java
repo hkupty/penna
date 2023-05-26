@@ -123,24 +123,19 @@ public final class PennaLogEventBuilder implements LoggingEventBuilder {
         return this;
     }
 
-    private List<Object> getArgumentsList() {
-        return this.current.arguments;
-    }
-
     @Override
     public LoggingEventBuilder addArgument(Object p) {
         if (p instanceof Throwable throwable) {
             setCause(throwable);
         } else {
-            getArgumentsList().add(p);
+            this.current.addArgument(p);
         }
         return this;
     }
 
     @Override
     public LoggingEventBuilder addArgument(Supplier<?> objectSupplier) {
-        getArgumentsList().add(objectSupplier.get());
-        return this;
+        return addArgument(objectSupplier.get());
     }
 
     private List<KeyValuePair> getKeyValueList() {
@@ -173,10 +168,6 @@ public final class PennaLogEventBuilder implements LoggingEventBuilder {
 
     @Override
     public void log() {
-        if (!this.current.arguments.isEmpty()) {
-            this.current.message = MessageFormatter.basicArrayFormat(this.current.message, this.current.getArgumentArray());
-        }
-
         try {
             sink.write(this.current);
         } catch (IOException e) {
@@ -213,7 +204,7 @@ public final class PennaLogEventBuilder implements LoggingEventBuilder {
     }
 
     public void addArguments(Object... args) {
-        getArgumentsList().addAll(Arrays.asList(args));
+        this.current.addAllArguments(args);
     }
 
     @Override
