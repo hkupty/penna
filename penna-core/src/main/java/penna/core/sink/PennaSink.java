@@ -54,12 +54,21 @@ public final class PennaSink implements SinkImpl, Closeable {
 
     private DirectJson jsonGenerator;
 
+    private PennaMDCAdapter mdcAdapter;
+
+
 
     // From the same ticket that PMD references, https://bugs.openjdk.org/browse/JDK-8080225, it is noted that
     // in JDK 10 the problem was solved. We are targeting JDK 17+, so the problem won't affect us.
     // Plus, any other alternative is significantly slower.
     @SuppressWarnings("PMD.AvoidFileStream")
     public PennaSink() {
+        if (MDC.getMDCAdapter() instanceof PennaMDCAdapter adapter) {
+            mdcAdapter = adapter;
+        } else {
+            MiniLogger.error("Not using PennaMDCAdapter for some reason! MDC will be off");
+            mdcAdapter = null;
+        }
 
         // WARNING! Introducing new log fields requires this array to be updated.
         emitters = new Emitter[LogField.values().length];
@@ -244,12 +253,11 @@ public final class PennaSink implements SinkImpl, Closeable {
     // The method must conform to the functional interface, so we should ignore this rule here.
     @SuppressWarnings("PMD.UnusedFormalParameter")
     private void emitMDC(final PennaLogEvent logEvent) {
-        var mdc = MDC.getCopyOfContextMap();
-        if (mdc != null) {
+        if (mdcAdapter.isNotEmpty()) {
             jsonGenerator.openObject(LogField.MDC.fieldName);
-            for (var kv : mdc.entrySet()) {
-                jsonGenerator.writeStringValue(kv.getKey(), kv.getValue());
-            }
+            mdcAdapter.forEach((key, value) -> {
+                jsonGenerator.writeStringValue(key, value);
+            });
             jsonGenerator.closeObject();
             jsonGenerator.writeSep();
         }
