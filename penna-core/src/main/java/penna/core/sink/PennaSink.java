@@ -250,14 +250,13 @@ public final class PennaSink implements SinkImpl, Closeable {
         jsonGenerator.writeNumberValue(LogField.TIMESTAMP.fieldName, Clock.getTimestamp());
     }
 
+
     // The method must conform to the functional interface, so we should ignore this rule here.
     @SuppressWarnings("PMD.UnusedFormalParameter")
     private void emitMDC(final PennaLogEvent logEvent) {
         if (mdcAdapter.isNotEmpty()) {
             jsonGenerator.openObject(LogField.MDC.fieldName);
-            mdcAdapter.forEach((key, value) -> {
-                jsonGenerator.writeStringValue(key, value);
-            });
+            mdcAdapter.forEach(jsonGenerator::writeStringValue);
             jsonGenerator.closeObject();
             jsonGenerator.writeSep();
         }
