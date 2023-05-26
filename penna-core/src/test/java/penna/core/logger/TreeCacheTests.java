@@ -110,9 +110,7 @@ public class TreeCacheTests {
                 "for",
                 "testing"
         });
-        assertEquals(Level.INFO, logger.getConfig().level());
         cache.updateConfig(new String[]{"com", "for"}, cfg -> cfg.replaceLevel(Level.DEBUG));
-        assertEquals(Level.DEBUG, logger.getConfig().level());
         assertEquals(DebugLevelGuard.singleton(), logger.levelGuard);
     }
 

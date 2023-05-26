@@ -20,11 +20,9 @@ import org.slf4j.MDC;
 import org.slf4j.MarkerFactory;
 import penna.api.config.Config;
 import penna.core.logger.utils.LogbackDevNullAppender;
-import penna.core.sink.PennaSink;
-import penna.core.sink.SinkImpl;
+import penna.core.sink.OutputManager;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -72,7 +70,6 @@ public class LoggerPerformanceTest {
 
                 }
             }
-
         }
     }
 
@@ -138,22 +135,19 @@ public class LoggerPerformanceTest {
 
     @State(Scope.Thread)
     public static class PennaState {
-        private final File dumpToNull = new File("/dev/null");
-        private FileOutputStream fos;
+        private OutputManager dumpToNull;
         TreeCache cache = new TreeCache(Config.getDefault());
         PennaLogger logger;
 
         @Setup
         public void setup() throws IOException {
-            fos = new FileOutputStream(dumpToNull);
-            SinkImpl sink = new PennaSink();
-            sink.init(fos.getChannel());
+            dumpToNull = new OutputManager.ToFile(new File("/dev/null"));
+            OutputManager.Impl.set(() -> dumpToNull);
             logger = cache.getLoggerAt("jmh", "test", "penna");
-            logger.sink.set(sink);
         }
         @TearDown
         public void tearDown() throws IOException {
-            fos.close();
+            dumpToNull.close();
         }
     }
 

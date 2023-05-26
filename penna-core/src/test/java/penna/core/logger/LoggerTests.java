@@ -1,10 +1,12 @@
 package penna.core.logger;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.MDC;
 import penna.api.config.Config;
 import penna.api.config.ConfigManager.ConfigItem.LoggerConfigItem;
 import penna.core.logger.guard.*;
+import penna.core.sink.OutputManager;
 import penna.core.sink.PennaSink;
 import penna.core.sink.SinkImpl;
 import penna.core.sink.impl.DummySink;
@@ -26,7 +28,7 @@ import java.util.concurrent.atomic.AtomicReferenceArray;
 
 class LoggerTests {
     record ThrowableLog(
-            String throwable,
+            @JsonProperty("class") String throwable,
             String message,
             List<String> stacktrace
     ) {}
@@ -79,14 +81,14 @@ class LoggerTests {
     @Test
     void can_write_log_messages() {
         var cache = new TreeCache(Config.getDefault());
-        PennaLogger pennaLogger = cache.getLoggerAt("test");
-
         AtomicInteger counter = new AtomicInteger(0);
         SinkImpl checker = new DummySink(mle -> counter.getAndIncrement());
+        PennaLogEventBuilder.Factory.replaceSinkLocally(checker);
+
+        PennaLogger pennaLogger = cache.getLoggerAt("test");
+
 
         Assertions.assertEquals(InfoLevelGuard.singleton(), pennaLogger.levelGuard);
-
-        pennaLogger.sink.set(checker);
 
         pennaLogger.trace("should not log");
         Assertions.assertEquals(0, counter.get());
@@ -108,7 +110,6 @@ class LoggerTests {
     @Test
     void markers_are_kept() {
         var cache = new TreeCache(Config.getDefault());
-        PennaLogger pennaLogger = cache.getLoggerAt("test");
 
         AtomicReference<Marker> usedMarker = new AtomicReference<>(null);
         SinkImpl checker = new DummySink(mle -> {
@@ -117,8 +118,10 @@ class LoggerTests {
             }
         });
 
+        PennaLogEventBuilder.Factory.replaceSinkLocally(checker);
+
+        PennaLogger pennaLogger = cache.getLoggerAt("test");
         Assertions.assertEquals(InfoLevelGuard.singleton(), pennaLogger.levelGuard);
-        pennaLogger.sink.set(checker);
 
         Marker ref = MarkerFactory.getMarker("ref");
 
@@ -135,15 +138,15 @@ class LoggerTests {
     @Test
     void messages_arrive_formatted_on_the_sink() {
         var cache = new TreeCache(Config.getDefault());
-        PennaLogger pennaLogger = cache.getLoggerAt("test");
-
         AtomicReference<String> message = new AtomicReference<>(null);
         SinkImpl checker = new DummySink(mle -> {
             message.set(mle.message);
         });
 
+        PennaLogEventBuilder.Factory.replaceSinkLocally(checker);
+        PennaLogger pennaLogger = cache.getLoggerAt("test");
+
         Assertions.assertEquals(InfoLevelGuard.singleton(), pennaLogger.levelGuard);
-        pennaLogger.sink.set(checker);
 
         pennaLogger.debug("should not log");
         Assertions.assertNull(message.get());
@@ -159,8 +162,6 @@ class LoggerTests {
     @Test
     void formatting_does_not_use_throwables() {
         var cache = new TreeCache(Config.getDefault());
-        PennaLogger pennaLogger = cache.getLoggerAt("test");
-
         AtomicReference<String> message = new AtomicReference<>(null);
         SinkImpl checker = new DummySink(ple -> {
             message.set(ple.message);
@@ -168,8 +169,10 @@ class LoggerTests {
 
         var exception = new Exception();
 
+        PennaLogEventBuilder.Factory.replaceSinkLocally(checker);
+        PennaLogger pennaLogger = cache.getLoggerAt("test");
+
         Assertions.assertEquals(InfoLevelGuard.singleton(), pennaLogger.levelGuard);
-        pennaLogger.sink.set(checker);
 
         pennaLogger.info("normal message", exception);
         Assertions.assertEquals("normal message", message.get());
@@ -187,16 +190,13 @@ class LoggerTests {
 
     @Test
     void everything_added_to_the_log_is_present_in_the_message() throws IOException {
-        SinkImpl sink = new PennaSink();
         Config config = Config.getDefault();
         TreeCache cache = new TreeCache(config);
         PennaLogger logger = cache.getLoggerAt("c", "est", "moi");
 
-        logger.sink.set(sink);
-
         File testFile = File.createTempFile("valid-message", ".json");
-        FileOutputStream fos = new FileOutputStream(testFile);
-        sink.init(fos.getChannel());
+        var testOut = new OutputManager.ToFile(testFile);
+        OutputManager.Impl.set(() -> testOut);
 
         MDC.put("key", "value");
         logger.atInfo()
@@ -206,7 +206,16 @@ class LoggerTests {
                 .log("formatted {}", "message");
         MDC.clear();
 
-        Assertions.assertDoesNotThrow(() -> om.readValue(testFile, LogMessage.class));
+        Assertions.assertDoesNotThrow(() -> om.readValue(testFile, LogMessage.class), () -> {
+            try {
+                om.readValue(testFile, LogMessage.class);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                return ex.getMessage();
+            }
+
+            return "Unable to deserialize";
+        });
 
         var logMessage = om.readValue(testFile, LogMessage.class);
 
@@ -219,6 +228,6 @@ class LoggerTests {
 
         // Keep this line at the bottom, so we can inspect the file if the test breaks
         testFile.deleteOnExit();
-        fos.close();
+        testOut.close();
     }
 }

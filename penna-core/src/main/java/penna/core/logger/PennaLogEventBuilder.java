@@ -1,6 +1,6 @@
-package penna.core.logger.event;
+package penna.core.logger;
 
-import penna.core.logger.PennaLogger;
+import penna.core.minilog.MiniLogger;
 import penna.core.models.PennaLogEvent;
 import org.slf4j.Marker;
 import org.slf4j.event.KeyValuePair;
@@ -8,7 +8,10 @@ import org.slf4j.event.Level;
 import org.slf4j.event.LoggingEvent;
 import org.slf4j.helpers.MessageFormatter;
 import org.slf4j.spi.LoggingEventBuilder;
+import penna.core.sink.PennaSink;
+import penna.core.sink.SinkImpl;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Supplier;
@@ -38,6 +41,7 @@ public final class PennaLogEventBuilder implements LoggingEventBuilder {
     public static final int POOL_SIZE = 16;
     private final PennaLogEvent[] pool;
     private int currentIndex;
+    SinkImpl sink;
     private PennaLogEvent current;
 
     public final static class Factory {
@@ -45,8 +49,9 @@ public final class PennaLogEventBuilder implements LoggingEventBuilder {
         private Factory() {}
         private final static ThreadLocal<PennaLogEventBuilder> pool = ThreadLocal.withInitial(PennaLogEventBuilder::new);
 
-        public static PennaLogEvent fromLoggingEvent(PennaLogger logger, LoggingEvent event) {
-            var builder = getBuilder();
+        public static void fromLoggingEvent(PennaLogger logger, LoggingEvent event) {
+            var builder = pool.get();
+            builder.next();
             builder.setCause(event.getThrowable());
             builder.setMessage(event.getMessage());
             builder.addArguments(event.getArgumentArray());
@@ -59,25 +64,24 @@ public final class PennaLogEventBuilder implements LoggingEventBuilder {
 
             builder.current.level = event.getLevel();
             builder.current.logger = logger;
-            builder.current.config = logger.getConfig();
+            builder.current.config = logger.config;
 
-            return builder.current;
+            builder.log();
         }
 
-        private static PennaLogEventBuilder getBuilder() {
+        public static PennaLogEventBuilder get(PennaLogger logger, Level level) {
             var builder = pool.get();
             builder.next();
+            builder.current.logger = logger;
+            builder.current.level = level;
+            builder.current.config = logger.config;
 
             return builder;
         }
 
-        public static LoggingEventBuilder get(PennaLogger logger, Level level) {
-            var builder = getBuilder();
-            builder.current.logger = logger;
-            builder.current.level = level;
-            builder.current.config = logger.getConfig();
-
-            return builder;
+        // DO NOT USE THIS METHOD.
+        static void replaceSinkLocally(SinkImpl sink) {
+            pool.get().sink = sink;
         }
     }
 
@@ -93,6 +97,8 @@ public final class PennaLogEventBuilder implements LoggingEventBuilder {
 
     private PennaLogEventBuilder() {
         String threadName = Thread.currentThread().getName();
+        // TODO Maybe we need multiple sinks again based on layout.
+        sink = PennaSink.getSink();
         pool = new PennaLogEvent[POOL_SIZE];
         for (int i = 0; i < POOL_SIZE; i++){
             pool[i] = new PennaLogEvent();
@@ -170,7 +176,12 @@ public final class PennaLogEventBuilder implements LoggingEventBuilder {
         if (!this.current.arguments.isEmpty()) {
             this.current.message = MessageFormatter.basicArrayFormat(this.current.message, this.current.getArgumentArray());
         }
-        this.current.logger.log(this.current);
+
+        try {
+            sink.write(this.current);
+        } catch (IOException e) {
+            MiniLogger.error("Unable to write log.", e);
+        }
     }
 
     @Override

@@ -28,8 +28,8 @@ public class SinkPerformanceTest {
 
     @Benchmark
     @OutputTimeUnit(TimeUnit.NANOSECONDS)
-    public void initALogger(Blackhole bh) throws IOException {
-        bh.consume(new TreeCache(Config.getDefault()).getLoggerAt("com", "pennacorp", "lePennaApp", "controller", "TheGreatestController"));
+    public void initALogger(Blackhole bh, SimpleState state) throws IOException {
+        bh.consume(state.cache.getLoggerAt("com", "pennacorp", "lePennaApp", "controller", "TheGreatestController"));
     }
 
     @Benchmark

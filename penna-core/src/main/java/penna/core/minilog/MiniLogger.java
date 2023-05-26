@@ -11,14 +11,14 @@ public final class MiniLogger {
     }
 
     public static void error(String message, Throwable throwable) {
-        error(message);
         System.err.print("{\"logger\":\"penna.core.MiniLogger\",\"level\":\"ERROR\",\"message\":\"");
-        System.err.println(throwable.getMessage());
-        System.err.println("\", \"throwable\":\"");
+        System.err.print(message);
+        System.err.print("\",\"error_message\":\"");
+        System.err.print(throwable.getMessage());
+        System.err.print("\",\"throwable\":\"");
         var stack = throwable.getStackTrace();
         for(int i = 0; i < stack.length; i++) {
             System.err.println(stack[i].toString());
-            System.err.println("\n");
         }
         System.err.println("\"}");
     }

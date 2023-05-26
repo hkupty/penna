@@ -1,41 +1,27 @@
 package penna.core.logger;
 
 import penna.api.config.Config;
-import penna.core.minilog.MiniLogger;
-import penna.core.models.PennaLogEvent;
 import penna.core.logger.guard.LevelGuard;
-import penna.core.logger.event.PennaLogEventBuilder;
-import penna.core.sink.PennaSink;
-import penna.core.sink.SinkImpl;
 import org.slf4j.Marker;
 import org.slf4j.event.LoggingEvent;
 import org.slf4j.spi.LoggingEventBuilder;
-
-import java.io.IOException;
+import penna.core.models.LogConfig;
 
 
 public final class PennaLogger implements IPennaLogger {
 
     private transient final String name;
     transient LevelGuard levelGuard;
-    private transient Config config;
-    final ThreadLocal<SinkImpl> sink;
+    transient LogConfig config;
 
     PennaLogger(String name, Config config) {
         this.name = name;
-        sink = ThreadLocal.withInitial(PennaSink::getSink);
         this.updateConfig(config);
     }
 
     public void updateConfig(Config config) {
         levelGuard = LevelGuard.FromConfig.get(config);
-        this.config = config;
-    }
-
-
-    @Override
-    public Config getConfig() {
-        return config;
+        this.config = LogConfig.fromConfig(config);
     }
 
     @Override
@@ -358,19 +344,10 @@ public final class PennaLogger implements IPennaLogger {
         atError().addMarker(marker).setCause(t).log(msg);
     }
 
-    @Override
-    public void log(PennaLogEvent log) {
-        try {
-            sink.get().write(log);
-        } catch (IOException e) {
-            MiniLogger.error("Unable to write log.", e);
-        }
-    }
-
     // Please excuse my friend, he's drunk, and he doesn't know *we are the logging framework*.
     @SuppressWarnings("PMD.GuardLogStatement")
     @Override
     public void log(LoggingEvent event) {
-        log(PennaLogEventBuilder.Factory.fromLoggingEvent(this, event));
+        PennaLogEventBuilder.Factory.fromLoggingEvent(this, event);
     }
 }

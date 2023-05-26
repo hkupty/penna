@@ -4,6 +4,7 @@ import org.slf4j.MDC;
 import org.slf4j.event.Level;
 import penna.api.models.LogField;
 import penna.core.internals.*;
+import penna.core.models.LogConfig;
 import penna.core.models.PennaLogEvent;
 
 import java.io.*;
@@ -22,11 +23,6 @@ public final class PennaSink implements SinkImpl, Closeable {
         LEVEL_MAPPING[Level.WARN.ordinal()] = "WARN";
         LEVEL_MAPPING[Level.ERROR.ordinal()] = "ERROR";
     }
-
-    private final StackTraceFilter bloomFilter = StackTraceBloomFilter.create();
-    private final StackTraceFilter passthrough = new PassThroughFilter();
-
-    private StackTraceFilter filter = passthrough;
     private final int[] filterHashes = new int[StackTraceBloomFilter.NUMBER_OF_HASHES];
 
     /**
@@ -51,21 +47,19 @@ public final class PennaSink implements SinkImpl, Closeable {
     }
 
     private final Emitter[] emitters;
-    private int stacktraceMaxDepth = 1024; // to be revisited.
 
     private final AtomicLong counter = new AtomicLong(0L);
 
     private DirectJson jsonGenerator;
 
-    private final FileOutputStream fos;
 
     // From the same ticket that PMD references, https://bugs.openjdk.org/browse/JDK-8080225, it is noted that
     // in JDK 10 the problem was solved. We are targeting JDK 17+, so the problem won't affect us.
     // Plus, any other alternative is significantly slower.
     @SuppressWarnings("PMD.AvoidFileStream")
     public PennaSink() {
+
         // WARNING! Introducing new log fields requires this array to be updated.
-        fos = new FileOutputStream(FileDescriptor.out);
         emitters = new Emitter[LogField.values().length];
         emitters[LogField.COUNTER.ordinal()] = this::emitCounter;
         emitters[LogField.TIMESTAMP.ordinal()] = this::emitTimestamp;
@@ -82,7 +76,7 @@ public final class PennaSink implements SinkImpl, Closeable {
 
     public static SinkImpl getSink() {
         PennaSink sinkImpl = new PennaSink();
-        sinkImpl.init(sinkImpl.fos.getChannel());
+        sinkImpl.init(OutputManager.Impl.get().getChannel());
         return sinkImpl;
     }
 
@@ -94,22 +88,13 @@ public final class PennaSink implements SinkImpl, Closeable {
     @Override
     public void close() throws IOException {
         jsonGenerator.close();
-        fos.close();
     }
     // Hand-crafted based on from StackTraceElement::toString
     // ClassLoader is intentionally removed
     private void writeStackFrame(StackTraceElement frame) {
-        String module;
         String fileName;
 
         jsonGenerator.writeQuote();
-
-        if ((module = frame.getModuleName()) != null && !module.isEmpty()) {
-            jsonGenerator.writeRaw(module);
-            jsonGenerator.writeRaw('@');
-            jsonGenerator.writeRaw(frame.getModuleVersion());
-            jsonGenerator.writeRaw('/');
-        }
 
         jsonGenerator.writeRaw(frame.getClassName());
         jsonGenerator.writeRaw('.');
@@ -133,23 +118,24 @@ public final class PennaSink implements SinkImpl, Closeable {
 
     }
 
-    private void writeThrowable(final Throwable throwable, StackTraceFilter filter) {
+    private void writeThrowable(final Throwable throwable, LogConfig config) {
         final String message;
         StackTraceElement[] frames;
         Throwable cause;
 
-        jsonGenerator.writeStringValue("throwable", throwable.getClass().getName());
+        jsonGenerator.writeStringValue("class", throwable.getClass().getName());
 
         if((message = throwable.getMessage()) != null) {
             jsonGenerator.writeStringValue("message", message);
         }
 
-        if ((frames = throwable.getStackTrace()) != null) {
+        if ((frames = throwable.getStackTrace()) != null && frames.length > 0) {
             jsonGenerator.writeString("stacktrace");
             jsonGenerator.writeEntrySep();
             jsonGenerator.openArray();
             var brokenOut = false;
-            for (int index = 0; index < Math.min(frames.length, stacktraceMaxDepth); index++) {
+            var filter = config.filter();
+            for (int index = 0; index < Math.min(frames.length, config.stacktraceDepth()); index++) {
                 filter.hash(filterHashes, frames[index]);
                 writeStackFrame(frames[index]);
                 jsonGenerator.writeRaw(',');
@@ -161,7 +147,7 @@ public final class PennaSink implements SinkImpl, Closeable {
                 filter.mark(filterHashes);
             }
 
-            if (!brokenOut && frames.length > stacktraceMaxDepth) {
+            if (!brokenOut && frames.length > config.stacktraceDepth()) {
                 jsonGenerator.writeString("...");
             }
 
@@ -174,7 +160,7 @@ public final class PennaSink implements SinkImpl, Closeable {
             var suppressed = throwable.getSuppressed();
             for (int i = 0; i < suppressed.length; i++) {
                 jsonGenerator.openObject();
-                writeThrowable(suppressed[i], filter);
+                writeThrowable(suppressed[i], config);
                 jsonGenerator.closeObject();
                 jsonGenerator.writeSep();
             }
@@ -186,51 +172,52 @@ public final class PennaSink implements SinkImpl, Closeable {
             jsonGenerator.writeString("cause");
             jsonGenerator.writeEntrySep();
             jsonGenerator.openObject();
-            writeThrowable(cause, filter);
+            writeThrowable(cause, config);
             jsonGenerator.closeObject();
             jsonGenerator.writeSep();
         }
     }
 
-    private void writeMap(final Map map) throws IOException {
+    private void writeMap(LogConfig config, final Map map) throws IOException {
         jsonGenerator.openObject();
         for (var key : map.keySet()) {
             jsonGenerator.writeString(key.toString());
             jsonGenerator.writeEntrySep();
-            writeObject(map.get(key));
+            writeObject(config, map.get(key));
             jsonGenerator.writeSep();
         }
         jsonGenerator.closeObject();
         jsonGenerator.writeSep();
     }
 
-    private void writeArray(final List lst) throws IOException {
+    private void writeArray(LogConfig config, final List lst) throws IOException {
         jsonGenerator.openArray();
         for (Object o : lst) {
-            writeObject(o);
+            writeObject(config, o);
         }
         jsonGenerator.closeArray();
         jsonGenerator.writeSep();
     }
 
-    private void writeArray(final Object... lst) throws IOException {
+    private void writeArray(LogConfig config, final Object... lst) throws IOException {
         jsonGenerator.openArray();
         for (Object o : lst) {
-            writeObject(o);
+            writeObject(config, o);
         }
         jsonGenerator.closeArray();
         jsonGenerator.writeSep();
     }
 
-    private void writeObject(final Object object) throws IOException {
+    private void writeObject(LogConfig config, final Object object) throws IOException {
         if (object instanceof Throwable throwable) {
-            writeThrowable(throwable, filter.reset());
+            config.filter().reset();
+            writeThrowable(throwable, config);
         } else if (object instanceof Map map) {
-            writeMap(map);
+            writeMap(config, map);
         } else if (object instanceof List lst) {
-            writeArray(lst);
+            writeArray(config, lst);
         } else if (object instanceof Object[] lst) {
-            writeArray(lst);
+            writeArray(config, lst);
         } else if (object instanceof String str){
             jsonGenerator.writeString(str);
         } else if (object instanceof Long lng){
@@ -297,8 +284,9 @@ public final class PennaSink implements SinkImpl, Closeable {
 
     private void emitThrowable(final PennaLogEvent logEvent) {
         if (logEvent.throwable != null) {
+            logEvent.config.filter().reset();
             jsonGenerator.openObject(LogField.THROWABLE.fieldName);
-            writeThrowable(logEvent.throwable, filter.reset());
+            writeThrowable(logEvent.throwable, logEvent.config);
             jsonGenerator.closeObject();
             jsonGenerator.writeSep();
         }
@@ -311,7 +299,7 @@ public final class PennaSink implements SinkImpl, Closeable {
                 var kvp = logEvent.keyValuePairs.get(i);
                 jsonGenerator.writeString(kvp.key);
                 jsonGenerator.writeEntrySep();
-                writeObject(kvp.value);
+                writeObject(logEvent.config, kvp.value);
             }
             jsonGenerator.closeObject();
             jsonGenerator.writeSep();
@@ -321,7 +309,7 @@ public final class PennaSink implements SinkImpl, Closeable {
     private void emitExtra (final PennaLogEvent logEvent) throws IOException {
         if (logEvent.extra != null) {
             jsonGenerator.openObject(LogField.THROWABLE.fieldName);
-            writeObject(logEvent.throwable);
+            writeObject(logEvent.config, logEvent.throwable);
             jsonGenerator.closeObject();
             jsonGenerator.writeSep();
         }
@@ -332,9 +320,6 @@ public final class PennaSink implements SinkImpl, Closeable {
         jsonGenerator.openObject();
 
         // This should be safe to do here since this is thread local
-        stacktraceMaxDepth = logEvent.config.exceptionHandling().maxDepth();
-        filter = logEvent.config.exceptionHandling().deduplication() ? bloomFilter : passthrough;
-
         var fields = logEvent.config.fields();
 
         for (int i = 0; i < fields.length; i++){
