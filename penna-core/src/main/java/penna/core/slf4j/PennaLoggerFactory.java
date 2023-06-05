@@ -18,7 +18,6 @@ public final class PennaLoggerFactory implements ILoggerFactory, Configurable {
         return singleton;
     }
 
-
     @Override
     public void configure(ConfigManager.ConfigItem... configItems) {
         for (ConfigManager.ConfigItem configItem : configItems) {

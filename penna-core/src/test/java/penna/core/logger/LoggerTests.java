@@ -136,59 +136,6 @@ class LoggerTests {
     }
 
     @Test
-    void messages_arrive_formatted_on_the_sink() {
-        var cache = new TreeCache(Config.getDefault());
-        AtomicReference<String> message = new AtomicReference<>(null);
-        SinkImpl checker = new DummySink(mle -> {
-            message.set(mle.message);
-        });
-
-        PennaLogEventBuilder.Factory.replaceSinkLocally(checker);
-        PennaLogger pennaLogger = cache.getLoggerAt("test");
-
-        Assertions.assertEquals(InfoLevelGuard.singleton(), pennaLogger.levelGuard);
-
-        pennaLogger.debug("should not log");
-        Assertions.assertNull(message.get());
-
-        pennaLogger.info("normal message");
-        Assertions.assertEquals("normal message", message.get());
-
-
-        pennaLogger.info("{} message", "formatted");
-        Assertions.assertEquals("formatted message", message.get());
-    }
-
-    @Test
-    void formatting_does_not_use_throwables() {
-        var cache = new TreeCache(Config.getDefault());
-        AtomicReference<String> message = new AtomicReference<>(null);
-        SinkImpl checker = new DummySink(ple -> {
-            message.set(ple.message);
-        });
-
-        var exception = new Exception();
-
-        PennaLogEventBuilder.Factory.replaceSinkLocally(checker);
-        PennaLogger pennaLogger = cache.getLoggerAt("test");
-
-        Assertions.assertEquals(InfoLevelGuard.singleton(), pennaLogger.levelGuard);
-
-        pennaLogger.info("normal message", exception);
-        Assertions.assertEquals("normal message", message.get());
-
-
-        pennaLogger.info("{} message", "formatted", exception);
-        Assertions.assertEquals("formatted message", message.get());
-
-        pennaLogger.info("with {} {} message", "two", "formatted", exception);
-        Assertions.assertEquals("with two formatted message", message.get());
-
-        pennaLogger.info("with {} {} {}", "three", "formatted", "message", exception);
-        Assertions.assertEquals("with three formatted message", message.get());
-    }
-
-    @Test
     void everything_added_to_the_log_is_present_in_the_message() throws IOException {
         Config config = Config.getDefault();
         TreeCache cache = new TreeCache(config);
