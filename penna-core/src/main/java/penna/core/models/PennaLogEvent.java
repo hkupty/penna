@@ -12,7 +12,7 @@ import java.util.List;
 
 public class PennaLogEvent implements LoggingEvent {
 
-    private int cursor = 0;
+    private int cursor;
     public Object[] arguments = new Object[8];
     public List<Marker> markers = new ArrayList<>();
     public List<KeyValuePair> keyValuePairs = new ArrayList<>();
@@ -63,6 +63,7 @@ public class PennaLogEvent implements LoggingEvent {
         return Arrays.asList(arguments);
     }
 
+    @SuppressWarnings("PMD.MethodReturnsInternalArray")
     @Override
     public Object[] getArgumentArray() {
         return arguments;
