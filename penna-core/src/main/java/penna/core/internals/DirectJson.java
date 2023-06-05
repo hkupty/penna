@@ -143,7 +143,7 @@ public final class DirectJson implements Closeable {
                 case '\n' -> buffer.put(NEWLINE);
                 case '\r' -> buffer.put(LINEBREAK);
                 case '\t' -> buffer.put(TAB);
-                case '{' -> {
+                case DELIM_START -> {
                     if (str.codePointAt(i+1) == '}') {
                         if (str.codePointAt(i - 1) == '\\' && str.codePointAt(i - 2) != '\\') {
                             buffer.put(buffer.position() - 1, DELIM_START);
