@@ -6,13 +6,11 @@ import org.slf4j.Marker;
 import org.slf4j.event.KeyValuePair;
 import org.slf4j.event.Level;
 import org.slf4j.event.LoggingEvent;
-import org.slf4j.helpers.MessageFormatter;
 import org.slf4j.spi.LoggingEventBuilder;
 import penna.core.sink.PennaSink;
 import penna.core.sink.SinkImpl;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.function.Supplier;
 
