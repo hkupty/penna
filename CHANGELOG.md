@@ -10,13 +10,28 @@ the PATCH component is omitted when its value is `0`.
 
 ### `penna-api`
 
+#### Changed
+
+- Add `ExcaptionHandling` configuration ([#53](https://github.com/hkupty/penna/pull/53))
+
 ### `penna-core`
+
+#### Added
+
+- Penna MDC Adapter ([#55](https://github.com/hkupty/penna/pull/55))
 
 #### Changed
 
 - Allow sinks to read config ([#51](https://github.com/hkupty/penna/pull/51))
+- Configure stacktrace depth and frame deduplication ([#53](https://github.com/hkupty/penna/pull/53))
+- Optimize keyword handling in json logs ([#56](https://github.com/hkupty/penna/pull/56))
+- Format logs only when writting the output ([#56](https://github.com/hkupty/penna/pull/56))
 
 ### `penna-yaml-config`
+
+#### Changed
+
+- Allow for configuring exception handling ([#53](https://github.com/hkupty/penna/pull/53))
 
 ## 0.6.2 - 2023-04-12
 
