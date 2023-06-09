@@ -1,0 +1,20 @@
+{{ with .Site.GetPage "/blog" }}
+<div class="box">
+  <span class="content">
+      <span class="icon-text">
+      <ion-icon name="{{.Params.Icon}}" class="icon has-text-link"></ion-icon>
+      <span class="subtitle is-5">{{.Title}}</span>
+    </span>
+    <p class="py-5">{{ .Content }}</p>
+  </span>
+  <ul>
+  {{ range .Pages }}
+    <li>
+    <a href="{{ .Permalink }}">{{ .Date.Format "2006-01-02" }} | {{.Title }}</a>
+    <br />
+    {{ .Summary }} <a href="{{ .Permalink }}">Read more</a>
+    </li>
+  {{ end }}
+  </ul>
+</div>
+{{ end }}

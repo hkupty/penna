@@ -1,6 +1,6 @@
 {{- define "main" }}
-  <article class="content">
-    <header>
+  <article class="box content">
+    <header class="pb-6">
       <h1 class="title"> {{ .Title }} </h1>
       {{- if .Description }}
         {{ .Description }}
@@ -12,6 +12,8 @@
         {{- end -}}
       </div>
       {{- end }}
+    {{ .TableOfContents }}
+    <hr />
     </header>
     {{- if .Content }}
     <section>
