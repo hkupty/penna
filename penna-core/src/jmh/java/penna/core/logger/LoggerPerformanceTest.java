@@ -3,12 +3,10 @@ package penna.core.logger;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.encoder.JsonEncoder;
 import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.contrib.jackson.JacksonJsonFormatter;
-import ch.qos.logback.contrib.json.classic.JsonLayout;
 import ch.qos.logback.core.OutputStreamAppender;
 import ch.qos.logback.core.encoder.Encoder;
-import ch.qos.logback.core.encoder.LayoutWrappingEncoder;
 import net.logstash.logback.encoder.LogstashEncoder;
 import org.junit.jupiter.api.Test;
 import org.openjdk.jmh.annotations.*;
@@ -79,26 +77,13 @@ public class LoggerPerformanceTest {
         Logger logger;
         @Param({
                 "contrib",
-                "logstash"
+//                "logstash"
         })
         String encoder;
 
         private Encoder<ILoggingEvent> getContribEncoder() {
-            var encoder = new LayoutWrappingEncoder<ILoggingEvent>();
-            var layout = new JsonLayout();
-            var formatter = new JacksonJsonFormatter();
-
-            encoder.setContext(context);
-            layout.setContext(context);
-
-            formatter.setPrettyPrint(false);
-            layout.setJsonFormatter(formatter);
-            layout.setAppendLineSeparator(true);
-            encoder.setLayout(layout);
-
-            layout.start();
+            var encoder = new JsonEncoder();
             encoder.start();
-
             return encoder;
         }
 
