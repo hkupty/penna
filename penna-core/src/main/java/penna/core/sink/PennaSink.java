@@ -132,7 +132,7 @@ public final class PennaSink implements SinkImpl, Closeable {
 
     }
 
-    private void writeThrowable(final Throwable throwable, LogConfig config) {
+    private void writeThrowable(final Throwable throwable, LogConfig config, int level) {
         final String message;
         StackTraceElement[] frames;
         Throwable cause;
@@ -168,23 +168,24 @@ public final class PennaSink implements SinkImpl, Closeable {
             jsonGenerator.writeSep();
         }
 
-        if (throwable.getSuppressed().length > 0) {
+        if (++level < config.traverseDepth() && throwable.getSuppressed().length > 0) {
             jsonGenerator.openArray("suppressed");
             var suppressed = throwable.getSuppressed();
             for (int i = 0; i < suppressed.length; i++) {
                 jsonGenerator.openObject();
-                writeThrowable(suppressed[i], config);
+                writeThrowable(suppressed[i], config, level);
                 jsonGenerator.closeObject();
                 jsonGenerator.writeSep();
             }
             jsonGenerator.closeArray();
             jsonGenerator.writeSep();
+            --level;
         }
 
-        if ((cause = throwable.getCause()) != null) {
+        if (++level < config.traverseDepth() && (cause = throwable.getCause()) != null) {
             jsonGenerator.writeKeyString("cause");
             jsonGenerator.openObject();
-            writeThrowable(cause, config);
+            writeThrowable(cause, config, level);
             jsonGenerator.closeObject();
             jsonGenerator.writeSep();
         }
@@ -223,7 +224,7 @@ public final class PennaSink implements SinkImpl, Closeable {
     private void writeObject(LogConfig config, final Object object) throws IOException {
         if (object instanceof Throwable throwable) {
             config.filter().reset();
-            writeThrowable(throwable, config);
+            writeThrowable(throwable, config, 0);
         } else if (object instanceof Map map) {
             writeMap(config, map);
         } else if (object instanceof List lst) {
@@ -297,7 +298,7 @@ public final class PennaSink implements SinkImpl, Closeable {
         if (logEvent.throwable != null) {
             logEvent.config.filter().reset();
             jsonGenerator.openObject(LogField.THROWABLE.fieldName);
-            writeThrowable(logEvent.throwable, logEvent.config);
+            writeThrowable(logEvent.throwable, logEvent.config, 0);
             jsonGenerator.closeObject();
             jsonGenerator.writeSep();
         }
