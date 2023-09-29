@@ -14,6 +14,7 @@ import java.nio.channels.FileChannel;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.BiConsumer;
 
 public final class PennaSink implements SinkImpl, Closeable {
     private static final String[] LEVEL_MAPPING = new String[5];
@@ -54,7 +55,8 @@ public final class PennaSink implements SinkImpl, Closeable {
 
     private DirectJson jsonGenerator;
 
-    private PennaMDCAdapter mdcAdapter;
+    private final PennaMDCAdapter mdcAdapter;
+    private BiConsumer<String, String> mdcWriter;
 
 
 
@@ -94,6 +96,7 @@ public final class PennaSink implements SinkImpl, Closeable {
     @Override
     public void init(final FileChannel channel) {
         jsonGenerator = new DirectJson(channel);
+        mdcWriter = jsonGenerator::writeStringValue;
     }
 
     @Override
@@ -254,7 +257,7 @@ public final class PennaSink implements SinkImpl, Closeable {
     private void emitMDC(final PennaLogEvent logEvent) {
         if (mdcAdapter.isNotEmpty()) {
             jsonGenerator.openObject(LogField.MDC.fieldName);
-            mdcAdapter.forEach(jsonGenerator::writeStringValue);
+            mdcAdapter.forEach(mdcWriter);
             jsonGenerator.closeObject();
             jsonGenerator.writeSep();
         }
