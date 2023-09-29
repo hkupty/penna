@@ -109,8 +109,8 @@ public final class DirectJson implements Closeable {
         }
     }
 
-    private void writeUnsafe(String str) {
-        for(int i = 0; i < str.length(); i++ ){
+    void writeUnsafe(String str) {
+        for(int i = 0; i < str.length(); i++){
             buffer.put((byte) str.codePointAt(i));
         }
 
@@ -144,7 +144,7 @@ public final class DirectJson implements Closeable {
                 case '\r' -> buffer.put(LINEBREAK);
                 case '\t' -> buffer.put(TAB);
                 case DELIM_START -> {
-                    if (str.codePointAt(i+1) == '}') {
+                    if (str.codePointAt(i + 1) == '}') {
                         if (str.codePointAt(i - 1) == '\\' && str.codePointAt(i - 2) != '\\') {
                             buffer.put(buffer.position() - 1, DELIM_START);
                         } else {
@@ -299,7 +299,7 @@ public final class DirectJson implements Closeable {
         buffer.put(KV_SEP);
     }
 
-    private void checkSpace(int size) {
+    void checkSpace(int size) {
         if ((buffer.position() + size) * 5 > buffer.capacity() * 4) {
             ByteBuffer newBuffer = ByteBuffer.allocateDirect((buffer.capacity() + size) * 2);
             buffer.flip();
