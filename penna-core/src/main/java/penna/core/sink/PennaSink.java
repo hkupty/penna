@@ -1,7 +1,6 @@
 package penna.core.sink;
 
 import org.slf4j.MDC;
-import org.slf4j.event.Level;
 import penna.api.models.LogField;
 import penna.core.internals.*;
 import penna.core.minilog.MiniLogger;
@@ -26,12 +25,6 @@ public final class PennaSink implements SinkImpl, Closeable {
     private final PennaMDCAdapter mdcAdapter;
     private BiConsumer<String, String> mdcWriter;
 
-
-
-    // From the same ticket that PMD references, https://bugs.openjdk.org/browse/JDK-8080225, it is noted that
-    // in JDK 10 the problem was solved. We are targeting JDK 17+, so the problem won't affect us.
-    // Plus, any other alternative is significantly slower.
-    @SuppressWarnings("PMD.AvoidFileStream")
     public PennaSink() {
         if (MDC.getMDCAdapter() instanceof PennaMDCAdapter adapter) {
             mdcAdapter = adapter;
@@ -70,14 +63,14 @@ public final class PennaSink implements SinkImpl, Closeable {
         jsonGenerator.writeRaw(frame.getMethodName());
         jsonGenerator.writeRaw('(');
 
-        if (frame.isNativeMethod()) {
-            jsonGenerator.writeRaw("Native Method");
-        } else if ((fileName = frame.getFileName()) != null && !fileName.isEmpty()) {
+        if ((fileName = frame.getFileName()) != null && !fileName.isEmpty()) {
             jsonGenerator.writeRaw(fileName);
             if (frame.getLineNumber() > 0){
                 jsonGenerator.writeRaw(':');
                 jsonGenerator.writeNumberRaw(frame.getLineNumber());
             }
+        } else if (frame.isNativeMethod()) {
+            jsonGenerator.writeRaw("Native Method");
         } else {
             jsonGenerator.writeRaw("Unknown Source");
         }
@@ -177,23 +170,23 @@ public final class PennaSink implements SinkImpl, Closeable {
     }
 
     private void writeObject(LogConfig config, final Object object) throws IOException {
-        if (object instanceof Throwable throwable) {
-            config.filter().reset();
-            writeThrowable(throwable, config, 0);
-        } else if (object instanceof Map map) {
-            writeMap(config, map);
-        } else if (object instanceof List lst) {
-            writeArray(config, lst);
-        } else if (object instanceof Object[] lst) {
-            writeArray(config, lst);
-        } else if (object instanceof String str){
-            jsonGenerator.writeString(str);
-        } else if (object instanceof Long lng){
-            jsonGenerator.writeNumber(lng);
-        } else if (object instanceof Double dbl){
-            jsonGenerator.writeNumber(dbl);
-        } else {
-            jsonGenerator.writeString(object.toString());
+        switch (object) {
+            case Throwable throwable -> {
+                config.filter().reset();
+                writeThrowable(throwable, config, 0);
+            }
+            case Map map -> writeMap(config, map);
+            case List lst -> writeArray(config, lst);
+            case Object[] lst -> writeArray(config, lst);
+            case String str -> jsonGenerator.writeString(str);
+            case Integer num  -> jsonGenerator.writeNumber(num);
+            case Long num -> jsonGenerator.writeNumber(num);
+            case Float num -> jsonGenerator.writeNumber(num);
+            case Double num -> jsonGenerator.writeNumber(num);
+            case null -> {}
+            default -> {
+                jsonGenerator.writeString(object.toString());
+            }
         }
     }
 
