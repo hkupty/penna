@@ -13,7 +13,7 @@ public final class Clock {
     private static final long REFRESH_RATE = 1_000_000;
 
     // This is how often, in ms, we should sync with System.currentTimeMillis()
-    private static final long PRECISION = 1_000;
+    private static final long PRECISION = 1_023;
     private static final Lock startThreadLock = new ReentrantLock();
 
     private static final AtomicLong timestamp = new AtomicLong(System.currentTimeMillis());
@@ -23,7 +23,7 @@ public final class Clock {
 
             // System.currentTimeMillis is known to be slow on linux.
             // We can increment manually and sync at every second maybe?
-            if (ts % PRECISION == 0) {
+            if ((ts & PRECISION) == 0x0) {
                 timestamp.set(System.currentTimeMillis());
             }
             LockSupport.parkNanos(REFRESH_RATE);
