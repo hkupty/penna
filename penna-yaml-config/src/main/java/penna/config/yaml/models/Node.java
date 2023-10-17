@@ -14,9 +14,12 @@ public sealed interface Node {
         boolean deduplicate();
         int maxDepth();
 
+        int traverseDepth();
+
         record ExceptionsConfig(
                 boolean deduplicate,
-                int maxDepth
+                int maxDepth,
+                int traverseDepth
         ) implements Exceptions {}
     }
 

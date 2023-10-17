@@ -37,7 +37,7 @@ public class JacksonConfigManager implements ConfigManager {
 
         return ((Config base) -> base
                 .replaceLevel(hasLevel ? Level.valueOf(configNode.level().toUpperCase(Locale.ENGLISH)) : base.level())
-                .replaceExceptionHandling(hasException ? new ExceptionHandling(configNode.exceptions().maxDepth(), configNode.exceptions().deduplicate()) : base.exceptionHandling())
+                .replaceExceptionHandling(hasException ? new ExceptionHandling(configNode.exceptions().maxDepth(), configNode.exceptions().traverseDepth(), configNode.exceptions().deduplicate()) : base.exceptionHandling())
                 .replaceFields(hasFields ? configNode.fields().stream().map(LogField::fromFieldName).filter(Objects::nonNull).toArray(size -> Arrays.copyOf(reference, size)) : base.fields()));
     }
 
