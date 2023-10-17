@@ -224,9 +224,13 @@ public final class DirectJson implements Closeable {
     }
 
     public void writeNumber(final long data) {
+        if (data < 0) {
+            writeRaw('-');
+        }
+
         final int pos = buffer.position();
-        final int sz = data == 0 ? 1 : (int) Math.log10(data) + 1;
-        long dataPointer = data;
+        long dataPointer = Math.abs(data);
+        final int sz = data == 0 ? 1 : (int) Math.log10(dataPointer) + 1;
 
         for (int i = sz - 1; i >= 0; i--) {
             byte chr = (byte) (dataPointer % 10);
@@ -240,8 +244,12 @@ public final class DirectJson implements Closeable {
     }
 
     public void writeNumber(final double data) {
+        if (data < 0) {
+            writeRaw('-');
+        }
         int pos = buffer.position();
-        long whole = (long) data;
+        double absData = Math.abs(data);
+        long whole = (long) absData;
         final int sz = (int) Math.log10(whole) + 1;
 
         for (int i = sz - 1; i >= 0; i--) {
@@ -253,7 +261,7 @@ public final class DirectJson implements Closeable {
         buffer.position(pos + sz);
         buffer.put(DOT);
         pos = buffer.position();
-        BigDecimal fractional = BigDecimal.valueOf(data).remainder(BigDecimal.ONE);
+        BigDecimal fractional = BigDecimal.valueOf(absData).remainder(BigDecimal.ONE);
         int decs = 0;
         while (!fractional.equals(BigDecimal.ZERO)) {
             fractional = fractional.movePointRight(1);
