@@ -17,39 +17,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiConsumer;
 
 public final class PennaSink implements SinkImpl, Closeable {
-    private static final String[] LEVEL_MAPPING = new String[5];
-
-    static {
-        LEVEL_MAPPING[Level.TRACE.ordinal()] = "TRACE";
-        LEVEL_MAPPING[Level.DEBUG.ordinal()] = "DEBUG";
-        LEVEL_MAPPING[Level.INFO.ordinal()] = "INFO";
-        LEVEL_MAPPING[Level.WARN.ordinal()] = "WARN";
-        LEVEL_MAPPING[Level.ERROR.ordinal()] = "ERROR";
-    }
     private final int[] filterHashes = new int[StackTraceBloomFilter.NUMBER_OF_HASHES];
-
-    /**
-     * The Emitter functional interface allows us to define the specific
-     * function signature `PennaLogEvent -> ()` that throws an exception without using generics.
-     * This, in itself, is not a huge advantage, but allows us to go for a very straightforward
-     * approach when writing the log messages, by picking the fields we want to write from the message
-     * based on {@link PennaLogEvent#config}'s {@link penna.api.config.Config#fields()} and mapping to the appropriate function.
-     * <br />
-     * In {@link PennaSink}, it is defined as a local reference to each emit* method in an
-     * array, where each method is in the same position in the mapping array as the
-     * respective {@link LogField#ordinal()} for that log field.
-     * <br />
-     * In other words, we do a very fast lookup based on array position to determine which emit* methods to call,
-     * in which order.
-     * While it might get duplicated in other sinks, the compiler seems to like it better when
-     * kept as a private interface, as more optimizations are possible.
-     */
-    @FunctionalInterface
-    private interface Emitter {
-        void apply(final PennaLogEvent event) throws IOException;
-    }
-
-    private final Emitter[] emitters;
 
     private final AtomicLong counter = new AtomicLong(0L);
 
@@ -72,19 +40,6 @@ public final class PennaSink implements SinkImpl, Closeable {
             mdcAdapter = null;
         }
 
-        // WARNING! Introducing new log fields requires this array to be updated.
-        emitters = new Emitter[LogField.values().length];
-        emitters[LogField.COUNTER.ordinal()] = this::emitCounter;
-        emitters[LogField.TIMESTAMP.ordinal()] = this::emitTimestamp;
-        emitters[LogField.LEVEL.ordinal()] = this::emitLevel;
-        emitters[LogField.MESSAGE.ordinal()] = this::emitMessage;
-        emitters[LogField.LOGGER_NAME.ordinal()] = this::emitLogger;
-        emitters[LogField.THREAD_NAME.ordinal()] = this::emitThreadName;
-        emitters[LogField.MDC.ordinal()] = this::emitMDC;
-        emitters[LogField.MARKERS.ordinal()] = this::emitMarkers;
-        emitters[LogField.THROWABLE.ordinal()] = this::emitThrowable;
-        emitters[LogField.KEY_VALUE_PAIRS.ordinal()] = this::emitKeyValuePair;
-        emitters[LogField.EXTRA.ordinal()] = this::emitExtra;
     }
 
     public static SinkImpl getSink() {
@@ -270,7 +225,7 @@ public final class PennaSink implements SinkImpl, Closeable {
 
     private void emitLevel(final PennaLogEvent logEvent) {
         jsonGenerator.writeKeyString(LogField.LEVEL.fieldName);
-        jsonGenerator.writeUnsafeString(LEVEL_MAPPING[logEvent.level.ordinal()]);
+        jsonGenerator.writeUnsafeString(logEvent.level.toString());
     }
 
     private void emitThreadName(final PennaLogEvent logEvent) {
@@ -335,7 +290,19 @@ public final class PennaSink implements SinkImpl, Closeable {
         var fields = logEvent.config.fields();
 
         for (int i = 0; i < fields.length; i++){
-            emitters[fields[i].ordinal()].apply(logEvent);
+            switch (fields[i]){
+                case LEVEL -> emitLevel(logEvent);
+                case COUNTER -> emitCounter(logEvent);
+                case LOGGER_NAME -> emitLogger(logEvent);
+                case MESSAGE -> emitMessage(logEvent);
+                case MARKERS -> emitMarkers(logEvent);
+                case KEY_VALUE_PAIRS -> emitKeyValuePair(logEvent);
+                case THREAD_NAME -> emitThreadName(logEvent);
+                case TIMESTAMP -> emitTimestamp(logEvent);
+                case THROWABLE -> emitThrowable(logEvent);
+                case MDC -> emitMDC(logEvent);
+                case EXTRA -> emitExtra(logEvent);
+            }
         }
 
         jsonGenerator.closeObject();
