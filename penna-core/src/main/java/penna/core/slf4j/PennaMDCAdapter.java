@@ -2,24 +2,13 @@ package penna.core.slf4j;
 
 import org.slf4j.spi.MDCAdapter;
 import penna.core.slf4j.mdc.MDCNode;
-import penna.core.slf4j.mdc.Node;
-import penna.core.slf4j.mdc.RootNode;
 
 import java.util.*;
 import java.util.function.BiConsumer;
 
 public final class PennaMDCAdapter implements MDCAdapter {
 
-    private final InheritableThreadLocal<MDCNode> threadLocalTree = new InheritableThreadLocal<>() {
-
-        @Override
-        protected MDCNode initialValue() { return RootNode.create(); }
-
-        @Override
-        protected MDCNode childValue(MDCNode parentValue) {
-            return Node.create(parentValue);
-        }
-    };
+    private final ThreadLocal<MDCNode> threadLocalTree = ThreadLocal.withInitial(MDCNode::create);
 
     public void forEach(BiConsumer<String, String> action) {
         var node = threadLocalTree.get();
