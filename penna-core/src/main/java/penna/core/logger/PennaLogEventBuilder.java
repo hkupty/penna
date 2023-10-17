@@ -37,6 +37,7 @@ import java.util.function.Supplier;
  */
 public final class PennaLogEventBuilder implements LoggingEventBuilder {
     public static final int POOL_SIZE = 16;
+    public static final int POOL_SIZE_MASK = POOL_SIZE - 1;
     private final PennaLogEvent[] pool;
     private int currentIndex;
     SinkImpl sink;
@@ -61,7 +62,7 @@ public final class PennaLogEventBuilder implements LoggingEventBuilder {
             }
 
             builder.current.level = event.getLevel();
-            builder.current.logger = logger;
+            builder.current.logger = logger.getName();
             builder.current.config = logger.config;
 
             builder.log();
@@ -70,7 +71,7 @@ public final class PennaLogEventBuilder implements LoggingEventBuilder {
         public static PennaLogEventBuilder get(PennaLogger logger, Level level) {
             var builder = pool.get();
             builder.next();
-            builder.current.logger = logger;
+            builder.current.logger = logger.name;
             builder.current.level = level;
             builder.current.config = logger.config;
 
@@ -88,7 +89,7 @@ public final class PennaLogEventBuilder implements LoggingEventBuilder {
      */
     private void next() {
         // This is only possible because POOL_SIZE is a power of 2
-        currentIndex = (currentIndex + 1) & (POOL_SIZE - 1);
+        currentIndex = (currentIndex + 1) & POOL_SIZE_MASK;
         current = pool[currentIndex];
         current.reset();
     }

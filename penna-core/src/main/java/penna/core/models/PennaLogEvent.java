@@ -21,7 +21,7 @@ public class PennaLogEvent implements LoggingEvent {
     public String message;
     public String threadName;
     public Throwable throwable;
-    public IPennaLogger logger;
+    public String logger;
     public LogConfig config;
 
     /**
@@ -50,7 +50,7 @@ public class PennaLogEvent implements LoggingEvent {
 
     @Override
     public String getLoggerName() {
-        return logger.getName();
+        return logger;
     }
 
     @Override
