@@ -308,7 +308,7 @@ public final class DirectJson implements Closeable {
     }
 
     void checkSpace(int size) {
-        if ((buffer.position() + size) * 5 > buffer.capacity() * 4) {
+        if ((buffer.position() + size * 2 ) > buffer.capacity()) {
             ByteBuffer newBuffer = ByteBuffer.allocateDirect((buffer.capacity() + size) * 2);
             buffer.flip();
             newBuffer.put(buffer);
