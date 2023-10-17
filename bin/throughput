@@ -27,22 +27,22 @@ function batch() {
   echo "Running penna"
   gradle -q :throughput:buildPennaJar
   perf stat java ${FLAGS} -jar "${MAPLE_JAR}" "${TIME}" "${THREADS}" > out/penna.json
-  echo "Running logback"
-  gradle -q :throughput:buildLogbackJar
-  perf stat java ${FLAGS} -jar "${LOGBACK_JAR}" "${TIME}" "${THREADS}" > out/logback.json
+  # echo "Running logback"
+  # gradle -q :throughput:buildLogbackJar
+  # perf stat java ${FLAGS} -jar "${LOGBACK_JAR}" "${TIME}" "${THREADS}" > out/logback.json
 
   echo ""
 
   MAPLE_TOTAL="$(wc -l out/penna.json | cut -d ' ' -f1)"
-  LOGBACK_TOTAL="$(wc -l out/logback.json | cut -d ' ' -f1)"
+  # LOGBACK_TOTAL="$(wc -l out/logback.json | cut -d ' ' -f1)"
 
   echo ">> Total"
   printf "%10s %10s\n" "penna" "${MAPLE_TOTAL}"
-  printf "%10s %10s\n" "logback" "${LOGBACK_TOTAL}"
+  # printf "%10s %10s\n" "logback" "${LOGBACK_TOTAL}"
   echo ""
   echo ">> logs/ms"
   printf "%10s %10s\n" "penna" "$(python -c "print($MAPLE_TOTAL / $TIME)")"
-  printf "%10s %10s\n" "logback" "$(python -c "print($LOGBACK_TOTAL / $TIME)")"
+  # printf "%10s %10s\n" "logback" "$(python -c "print($LOGBACK_TOTAL / $TIME)")"
 }
 
 
