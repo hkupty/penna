@@ -50,7 +50,7 @@ public class LoggerPerformanceTest {
                     logger
                             .atInfo()
                             .addMarker(MarkerFactory.getMarker("For the win!"))
-                            .addArgument(UUID::randomUUID)
+                            .addArgument("static-value")
                             .log("Some event: {}");
                     MDC.remove("SomeKey");
                 }
@@ -59,7 +59,7 @@ public class LoggerPerformanceTest {
                     logger
                             .atInfo()
                             .addMarker(MarkerFactory.getMarker("For the win!"))
-                            .addArgument(UUID::randomUUID)
+                            .addArgument("static-value")
                             .log("Some event: {}", exception);
                     MDC.remove("SomeKey");
                 }
@@ -137,23 +137,21 @@ public class LoggerPerformanceTest {
     }
 
     @Benchmark
-    @OutputTimeUnit(TimeUnit.NANOSECONDS)
     public void penna(PennaState state, TestBehavior tb) throws IOException {
         tb.log(state.logger);
     }
 
-    @Benchmark
-    @OutputTimeUnit(TimeUnit.NANOSECONDS)
-    public void logback(LogbackState state, TestBehavior tb) throws IOException {
-        tb.log(state.logger);
-    }
-
+//    @Benchmark
+//    public void logback(LogbackState state, TestBehavior tb) throws IOException {
+//        tb.log(state.logger);
+//    }
 
     @Test
     public void runBenchmarks() throws Exception {
         Options options = new OptionsBuilder()
                 .include(this.getClass().getName() + ".*")
-                .mode(Mode.AverageTime)
+                .mode(Mode.Throughput)
+                .timeUnit(TimeUnit.MILLISECONDS)
                 .warmupTime(TimeValue.seconds(20))
                 .warmupIterations(3)
                 .threads(1)
@@ -162,6 +160,7 @@ public class LoggerPerformanceTest {
                 .shouldFailOnError(true)
                 .shouldDoGC(true)
                 .addProfiler("gc")
+                .jvm("/usr/lib/jvm/java-21-jetbrains/bin/java")
                 .build();
 
         new Runner(options).run();
