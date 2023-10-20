@@ -16,6 +16,24 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiConsumer;
 
 public final class PennaSink implements SinkImpl, Closeable {
+    private static final byte[] SUPPRESSED = "suppressed".getBytes();
+    private static final byte[] STACKTRACE = "stacktrace".getBytes();
+    private static final byte[] CLASS = "class".getBytes();
+    private static final byte[] MESSAGE = "message".getBytes();
+    private static final byte[] REPEATED = "... repeated frames omitted".getBytes();
+    private static final byte[] ELLIPSIS = "...".getBytes();
+    private static final byte[] CAUSE = "cause".getBytes();
+    private static final byte[] NATIVE = "Native Method".getBytes();
+    private static final byte[] UNKNOWN = "Unknown Source".getBytes();
+
+    private static final byte[][] LEVEL_ENUM_MAP = new byte[][] {
+            "ERROR".getBytes(),
+            "WARN".getBytes(),
+            "INFO".getBytes(),
+            "DEBUG".getBytes(),
+            "TRACE".getBytes()
+    };
+
     private final int[] filterHashes = new int[StackTraceBloomFilter.NUMBER_OF_HASHES];
 
     private final AtomicLong counter = new AtomicLong(0L);
@@ -58,21 +76,21 @@ public final class PennaSink implements SinkImpl, Closeable {
 
         jsonGenerator.writeQuote();
 
-        jsonGenerator.writeRaw(frame.getClassName());
+        jsonGenerator.writeUnsafe(frame.getClassName());
         jsonGenerator.writeRaw('.');
-        jsonGenerator.writeRaw(frame.getMethodName());
+        jsonGenerator.writeUnsafe(frame.getMethodName());
         jsonGenerator.writeRaw('(');
 
         if ((fileName = frame.getFileName()) != null && !fileName.isEmpty()) {
-            jsonGenerator.writeRaw(fileName);
+            jsonGenerator.writeUnsafe(fileName);
             if (frame.getLineNumber() > 0){
                 jsonGenerator.writeRaw(':');
                 jsonGenerator.writeNumberRaw(frame.getLineNumber());
             }
         } else if (frame.isNativeMethod()) {
-            jsonGenerator.writeRaw("Native Method");
+            jsonGenerator.writeRaw(NATIVE);
         } else {
-            jsonGenerator.writeRaw("Unknown Source");
+            jsonGenerator.writeRaw(UNKNOWN);
         }
 
         jsonGenerator.writeRaw(')');
@@ -84,15 +102,20 @@ public final class PennaSink implements SinkImpl, Closeable {
         final String message;
         StackTraceElement[] frames;
         Throwable cause;
+        // Assume a throwable will take at least 200 characters
+        jsonGenerator.checkSpace(200);
 
-        jsonGenerator.writeStringValue("class", throwable.getClass().getName());
+        jsonGenerator.writeKey(CLASS);
+        var classname = throwable.getClass().getName();
+        jsonGenerator.writeUnsafeString(classname);
 
         if((message = throwable.getMessage()) != null) {
-            jsonGenerator.writeStringValue("message", message);
+            jsonGenerator.writeKey(MESSAGE);
+            jsonGenerator.writeString(message);
         }
 
         if ((frames = throwable.getStackTrace()) != null && frames.length > 0) {
-            jsonGenerator.writeKeyString("stacktrace");
+            jsonGenerator.writeKey(STACKTRACE);
             jsonGenerator.openArray();
             var brokenOut = false;
             var filter = config.filter();
@@ -101,7 +124,7 @@ public final class PennaSink implements SinkImpl, Closeable {
                 writeStackFrame(frames[index]);
                 jsonGenerator.writeRaw(',');
                 if (filter.check(filterHashes)) {
-                    jsonGenerator.writeUnsafeString("... repeated frames omitted");
+                    jsonGenerator.writeStringFromBytes(REPEATED);
                     brokenOut = true;
                     break;
                 }
@@ -109,7 +132,7 @@ public final class PennaSink implements SinkImpl, Closeable {
             }
 
             if (!brokenOut && frames.length > config.stacktraceDepth()) {
-                jsonGenerator.writeUnsafeString("...");
+                jsonGenerator.writeStringFromBytes(ELLIPSIS);
             }
 
             jsonGenerator.closeArray();
@@ -117,7 +140,7 @@ public final class PennaSink implements SinkImpl, Closeable {
         }
 
         if (++level < config.traverseDepth() && throwable.getSuppressed().length > 0) {
-            jsonGenerator.openArray("suppressed");
+            jsonGenerator.openArray(SUPPRESSED);
             var suppressed = throwable.getSuppressed();
             for (int i = 0; i < suppressed.length; i++) {
                 jsonGenerator.openObject();
@@ -131,7 +154,7 @@ public final class PennaSink implements SinkImpl, Closeable {
         }
 
         if (++level < config.traverseDepth() && (cause = throwable.getCause()) != null) {
-            jsonGenerator.writeKeyString("cause");
+            jsonGenerator.writeKey(CAUSE);
             jsonGenerator.openObject();
             writeThrowable(cause, config, level);
             jsonGenerator.closeObject();
@@ -191,13 +214,17 @@ public final class PennaSink implements SinkImpl, Closeable {
     }
 
     private void emitMessage(final PennaLogEvent logEvent) {
-        jsonGenerator.writeStringValueFormatting(LogField.MESSAGE.fieldName, logEvent.message, logEvent.arguments);
+        jsonGenerator.checkSpace(20 + logEvent.message.length());
+        jsonGenerator.writeKey(LogField.MESSAGE.fieldName);
+        jsonGenerator.writeStringFormatting(logEvent.message, logEvent.arguments);
     }
 
     // The method must conform to the functional interface, so we should ignore this rule here.
     @SuppressWarnings("PMD.UnusedFormalParameter")
     private void emitTimestamp(final PennaLogEvent logEvent) {
-        jsonGenerator.writeNumberValue(LogField.TIMESTAMP.fieldName, Clock.getTimestamp());
+        jsonGenerator.checkSpace(25);
+        jsonGenerator.writeKey(LogField.TIMESTAMP.fieldName);
+        jsonGenerator.writeNumber(Clock.getTimestamp());
     }
 
 
@@ -213,22 +240,28 @@ public final class PennaSink implements SinkImpl, Closeable {
     }
 
     private void emitLogger(final PennaLogEvent logEvent) {
-        jsonGenerator.writeStringValue(LogField.LOGGER_NAME.fieldName, logEvent.getLoggerName());
+        jsonGenerator.writeKey(LogField.LOGGER_NAME.fieldName);
+        jsonGenerator.writeStringFromBytes(logEvent.logger);
     }
 
     private void emitLevel(final PennaLogEvent logEvent) {
-        jsonGenerator.writeKeyString(LogField.LEVEL.fieldName);
-        jsonGenerator.writeUnsafeString(logEvent.level.toString());
+        jsonGenerator.checkSpace(10);
+        jsonGenerator.writeKey(LogField.LEVEL.fieldName);
+        jsonGenerator.writeStringFromBytes(LEVEL_ENUM_MAP[logEvent.level.ordinal()]);
     }
 
     private void emitThreadName(final PennaLogEvent logEvent) {
-        jsonGenerator.writeStringValue(LogField.THREAD_NAME.fieldName, logEvent.getThreadName());
+        jsonGenerator.checkSpace(12 + logEvent.threadName.length);
+        jsonGenerator.writeKey(LogField.THREAD_NAME.fieldName);
+        jsonGenerator.writeStringFromBytes(logEvent.threadName);
     }
 
     // The method must conform to the functional interface, so we should ignore this rule here.
     @SuppressWarnings("PMD.UnusedFormalParameter")
     private void emitCounter(final PennaLogEvent logEvent) {
-        jsonGenerator.writeNumberValue(LogField.COUNTER.fieldName, counter.getAndIncrement());
+        jsonGenerator.checkSpace(64);
+        jsonGenerator.writeKey(LogField.COUNTER.fieldName);
+        jsonGenerator.writeNumber(counter.getAndIncrement());
     }
 
     private void emitMarkers(final PennaLogEvent logEvent) {

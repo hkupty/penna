@@ -62,7 +62,7 @@ public final class PennaLogEventBuilder implements LoggingEventBuilder {
             }
 
             builder.current.level = event.getLevel();
-            builder.current.logger = logger.getName();
+            builder.current.logger = logger.getName().getBytes();
             builder.current.config = logger.config;
 
             builder.log();
@@ -71,7 +71,7 @@ public final class PennaLogEventBuilder implements LoggingEventBuilder {
         public static PennaLogEventBuilder get(PennaLogger logger, Level level) {
             var builder = pool.get();
             builder.next();
-            builder.current.logger = logger.name;
+            builder.current.logger = logger.nameAsChars;
             builder.current.level = level;
             builder.current.config = logger.config;
 
@@ -101,7 +101,7 @@ public final class PennaLogEventBuilder implements LoggingEventBuilder {
         pool = new PennaLogEvent[POOL_SIZE];
         for (int i = 0; i < POOL_SIZE; i++){
             pool[i] = new PennaLogEvent();
-            pool[i].threadName = threadName;
+            pool[i].threadName = threadName.getBytes();
         }
 
         current = pool[currentIndex];

@@ -76,7 +76,7 @@ class NativePennaSinkTests {
                 .use(markers).in((evt, m) -> {evt.markers.addAll(m); return evt;})
                 .use(kvps).in((evt, m) -> {evt.keyValuePairs.addAll(m); return evt;})
                 .use(levels).in((evt, m) -> {evt.level = m; return evt;})
-                .use(threads).in((evt, m) -> {evt.threadName = m; return evt;})
+                .use(threads).in((evt, m) -> {evt.threadName = m.getBytes(); return evt;})
                 .use(throwableArbitrary()).withProbability(0.3).in((evt, t) -> {evt.throwable = t; return evt;})
                 .build();
     }
@@ -146,7 +146,7 @@ class NativePennaSinkTests {
         PennaLogger logger = cache.getLoggerAt("c", "est", "moi");
 
         event.config = LogConfig.fromConfig(Config.withFields(fields));
-        event.logger = logger;
+        event.logger = logger.nameAsChars;
 
         logger.log(event);
 
