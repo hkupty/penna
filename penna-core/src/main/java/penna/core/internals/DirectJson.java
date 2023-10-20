@@ -1,10 +1,7 @@
 package penna.core.internals;
 
 
-import java.io.Closeable;
-import java.io.FileDescriptor;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.math.BigDecimal;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
@@ -12,6 +9,7 @@ import java.nio.charset.StandardCharsets;
 
 public final class DirectJson implements Closeable {
     private static final int INITIAL_BUFFER_SIZE = 32 * 1024;
+    private int highWatermark = (int) Math.ceil(INITIAL_BUFFER_SIZE * 0.8);
     private static final byte[] LINE_BREAK = System.getProperty("line.separator").getBytes(StandardCharsets.UTF_8);
     private static final byte QUOTE = '"';
     private static final byte ENTRY_SEP = ':';
@@ -62,6 +60,7 @@ public final class DirectJson implements Closeable {
 
     private final FileOutputStream backingOs;
     private final FileChannel channel;
+
     // This is not private only for the sake of testing
     ByteBuffer buffer = ByteBuffer.allocateDirect(INITIAL_BUFFER_SIZE);
 
@@ -78,16 +77,84 @@ public final class DirectJson implements Closeable {
         this.channel = backingOs.getChannel();
     }
 
+    // --[ Write stuff to the buffer ]-- //
+    public void writeRawFormatting(final String str, final Object... arguments) {
+        int cursor = 0;
+        for(int i = 0; i < str.length(); i++){
+            var chr = str.codePointAt(i);
+            switch (chr) {
+                case '\\' -> buffer.put(ESCAPE);
+                case '\n' -> buffer.put(NEWLINE);
+                case '\r' -> buffer.put(LINEBREAK);
+                case '\t' -> buffer.put(TAB);
+                case DELIM_START -> {
+                    if (str.codePointAt(i + 1) == '}' &&
+                            (str.codePointAt(i - 1) != '\\' || str.codePointAt(i - 2) == '\\')
+                    ) {
+                        // Warning! Mismatch in arguments/template might cause exception.
+                        var argument = arguments[cursor++].toString();
+                        checkSpace(argument.length());
+                        writeRaw(argument);
+
+                    } else {
+                        int offset = str.codePointAt(i - 1) == '\\' ? 1 : 0;
+                        buffer.put(buffer.position() - offset, DELIM_START);
+                    }
+                }
+                case DELIM_STOP -> {
+                    if (str.codePointAt(i - 1)  != '{' ||
+                        (str.codePointAt(i - 2) == '\\' && str.codePointAt(i - 3) != '\\')) {
+                        buffer.put(DELIM_STOP);
+                    }
+                }
+                default -> {
+                    if (chr >= 0x80 && chr <= 0x10FFFF) {
+                        buffer.put(String.valueOf(str.charAt(i)).getBytes());
+                    } else if (chr > 0x1F) buffer.put((byte) chr);
+                }
+            }
+        }
+    }
+    public void writeRaw(final String str) {
+        for(int i = 0; i < str.length(); i++ ){
+            var chr = str.codePointAt(i);
+            switch (chr) {
+                case '\\' -> buffer.put(ESCAPE);
+                case '\n' -> buffer.put(NEWLINE);
+                case '\r' -> buffer.put(LINEBREAK);
+                case '\t' -> buffer.put(TAB);
+                default -> {
+                    if (chr >= 0x80 && chr <= 0x10FFFF) {
+                        buffer.put(String.valueOf(str.charAt(i)).getBytes());
+                    } else if (chr > 0x1F) buffer.put((byte) chr);
+                }
+            }
+        }
+    }
+
+    public void writeRaw(final char chr) { buffer.put((byte) chr); }
+    public void writeRaw(final byte[] chrs) { buffer.put(chrs); }
+
     public void openObject() { buffer.put(OPEN_OBJ); }
     public void openArray() { buffer.put(OPEN_ARR); }
 
     public void openObject(String str) {
-        writeKeyString(str);
+        writeKey(str);
+        buffer.put(OPEN_OBJ);
+    }
+
+    public void openObject(final byte[] str) {
+        writeKey(str);
         buffer.put(OPEN_OBJ);
     }
 
     public void openArray(String str) {
-        writeKeyString(str);
+        writeKey(str);
+        buffer.put(OPEN_ARR);
+    }
+
+    public void openArray(final byte[] str) {
+        writeKey(str);
         buffer.put(OPEN_ARR);
     }
 
@@ -109,88 +176,46 @@ public final class DirectJson implements Closeable {
         }
     }
 
-    void writeUnsafe(String str) {
+    public void writeUnsafe(final String str) {
         for(int i = 0; i < str.length(); i++){
             buffer.put((byte) str.codePointAt(i));
         }
-
     }
-
-    public void writeRaw(String str) {
-        for(int i = 0; i < str.length(); i++ ){
-            var chr = str.codePointAt(i);
-            switch (chr) {
-                case '\\' -> buffer.put(ESCAPE);
-                case '\n' -> buffer.put(NEWLINE);
-                case '\r' -> buffer.put(LINEBREAK);
-                case '\t' -> buffer.put(TAB);
-                default -> {
-                    if (chr >= 0x80 && chr <= 0x10FFFF) {
-                        buffer.put(String.valueOf(str.charAt(i)).getBytes());
-                    } else if (chr > 0x1F) buffer.put((byte) chr);
-                }
-            }
-        }
-    }
-
-
-    public void writeRawFormatting(String str, Object... arguments) {
-        int cursor = 0;
-        for(int i = 0; i < str.length(); i++ ){
-            var chr = str.codePointAt(i);
-            switch (chr) {
-                case '\\' -> buffer.put(ESCAPE);
-                case '\n' -> buffer.put(NEWLINE);
-                case '\r' -> buffer.put(LINEBREAK);
-                case '\t' -> buffer.put(TAB);
-                case DELIM_START -> {
-                    if (str.codePointAt(i + 1) == '}') {
-                        if (str.codePointAt(i - 1) == '\\' && str.codePointAt(i - 2) != '\\') {
-                            buffer.put(buffer.position() - 1, DELIM_START);
-                        } else {
-                            // Warning! Mismatch in arguments/template might cause exception.
-                            writeRaw(arguments[cursor++].toString());
-                        }
-                    }
-                }
-                case DELIM_STOP -> {
-                    if (str.codePointAt(i-1) == '{' && str.codePointAt(i-2) == '\\' && str.codePointAt(i-3) != '\\') {
-                        buffer.put(DELIM_STOP);
-                    }
-                }
-                default -> {
-                    if (chr >= 0x80 && chr <= 0x10FFFF) {
-                        buffer.put(String.valueOf(str.charAt(i)).getBytes());
-                    } else if (chr > 0x1F) buffer.put((byte) chr);
-                }
-            }
-        }
-    }
-
-
-
-    public void writeRaw(char chr) { buffer.put((byte) chr); }
-    public void writeRaw(byte[] chr) { buffer.put(chr); }
 
     public void writeQuote() { buffer.put(QUOTE); }
 
-    public void writeKeyString(String str) {
-        checkSpace(str.length() + 3);
+    // --[ 2nd level; based on the level above ]-- //
+
+    public void writeStringFromBytes(final byte[] chrs) {
+        buffer.put(QUOTE);
+        writeRaw(chrs);
+        buffer.put(QUOTE);
+        buffer.put(KV_SEP);
+
+    }
+
+    public void writeKey(String str) {
         buffer.put(QUOTE);
         writeUnsafe(str);
         buffer.put(QUOTE);
         buffer.put(ENTRY_SEP);
     }
 
-    public void writeUnsafeString(String str) {
-        checkSpace(str.length() + 3);
+    public void writeKey(final byte[] chrs) {
+        buffer.put(QUOTE);
+        writeRaw(chrs);
+        buffer.put(QUOTE);
+        buffer.put(ENTRY_SEP);
+    }
+
+    public void writeUnsafeString(final String str) {
         buffer.put(QUOTE);
         writeUnsafe(str);
         buffer.put(QUOTE);
         buffer.put(KV_SEP);
     }
 
-    public void writeString(String str) {
+    public void writeString(final String str) {
         checkSpace(str.length() + 3);
         buffer.put(QUOTE);
         writeRaw(str);
@@ -198,8 +223,7 @@ public final class DirectJson implements Closeable {
         buffer.put(KV_SEP);
     }
 
-    public void writeStringFormatting(String str, Object... args) {
-        checkSpace(str.length() + 3);
+    public void writeStringFormatting(final String str, final Object... args) {
         buffer.put(QUOTE);
         writeRawFormatting(str, args);
         buffer.put(QUOTE);
@@ -209,18 +233,7 @@ public final class DirectJson implements Closeable {
     public void writeSep() { buffer.put(KV_SEP); }
 
     public void writeNumberRaw(final long data) {
-        final int pos = buffer.position();
-        final int sz = (int) Math.log10(data) + 1;
-        long dataPointer = data;
-
-        for (int i = sz - 1; i >= 0; i--) {
-            byte chr = (byte) (dataPointer % 10);
-            dataPointer = dataPointer / 10;
-            chr += 48;
-            buffer.put(pos + i, chr);
-        }
-
-        buffer.position(pos + sz);
+        IntToAscii.longToAscii(data, buffer);
     }
 
     public void writeNumber(final long data) {
@@ -228,18 +241,7 @@ public final class DirectJson implements Closeable {
             writeRaw('-');
         }
 
-        final int pos = buffer.position();
-        long dataPointer = Math.abs(data);
-        final int sz = data == 0 ? 1 : (int) Math.log10(dataPointer) + 1;
-
-        for (int i = sz - 1; i >= 0; i--) {
-            byte chr = (byte) (dataPointer % 10);
-            dataPointer = dataPointer / 10;
-            chr += 48;
-            buffer.put(pos + i, chr);
-        }
-
-        buffer.position(pos + sz);
+        writeNumberRaw(data);
         buffer.put(KV_SEP);
     }
 
@@ -247,21 +249,10 @@ public final class DirectJson implements Closeable {
         if (data < 0) {
             writeRaw('-');
         }
-        int pos = buffer.position();
-        double absData = Math.abs(data);
-        long whole = (long) absData;
-        final int sz = (int) Math.log10(whole) + 1;
-
-        for (int i = sz - 1; i >= 0; i--) {
-            byte chr = (byte) (whole % 10);
-            whole = whole / 10;
-            chr += 48;
-            buffer.put(pos + i, chr);
-        }
-        buffer.position(pos + sz);
+        writeNumberRaw((long) data);
         buffer.put(DOT);
-        pos = buffer.position();
-        BigDecimal fractional = BigDecimal.valueOf(absData).remainder(BigDecimal.ONE);
+        var pos = buffer.position();
+        BigDecimal fractional = BigDecimal.valueOf(Math.abs(data)).remainder(BigDecimal.ONE);
         int decs = 0;
         while (!fractional.equals(BigDecimal.ZERO)) {
             fractional = fractional.movePointRight(1);
@@ -277,23 +268,26 @@ public final class DirectJson implements Closeable {
 
     public void writeEntrySep() { buffer.put(buffer.position() - 1, ENTRY_SEP); }
 
-    public void writeStringValue(String key, String value) {
-        writeKeyString(key);
+    public void writeStringValue(final String key, final String value) {
+        checkSpace(key.length() + value.length() + 5);
+        writeKey(key);
         writeString(value);
     }
 
     public void writeStringValueFormatting(String key, String value, Object... args) {
-        writeKeyString(key);
+        checkSpace(key.length() + value.length() + 5);
+        writeKey(key);
         writeStringFormatting(value, args);
     }
 
     public void writeNumberValue(String key, long value) {
-        writeKeyString(key);
+        checkSpace(key.length() + 3);
+        writeKey(key);
         writeNumber(value);
     }
 
     public void writeNumberValue(String key, double value) {
-        writeKeyString(key);
+        writeKey(key);
         writeNumber(value);
     }
 
@@ -307,9 +301,11 @@ public final class DirectJson implements Closeable {
         buffer.put(KV_SEP);
     }
 
-    void checkSpace(int size) {
-        if ((buffer.position() + size * 2 ) > buffer.capacity()) {
-            ByteBuffer newBuffer = ByteBuffer.allocateDirect((buffer.capacity() + size) * 2);
+    public void checkSpace(int size) {
+        if ((buffer.position() + size) > highWatermark) {
+            var newCapacity = (buffer.capacity() + size) * 2;
+            ByteBuffer newBuffer = ByteBuffer.allocateDirect(newCapacity);
+            highWatermark = (int) Math.ceil(newCapacity * 0.8);
             buffer.flip();
             newBuffer.put(buffer);
             buffer = newBuffer;
