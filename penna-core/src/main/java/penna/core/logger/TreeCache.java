@@ -1,6 +1,7 @@
 package penna.core.logger;
 
 
+import org.jetbrains.annotations.VisibleForTesting;
 import penna.api.config.Config;
 import penna.api.config.ConfigManager;
 
@@ -128,7 +129,7 @@ public class TreeCache {
         return entry.logger();
     }
 
-    // Default visibility, for testing
+    @VisibleForTesting
     void traverse(Entry base, Consumer<EntryData> update) {
         update.accept(base.data);
         for (int index = 0; index < base.children.size(); index++){

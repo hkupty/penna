@@ -1,6 +1,8 @@
 package penna.api.models;
 
 import java.util.Arrays;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * The LogField enum is central to penna as it allows the customers to define which properties the log messages
@@ -76,7 +78,7 @@ public enum LogField {
      * String property that will be used to render the field in the final json message.
      */
     public final byte[] fieldName;
-    LogField(String fieldName) {
+    LogField(@NotNull String fieldName) {
         this.fieldName = fieldName.getBytes();
     }
 
@@ -86,7 +88,7 @@ public enum LogField {
      * @param fieldName the string representation of the field to be logged
      * @return The respective enum value or null if none matched.
      */
-    public static LogField fromFieldName(String fieldName) {
+    public static @Nullable LogField fromFieldName(@NotNull String fieldName) {
         @SuppressWarnings("PMD.DataflowAnomalyAnalysis")
         var field = fieldName.getBytes();
         for (LogField value : values()) {

@@ -1,0 +1,24 @@
+[versions]
+slf4j = "2.0.9"
+jackson = "2.15.3"
+jqwik = "1.7.2"
+junit = "5.8.1"
+jmh = "1.37"
+jbrAnn = "24.0.1"
+
+[libraries]
+slf4j = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
+jackson-core = { module = "com.fasterxml.jackson.core:jackson-core", version.ref = "jackson" }
+jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson" }
+jackson-yaml = { module = "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml", version.ref = "jackson" }
+jqwik = { module = "net.jqwik:jqwik", version.ref = "jqwik" }
+junit-api = { module ="org.junit.jupiter:junit-jupiter-api", version.ref = "junit" }
+junit-engine = { module ="org.junit.jupiter:junit-jupiter-engine", version.ref = "junit" }
+
+commons-math = { module = "org.apache.commons:commons-math3", version.prefer = "3.6.1"}
+commons-lang = { module = "org.apache.commons:commons-lang3", version.prefer = "3.13.0"}
+
+jmh-core = { module = "org.openjdk.jmh:jmh-core", version.ref = "jmh" }
+jmh-annotations = { module = "org.openjdk.jmh:jmh-generator-annprocess", version.ref = "jmh" }
+
+jetbrains-annotations = { module = "org.jetbrains:annotations", version.ref = "jbrAnn" }

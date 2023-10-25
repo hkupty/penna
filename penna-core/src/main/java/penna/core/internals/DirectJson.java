@@ -7,6 +7,7 @@ import java.math.BigDecimal;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
+import org.jetbrains.annotations.VisibleForTesting;
 
 public final class DirectJson implements Closeable {
     private static final int INITIAL_BUFFER_SIZE = 32 * 1024;
@@ -61,7 +62,7 @@ public final class DirectJson implements Closeable {
     private final FileOutputStream backingOs;
     private final FileChannel channel;
 
-    // This is not private only for the sake of testing
+    @VisibleForTesting
     ByteBuffer buffer = ByteBuffer.allocateDirect(INITIAL_BUFFER_SIZE);
 
     public DirectJson(FileChannel channel) {

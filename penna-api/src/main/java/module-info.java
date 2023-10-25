@@ -12,6 +12,7 @@
  */
 module penna.api {
     requires transitive org.slf4j;
+    requires transitive org.jetbrains.annotations;
 
     exports penna.api.models;
     exports penna.api.config;
