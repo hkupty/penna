@@ -18,11 +18,13 @@ import org.slf4j.MDC;
 import org.slf4j.MarkerFactory;
 import penna.api.config.Config;
 import penna.core.logger.utils.LogbackDevNullAppender;
-import penna.core.sink.OutputManager;
+import penna.core.sink.CoreSink;
+import penna.core.sink.SinkManager;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 public class LoggerPerformanceTest {
@@ -31,9 +33,9 @@ public class LoggerPerformanceTest {
     public static class TestBehavior {
         @Param({
                 "simple",
-                "modest",
-                "moderate",
-                "large"
+//                "modest",
+//                "moderate",
+//                "large"
         })
         String behavior;
         Throwable exception = new RuntimeException("with an exception");
@@ -120,19 +122,27 @@ public class LoggerPerformanceTest {
 
     @State(Scope.Thread)
     public static class PennaState {
-        private OutputManager dumpToNull;
+        private FileOutputStream fos;
         TreeCache cache = new TreeCache(Config.getDefault());
         PennaLogger logger;
 
         @Setup
         public void setup() throws IOException {
-            dumpToNull = new OutputManager.ToFile(new File("/dev/null"));
-            OutputManager.Impl.set(() -> dumpToNull);
+
+            var devnull = new File("/dev/null");
+            try {
+                fos = new FileOutputStream(devnull);
+            } catch (FileNotFoundException e) {
+                throw new RuntimeException("Dev null doesn't exist!", e);
+            }
+
+            SinkManager.Instance.replace(() -> new CoreSink(fos));
+
             logger = cache.getLoggerAt("jmh", "test", "penna");
         }
         @TearDown
         public void tearDown() throws IOException {
-            dumpToNull.close();
+            fos.close();
         }
     }
 
@@ -154,13 +164,16 @@ public class LoggerPerformanceTest {
                 .timeUnit(TimeUnit.MILLISECONDS)
                 .warmupTime(TimeValue.seconds(20))
                 .warmupIterations(3)
-                .threads(1)
                 .measurementIterations(3)
                 .forks(1)
                 .shouldFailOnError(true)
                 .shouldDoGC(true)
                 .addProfiler("gc")
+                .addProfiler("perfnorm")
+                .addProfiler("perfasm", "tooBigThreshold=2100")
+                .threads(4)
                 .jvm("/usr/lib/jvm/java-21-jetbrains/bin/java")
+                .jvmArgs("-Xmx8192m")
                 .build();
 
         new Runner(options).run();

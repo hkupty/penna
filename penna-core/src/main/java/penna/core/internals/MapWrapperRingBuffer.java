@@ -5,8 +5,8 @@ import java.util.Map;
 
 public final class MapWrapperRingBuffer {
     final MapWrapperTicket[] buffer = new MapWrapperTicket[32];
-    int index = 0;
-    int max = 0;
+    int index;
+    int max;
 
     public MapWrapperRingBuffer() {
         buffer[index] = new MapWrapperTicket(index, new HashMap<>());

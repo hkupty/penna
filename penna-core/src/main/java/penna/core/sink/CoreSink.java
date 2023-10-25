@@ -43,6 +43,10 @@ public final class CoreSink implements Sink, Closeable {
     private final PennaMDCAdapter mdcAdapter;
     private final BiConsumer<String, String> mdcWriter;
 
+    // From the same ticket that PMD references, https://bugs.openjdk.org/browse/JDK-8080225, it is noted that
+    // in JDK 10 the problem was solved. We are targeting JDK 17+, so the problem won't affect us.
+    // Plus, any other alternative is significantly slower.
+    @SuppressWarnings("PMD.AvoidFileStream")
     public CoreSink() { this(new FileOutputStream(FileDescriptor.out)); }
 
     public CoreSink(FileOutputStream fos) {
@@ -96,7 +100,8 @@ public final class CoreSink implements Sink, Closeable {
 
     }
 
-    private void writeThrowable(final Throwable throwable, LogConfig config, int level) {
+    private void writeThrowable(final Throwable throwable, LogConfig config, int initialLevel) {
+        int level = initialLevel;
         final String message;
         StackTraceElement[] frames;
         Throwable cause;
@@ -191,23 +196,27 @@ public final class CoreSink implements Sink, Closeable {
     }
 
     private void writeObject(LogConfig config, final Object object) throws IOException {
-        switch (object) {
-            case Throwable throwable -> {
-                config.filter().reset();
-                writeThrowable(throwable, config, 0);
-            }
-            case Map map -> writeMap(config, map);
-            case List lst -> writeArray(config, lst);
-            case Object[] lst -> writeArray(config, lst);
-            case String str -> jsonGenerator.writeString(str);
-            case Integer num  -> jsonGenerator.writeNumber(num);
-            case Long num -> jsonGenerator.writeNumber(num);
-            case Float num -> jsonGenerator.writeNumber(num);
-            case Double num -> jsonGenerator.writeNumber(num);
-            case null -> {}
-            default -> {
-                jsonGenerator.writeString(object.toString());
-            }
+        if (object instanceof Throwable throwable) {
+            config.filter().reset();
+            writeThrowable(throwable, config, 0);
+        } else if (object instanceof Map map) {
+            writeMap(config, map);
+        } else if (object instanceof List lst) {
+            writeArray(config, lst);
+        } else if (object instanceof Object[] lst) {
+            writeArray(config, lst);
+        } else if (object instanceof String str){
+            jsonGenerator.writeString(str);
+        } else if (object instanceof Long num){
+            jsonGenerator.writeNumber(num);
+        } else if (object instanceof Integer num){
+            jsonGenerator.writeNumber(num);
+        } else if (object instanceof Float num){
+            jsonGenerator.writeNumber(num);
+        } else if (object instanceof Double num){
+            jsonGenerator.writeNumber(num);
+        } else {
+            jsonGenerator.writeString(object.toString());
         }
     }
 

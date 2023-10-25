@@ -2,20 +2,18 @@ package penna.core.logger;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.slf4j.MDC;
-import penna.api.config.Config;
-import penna.api.config.ConfigManager.ConfigItem.LoggerConfigItem;
-import penna.core.logger.guard.*;
-import penna.core.sink.OutputManager;
-import penna.core.sink.PennaSink;
-import penna.core.sink.SinkImpl;
-import penna.core.sink.impl.DummySink;
-import penna.core.slf4j.PennaLoggerFactory;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.slf4j.MDC;
 import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
 import org.slf4j.event.Level;
+import penna.api.config.Config;
+import penna.core.logger.guard.*;
+import penna.core.sink.CoreSink;
+import penna.core.sink.Sink;
+import penna.core.sink.SinkManager;
+import penna.core.sink.TestSink;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -24,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.concurrent.atomic.AtomicReferenceArray;
 
 class LoggerTests {
     record ThrowableLog(
@@ -82,8 +79,9 @@ class LoggerTests {
     void can_write_log_messages() {
         var cache = new TreeCache(Config.getDefault());
         AtomicInteger counter = new AtomicInteger(0);
-        SinkImpl checker = new DummySink(mle -> counter.getAndIncrement());
-        PennaLogEventBuilder.Factory.replaceSinkLocally(checker);
+        Sink checker = new TestSink(mle -> counter.getAndIncrement());
+
+        SinkManager.Instance.replace(() -> checker);
 
         PennaLogger pennaLogger = cache.getLoggerAt("test");
 
@@ -112,13 +110,13 @@ class LoggerTests {
         var cache = new TreeCache(Config.getDefault());
 
         AtomicReference<Marker> usedMarker = new AtomicReference<>(null);
-        SinkImpl checker = new DummySink(mle -> {
-            if (mle.getMarkers().size() > 0) {
+        Sink checker = new TestSink(mle -> {
+            if (!mle.getMarkers().isEmpty()) {
                 usedMarker.set(mle.getMarkers().get(0));
             }
         });
 
-        PennaLogEventBuilder.Factory.replaceSinkLocally(checker);
+        SinkManager.Instance.replace(() -> checker);
 
         PennaLogger pennaLogger = cache.getLoggerAt("test");
         Assertions.assertEquals(InfoLevelGuard.singleton(), pennaLogger.levelGuard);
@@ -142,8 +140,9 @@ class LoggerTests {
         PennaLogger logger = cache.getLoggerAt("c", "est", "moi");
 
         File testFile = File.createTempFile("valid-message", ".json");
-        var testOut = new OutputManager.ToFile(testFile);
-        OutputManager.Impl.set(() -> testOut);
+        FileOutputStream fos = new FileOutputStream(testFile);
+
+        SinkManager.Instance.replace(() -> new CoreSink(fos));
 
         MDC.put("key", "value");
         logger.atInfo()
@@ -175,6 +174,6 @@ class LoggerTests {
 
         // Keep this line at the bottom, so we can inspect the file if the test breaks
         testFile.deleteOnExit();
-        testOut.close();
+        fos.close();
     }
 }
