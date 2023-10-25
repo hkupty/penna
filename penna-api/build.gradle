@@ -13,10 +13,11 @@ repositories {
 }
 
 dependencies {
-    compileOnly 'org.slf4j:slf4j-api:2.0.6'
+    compileOnly libs.slf4j
+    compileOnly libs.jetbrains.annotations
 
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+    testImplementation libs.junit.api
+    testRuntimeOnly libs.junit.engine
 }
 
 test {

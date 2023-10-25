@@ -32,12 +32,12 @@ testing {
             dependencies {
                 implementation project(":penna-api")
                 implementation project(":penna-core")
-                implementation 'org.slf4j:slf4j-api:2.0.9'
-                implementation 'net.jqwik:jqwik:1.7.2'
-                implementation 'org.apache.commons:commons-math3:3.6.1'
-                implementation 'com.fasterxml.jackson.core:jackson-core:2.14.0'
-                implementation 'com.fasterxml.jackson.core:jackson-databind:2.14.0'
-                compileOnly 'org.jetbrains:annotations:23.0.0'
+                implementation libs.slf4j
+                implementation libs.jqwik
+                implementation libs.commons.math
+                implementation libs.jackson.core
+                implementation libs.jackson.databind
+                compileOnly libs.jetbrains.annotations
             }
 
             targets {
@@ -53,12 +53,12 @@ testing {
             dependencies {
                 implementation project(":penna-api")
                 implementation project(":penna-core")
-                implementation 'org.apache.commons:commons-lang3:3.13.0'
-                implementation 'org.slf4j:slf4j-api:2.0.9'
-                implementation 'org.openjdk.jmh:jmh-core:1.37'
-                implementation 'org.openjdk.jmh:jmh-generator-annprocess:1.37'
-                implementation 'com.fasterxml.jackson.core:jackson-core:2.15.2'
-                implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.2'
+                implementation libs.slf4j
+
+                implementation libs.jackson.core
+                implementation libs.jackson.databind
+                implementation libs.commons.lang
+                implementation libs.jmh.core
                 implementation 'ch.qos.logback:logback-core:1.4.11'
                 implementation 'ch.qos.logback:logback-classic:1.4.11'
                 implementation 'ch.qos.logback.contrib:logback-jackson:0.1.5'
@@ -66,7 +66,7 @@ testing {
                 implementation 'ch.qos.logback.contrib:logback-json-classic:0.1.5'
                 implementation 'net.logstash.logback:logstash-logback-encoder:7.4'
 
-                annotationProcessor 'org.openjdk.jmh:jmh-generator-annprocess:1.37'
+                annotationProcessor libs.jmh.annotations
             }
 
             targets {
@@ -86,12 +86,13 @@ tasks.named("check") {
 }
 
 dependencies {
-    implementation 'org.slf4j:slf4j-api:2.0.9'
     implementation project(":penna-api")
+    implementation libs.slf4j
+    compileOnly libs.jetbrains.annotations
 
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
-    testImplementation 'com.fasterxml.jackson.core:jackson-core:2.14.2'
-    testImplementation 'com.fasterxml.jackson.core:jackson-databind:2.14.2'
+    testImplementation libs.junit.api
+    testRuntimeOnly libs.junit.engine
+    testImplementation libs.jackson.core
+    testImplementation libs.jackson.databind
 
 }
