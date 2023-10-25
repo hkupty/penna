@@ -11,7 +11,6 @@ import java.util.Arrays;
 import java.util.List;
 
 public class PennaLogEvent implements LoggingEvent {
-
     private int cursor;
     public Object[] arguments = new Object[8];
     public List<Marker> markers = new ArrayList<>();
@@ -23,6 +22,7 @@ public class PennaLogEvent implements LoggingEvent {
     public Throwable throwable;
     public byte[] logger;
     public LogConfig config;
+    public long timestamp;
 
     /**
      * Resets all the fields that will change during log creation.
@@ -41,6 +41,7 @@ public class PennaLogEvent implements LoggingEvent {
         message = null;
         throwable = null;
         logger = null;
+        timestamp = 0;
     }
 
     @Override
@@ -100,7 +101,7 @@ public class PennaLogEvent implements LoggingEvent {
 
     @Override
     public long getTimeStamp() {
-        return 0;
+        return timestamp;
     }
 
     @Override

@@ -222,7 +222,7 @@ public final class CoreSink implements Sink, Closeable {
     private void emitTimestamp(final PennaLogEvent logEvent) {
         jsonGenerator.checkSpace(25);
         jsonGenerator.writeKey(LogField.TIMESTAMP.fieldName);
-        jsonGenerator.writeNumber(Clock.getTimestamp());
+        jsonGenerator.writeNumber(logEvent.timestamp);
     }
 
 
