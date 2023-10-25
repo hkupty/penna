@@ -238,6 +238,7 @@ public final class CoreSink implements Sink, Closeable {
     }
 
     private void emitLogger(final PennaLogEvent logEvent) {
+        jsonGenerator.checkSpace(9 + logEvent.logger.length);
         jsonGenerator.writeKey(LogField.LOGGER_NAME.fieldName);
         jsonGenerator.writeStringFromBytes(logEvent.logger);
     }
