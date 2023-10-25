@@ -32,10 +32,10 @@ public sealed interface LevelGuard permits
         private static final EnumMap<Level, LevelGuard> levelMapping = new EnumMap<>(Level.class);
 
         static {
+            levelMapping.put(Level.TRACE, TraceLevelGuard.singleton());
             levelMapping.put(Level.DEBUG, DebugLevelGuard.singleton());
             levelMapping.put(Level.INFO, InfoLevelGuard.singleton());
             levelMapping.put(Level.WARN, WarnLevelGuard.singleton());
-            levelMapping.put(Level.TRACE, TraceLevelGuard.singleton());
             levelMapping.put(Level.ERROR, ErrorLevelGuard.singleton());
         }
 
