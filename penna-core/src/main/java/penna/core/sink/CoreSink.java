@@ -9,13 +9,12 @@ import penna.core.models.PennaLogEvent;
 import penna.core.slf4j.PennaMDCAdapter;
 
 import java.io.*;
-import java.nio.channels.FileChannel;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiConsumer;
 
-public final class PennaSink implements SinkImpl, Closeable {
+public final class CoreSink implements Sink, Closeable {
     private static final byte[] SUPPRESSED = "suppressed".getBytes();
     private static final byte[] STACKTRACE = "stacktrace".getBytes();
     private static final byte[] CLASS = "class".getBytes();
@@ -38,36 +37,35 @@ public final class PennaSink implements SinkImpl, Closeable {
 
     private final AtomicLong counter = new AtomicLong(0L);
 
-    private DirectJson jsonGenerator;
+    private final FileOutputStream fos;
+    private final DirectJson jsonGenerator;
 
     private final PennaMDCAdapter mdcAdapter;
-    private BiConsumer<String, String> mdcWriter;
+    private final BiConsumer<String, String> mdcWriter;
 
-    public PennaSink() {
+    public CoreSink() { this(new FileOutputStream(FileDescriptor.out)); }
+
+    public CoreSink(FileOutputStream fos) {
         if (MDC.getMDCAdapter() instanceof PennaMDCAdapter adapter) {
             mdcAdapter = adapter;
         } else {
             MiniLogger.error("Not using PennaMDCAdapter for some reason! MDC will be off");
             mdcAdapter = null;
         }
-
-    }
-
-    public static SinkImpl getSink() {
-        PennaSink sinkImpl = new PennaSink();
-        sinkImpl.init(OutputManager.Impl.get().getChannel());
-        return sinkImpl;
-    }
-
-    @Override
-    public void init(final FileChannel channel) {
-        jsonGenerator = new DirectJson(channel);
+        this.fos = fos ;
+        jsonGenerator = new DirectJson(fos.getChannel());
         mdcWriter = jsonGenerator::writeStringValue;
+
+    }
+
+    public static Sink getSink() {
+        return new CoreSink();
     }
 
     @Override
     public void close() throws IOException {
         jsonGenerator.close();
+        fos.close();
     }
     // Hand-crafted based on from StackTraceElement::toString
     // ClassLoader is intentionally removed
