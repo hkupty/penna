@@ -1,4 +1,0 @@
-penna:
-  loggers:
-    org.example:
-      level: debug
