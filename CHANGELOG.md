@@ -13,6 +13,8 @@ the PATCH component is omitted when its value is `0`.
 #### Changed
 
 - Add `ExcaptionHandling` configuration ([#53](https://github.com/hkupty/penna/pull/53))
+- Log fields internally return byte arrays instead of strings ([#59](https://github.com/hkupty/penna/pull/59))
+- `ExceptionHandling` allow for configuring maximum depth ([#59](https://github.com/hkupty/penna/pull/59))
 
 ### `penna-core`
 
@@ -26,6 +28,10 @@ the PATCH component is omitted when its value is `0`.
 - Configure stacktrace depth and frame deduplication ([#53](https://github.com/hkupty/penna/pull/53))
 - Optimize keyword handling in json logs ([#56](https://github.com/hkupty/penna/pull/56))
 - Format logs only when writting the output ([#56](https://github.com/hkupty/penna/pull/56))
+- Refactor structure of native MDC ([#59](https://github.com/hkupty/penna/pull/59))
+- Move sinks and restructure output creation ([#59](https://github.com/hkupty/penna/pull/59))
+- Refactor integer to ascii logic ([#59](https://github.com/hkupty/penna/pull/59))
+- Various misc improvements for performance ([#59](https://github.com/hkupty/penna/pull/59))
 
 ### `penna-yaml-config`
 
