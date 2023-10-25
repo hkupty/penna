@@ -87,6 +87,7 @@ public enum LogField {
      * @return The respective enum value or null if none matched.
      */
     public static LogField fromFieldName(String fieldName) {
+        @SuppressWarnings("PMD.DataflowAnomalyAnalysis")
         var field = fieldName.getBytes();
         for (LogField value : values()) {
             if (Arrays.equals(value.fieldName, field)) {
