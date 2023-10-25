@@ -1,0 +1,39 @@
+plugins {
+    id 'penna.base-java'
+    id 'penna.publishing'
+    id 'pmd'
+    id("org.gradlex.extra-java-module-info") version "1.4.2"
+}
+
+group 'com.hkupty.penna'
+
+version '0.6.2'
+
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation project(":penna-api")
+    implementation project(":penna-core")
+
+    implementation 'org.slf4j:slf4j-api:2.0.9'
+    api "com.diogonunes:JColor:5.5.1"
+
+
+    testImplementation platform('org.junit:junit-bom:5.9.1')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+}
+
+extraJavaModuleInfo {
+    module("JColor-5.5.1.jar", "JColor", "5.5.1") {
+        exports("com.diogonunes.jcolor")
+    }
+
+}
+
+
+test {
+    useJUnitPlatform()
+}
