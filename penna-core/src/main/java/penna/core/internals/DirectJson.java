@@ -72,6 +72,7 @@ public final class DirectJson implements Closeable {
     // in JDK 10 the problem was solved. We are targeting JDK 17+, so the problem won't affect us.
     // Plus, any other alternative is significantly slower.
     @SuppressWarnings("PMD.AvoidFileStream")
+    @Deprecated() // Pass in a file channel instead
     public DirectJson() {
         this.backingOs = new FileOutputStream(FileDescriptor.out);
         this.channel = backingOs.getChannel();
@@ -133,7 +134,7 @@ public final class DirectJson implements Closeable {
     }
 
     public void writeRaw(final char chr) { buffer.put((byte) chr); }
-    public void writeRaw(final byte[] chrs) { buffer.put(chrs); }
+    public void writeRaw(final byte[] chars) { buffer.put(chars); }
 
     public void openObject() { buffer.put(OPEN_OBJ); }
     public void openArray() { buffer.put(OPEN_ARR); }
@@ -186,9 +187,9 @@ public final class DirectJson implements Closeable {
 
     // --[ 2nd level; based on the level above ]-- //
 
-    public void writeStringFromBytes(final byte[] chrs) {
+    public void writeStringFromBytes(final byte[] chars) {
         buffer.put(QUOTE);
-        writeRaw(chrs);
+        writeRaw(chars);
         buffer.put(QUOTE);
         buffer.put(KV_SEP);
 
@@ -216,6 +217,7 @@ public final class DirectJson implements Closeable {
     }
 
     public void writeString(final String str) {
+        // TODO ensure check space happens on the correct places, but not repeatedly
         checkSpace(str.length() + 3);
         buffer.put(QUOTE);
         writeRaw(str);
