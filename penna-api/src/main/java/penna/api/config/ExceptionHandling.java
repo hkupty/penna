@@ -3,14 +3,16 @@ package penna.api.config;
 /**
  * This record holds configuration on how Penna should handle logging exception fields.
  * @param maxDepth How far the stacktrace can go before cutting short
+ * @param traverseDepth The amount of levels one can traverse down the exception
  * @param deduplication When enabled, penna will not print repeated stack frames
  */
 public record ExceptionHandling(
     int maxDepth,
+    int traverseDepth,
     boolean deduplication
 ) {
 
-    private static final ExceptionHandling singleton = new ExceptionHandling(64, false);
+    private static final ExceptionHandling singleton = new ExceptionHandling(64, 2, false);
 
     /**
      * Gets the default instance.
@@ -26,7 +28,7 @@ public record ExceptionHandling(
      * @return A copy of the original object with the values replaced
      */
     public ExceptionHandling replaceDeduplication(boolean deduplication) {
-        return new ExceptionHandling(this.maxDepth, deduplication);
+        return new ExceptionHandling(this.maxDepth, this.traverseDepth, deduplication);
     }
 
     /**
@@ -35,7 +37,7 @@ public record ExceptionHandling(
      * @return A copy of the original object with the values replaced
      */
     public ExceptionHandling replaceMaxDepth(int maxDepth) {
-        return new ExceptionHandling(maxDepth, this.deduplication);
+        return new ExceptionHandling(maxDepth, this.traverseDepth,  this.deduplication);
     }
 
     /**

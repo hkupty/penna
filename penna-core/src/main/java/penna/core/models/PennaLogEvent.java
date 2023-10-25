@@ -1,6 +1,5 @@
 package penna.core.models;
 
-import penna.core.logger.IPennaLogger;
 import org.slf4j.Marker;
 import org.slf4j.event.KeyValuePair;
 import org.slf4j.event.Level;
@@ -11,7 +10,6 @@ import java.util.Arrays;
 import java.util.List;
 
 public class PennaLogEvent implements LoggingEvent {
-
     private int cursor;
     public Object[] arguments = new Object[8];
     public List<Marker> markers = new ArrayList<>();
@@ -19,10 +17,11 @@ public class PennaLogEvent implements LoggingEvent {
     public Object extra;
     public Level level;
     public String message;
-    public String threadName;
+    public byte[] threadName;
     public Throwable throwable;
-    public IPennaLogger logger;
+    public byte[] logger;
     public LogConfig config;
+    public long timestamp;
 
     /**
      * Resets all the fields that will change during log creation.
@@ -41,6 +40,7 @@ public class PennaLogEvent implements LoggingEvent {
         message = null;
         throwable = null;
         logger = null;
+        timestamp = 0;
     }
 
     @Override
@@ -50,7 +50,7 @@ public class PennaLogEvent implements LoggingEvent {
 
     @Override
     public String getLoggerName() {
-        return logger.getName();
+        return new String(logger);
     }
 
     @Override
@@ -100,11 +100,11 @@ public class PennaLogEvent implements LoggingEvent {
 
     @Override
     public long getTimeStamp() {
-        return 0;
+        return timestamp;
     }
 
     @Override
     public String getThreadName() {
-        return threadName;
+        return new String(threadName);
     }
 }

@@ -9,7 +9,8 @@ import penna.core.internals.StackTraceFilter;
 public record LogConfig(
         LogField[] fields,
         StackTraceFilter filter,
-        int stacktraceDepth
+        int stacktraceDepth,
+        int traverseDepth
 
 ) {
 
@@ -17,7 +18,8 @@ public record LogConfig(
         return new LogConfig(
                 config.fields(),
                 config.exceptionHandling().deduplication() ? StackTraceBloomFilter.create() : new PassThroughFilter(),
-                config.exceptionHandling().maxDepth()
+                config.exceptionHandling().maxDepth(),
+                config.exceptionHandling().traverseDepth()
         );
     }
 }

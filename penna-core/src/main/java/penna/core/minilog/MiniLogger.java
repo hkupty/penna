@@ -15,6 +15,8 @@ public final class MiniLogger {
         System.err.print(message);
         System.err.print("\",\"error_message\":\"");
         System.err.print(throwable.getMessage());
+        System.err.print("\",\"thorable\":\"");
+        System.err.print(throwable.getClass());
         System.err.print("\",\"throwable\":\"");
         var stack = throwable.getStackTrace();
         for(int i = 0; i < stack.length; i++) {

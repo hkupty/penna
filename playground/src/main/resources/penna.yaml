@@ -1,9 +1,0 @@
-penna:
-  fields:
-    - message
-    - mdc
-    - logger
-    - throwable
-  loggers:
-    org.example:
-      level: debug

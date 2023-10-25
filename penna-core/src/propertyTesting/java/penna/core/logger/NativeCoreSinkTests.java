@@ -11,9 +11,8 @@ import penna.api.config.Config;
 import penna.api.models.LogField;
 import penna.core.models.LogConfig;
 import penna.core.models.PennaLogEvent;
-import penna.core.sink.OutputManager;
-import penna.core.sink.PennaSink;
-import penna.core.sink.SinkImpl;
+import penna.core.sink.CoreSink;
+import penna.core.sink.SinkManager;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -21,7 +20,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-class NativePennaSinkTests {
+class NativeCoreSinkTests {
 
     private static final ObjectMapper om = new ObjectMapper();
     @Provide
@@ -76,7 +75,7 @@ class NativePennaSinkTests {
                 .use(markers).in((evt, m) -> {evt.markers.addAll(m); return evt;})
                 .use(kvps).in((evt, m) -> {evt.keyValuePairs.addAll(m); return evt;})
                 .use(levels).in((evt, m) -> {evt.level = m; return evt;})
-                .use(threads).in((evt, m) -> {evt.threadName = m; return evt;})
+                .use(threads).in((evt, m) -> {evt.threadName = m.getBytes(); return evt;})
                 .use(throwableArbitrary()).withProbability(0.3).in((evt, t) -> {evt.throwable = t; return evt;})
                 .build();
     }
@@ -102,12 +101,9 @@ class NativePennaSinkTests {
     @Property
     void validJsonMessage(@ForAll("fields") LogField[] fields) throws IOException {
         File testFile = File.createTempFile("valid-message", ".json");
-        var out = new OutputManager.ToFile(testFile);
-        OutputManager.Impl.set(() -> out);
+        FileOutputStream fos = new FileOutputStream(testFile);
 
-        // HACK currently, only for tests, it is necessary to replace the sink at each iteration
-        SinkImpl sink = PennaSink.getSink();
-        PennaLogEventBuilder.Factory.replaceSinkLocally(sink);
+        SinkManager.Instance.replace(() -> new CoreSink(fos));
 
         Config config = Config.getDefault().replaceFields(fields);
         TreeCache cache = new TreeCache(config);
@@ -124,7 +120,7 @@ class NativePennaSinkTests {
 
         Assertions.assertDoesNotThrow(() -> om.readValue(testFile, Map.class));
         testFile.deleteOnExit();
-        out.close();
+        fos.close();
     }
 
 
@@ -134,25 +130,22 @@ class NativePennaSinkTests {
             @ForAll("simpleEvent") PennaLogEvent event
     ) throws IOException {
         File testFile = File.createTempFile("valid-message", ".json");
-        var out = new OutputManager.ToFile(testFile);
-        OutputManager.Impl.set(() -> out);
+        FileOutputStream fos = new FileOutputStream(testFile);
 
-        // HACK currently, only for tests, it is necessary to replace the sink at each iteration
-        SinkImpl sink = PennaSink.getSink();
-        PennaLogEventBuilder.Factory.replaceSinkLocally(sink);
+        SinkManager.Instance.replace(() -> new CoreSink(fos));
 
         Config config = Config.getDefault().replaceFields(fields);
         TreeCache cache = new TreeCache(config);
         PennaLogger logger = cache.getLoggerAt("c", "est", "moi");
 
         event.config = LogConfig.fromConfig(Config.withFields(fields));
-        event.logger = logger;
+        event.logger = logger.nameAsChars;
 
         logger.log(event);
 
         Assertions.assertDoesNotThrow(() -> om.readValue(testFile, Map.class));
         testFile.deleteOnExit();
-        out.close();
+        fos.close();
     }
 
 

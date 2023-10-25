@@ -1,5 +1,6 @@
 package penna.core.logger;
 
+import penna.core.internals.Clock;
 import penna.core.minilog.MiniLogger;
 import penna.core.models.PennaLogEvent;
 import org.slf4j.Marker;
@@ -7,8 +8,8 @@ import org.slf4j.event.KeyValuePair;
 import org.slf4j.event.Level;
 import org.slf4j.event.LoggingEvent;
 import org.slf4j.spi.LoggingEventBuilder;
-import penna.core.sink.PennaSink;
-import penna.core.sink.SinkImpl;
+import penna.core.sink.Sink;
+import penna.core.sink.SinkManager;
 
 import java.io.IOException;
 import java.util.List;
@@ -37,9 +38,10 @@ import java.util.function.Supplier;
  */
 public final class PennaLogEventBuilder implements LoggingEventBuilder {
     public static final int POOL_SIZE = 16;
+    public static final int POOL_SIZE_MASK = POOL_SIZE - 1;
     private final PennaLogEvent[] pool;
     private int currentIndex;
-    SinkImpl sink;
+    Sink sink;
     private PennaLogEvent current;
 
     public final static class Factory {
@@ -61,8 +63,9 @@ public final class PennaLogEventBuilder implements LoggingEventBuilder {
             }
 
             builder.current.level = event.getLevel();
-            builder.current.logger = logger;
+            builder.current.logger = logger.getName().getBytes();
             builder.current.config = logger.config;
+            builder.current.timestamp = Clock.getTimestamp();
 
             builder.log();
         }
@@ -70,16 +73,12 @@ public final class PennaLogEventBuilder implements LoggingEventBuilder {
         public static PennaLogEventBuilder get(PennaLogger logger, Level level) {
             var builder = pool.get();
             builder.next();
-            builder.current.logger = logger;
+            builder.current.logger = logger.nameAsChars;
             builder.current.level = level;
             builder.current.config = logger.config;
+            builder.current.timestamp = Clock.getTimestamp();
 
             return builder;
-        }
-
-        // DO NOT USE THIS METHOD.
-        static void replaceSinkLocally(SinkImpl sink) {
-            pool.get().sink = sink;
         }
     }
 
@@ -88,19 +87,18 @@ public final class PennaLogEventBuilder implements LoggingEventBuilder {
      */
     private void next() {
         // This is only possible because POOL_SIZE is a power of 2
-        currentIndex = (currentIndex + 1) & (POOL_SIZE - 1);
+        currentIndex = (currentIndex + 1) & POOL_SIZE_MASK;
         current = pool[currentIndex];
         current.reset();
     }
 
     private PennaLogEventBuilder() {
         String threadName = Thread.currentThread().getName();
-        // TODO Maybe we need multiple sinks again based on layout.
-        sink = PennaSink.getSink();
+        sink = SinkManager.Instance.get(this);
         pool = new PennaLogEvent[POOL_SIZE];
         for (int i = 0; i < POOL_SIZE; i++){
             pool[i] = new PennaLogEvent();
-            pool[i].threadName = threadName;
+            pool[i].threadName = threadName.getBytes();
         }
 
         current = pool[currentIndex];

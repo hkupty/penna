@@ -7,13 +7,8 @@ import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 import org.openjdk.jmh.runner.options.TimeValue;
-import org.slf4j.LoggerFactory;
 import penna.api.config.Config;
-import penna.core.sink.PennaSink;
-import penna.core.sink.SinkImpl;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 

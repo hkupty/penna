@@ -10,12 +10,14 @@ import penna.core.models.LogConfig;
 
 public final class PennaLogger implements IPennaLogger {
 
-    private transient final String name;
+    transient final byte[] nameAsChars;
+    transient final String name;
     transient LevelGuard levelGuard;
     transient LogConfig config;
 
     PennaLogger(String name, Config config) {
         this.name = name;
+        this.nameAsChars = name.getBytes();
         this.updateConfig(config);
     }
 
