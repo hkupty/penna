@@ -7,7 +7,7 @@ plugins {
 
 group 'com.hkupty.penna'
 
-version '0.6.2'
+version '0.7.0-alpha1'
 
 
 repositories {
@@ -18,8 +18,9 @@ dependencies {
     implementation project(":penna-api")
     implementation project(":penna-core")
 
-    implementation 'org.slf4j:slf4j-api:2.0.9'
-    api "com.diogonunes:JColor:5.5.1"
+    implementation libs.slf4j
+    compileOnly libs.jetbrains.annotations
+    implementation "com.diogonunes:JColor:5.5.1"
 
 
     testImplementation platform('org.junit:junit-bom:5.9.1')

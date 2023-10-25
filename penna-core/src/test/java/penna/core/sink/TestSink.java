@@ -18,9 +18,4 @@ public final class TestSink implements NonStandardSink {
     public void write(PennaLogEvent logEvent) throws IOException {
         consumer.accept(logEvent);
     }
-
-    @Override
-    public Supplier<Sink> sibling() {
-        return () -> new TestSink(consumer);
-    }
 }

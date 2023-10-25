@@ -38,10 +38,4 @@ public class DevConfigManager implements ConfigManager {
     public void updateConfigs(ConfigItem... configItems) {
         proxied.updateConfigs(configItems);
     }
-
-    @Override
-    public void logInit(Logger logger) {
-        logger.warn("Using Penna's Dev-Extras. This is not recommended for running in production");
-    }
-
 }

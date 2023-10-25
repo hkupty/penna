@@ -1,6 +1,7 @@
 package penna.dev.sink;
 
 import com.diogonunes.jcolor.Attribute;
+import org.jetbrains.annotations.TestOnly;
 import org.slf4j.MDC;
 import org.slf4j.helpers.MessageFormatter;
 import penna.core.models.PennaLogEvent;
@@ -28,6 +29,12 @@ public class DevRuntimeSink implements NonStandardSink, Closeable {
         if (MDC.getMDCAdapter() instanceof PennaMDCAdapter adapter) {
             mdcAdapter = adapter;
         }
+    }
+
+    @TestOnly
+    public void replaceOut(FileOutputStream fos) throws IOException {
+        this.fos.close();
+        this.fos = fos;
     }
 
     private static Attribute getColor(CharSequence key) {
@@ -118,11 +125,6 @@ public class DevRuntimeSink implements NonStandardSink, Closeable {
 
         ps.println(logData);
         ps.flush();
-    }
-
-    @Override
-    public Supplier<Sink> sibling() {
-        return DevRuntimeSink::new;
     }
 
     @Override
