@@ -23,6 +23,7 @@ dependencies {
     compileOnly libs.jackson.core
     compileOnly libs.jackson.databind
     compileOnly libs.jackson.yaml
+    compileOnly libs.jetbrains.annotations
 
     // Tests
     testImplementation libs.junit.api
