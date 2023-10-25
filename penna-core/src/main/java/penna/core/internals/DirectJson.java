@@ -1,6 +1,7 @@
 package penna.core.internals;
 
 
+
 import java.io.*;
 import java.math.BigDecimal;
 import java.nio.ByteBuffer;
@@ -57,7 +58,6 @@ public final class DirectJson implements Closeable {
     };
     static final byte DELIM_START = '{';
     static final byte DELIM_STOP = '}';
-
     private final FileOutputStream backingOs;
     private final FileChannel channel;
 
@@ -246,13 +246,15 @@ public final class DirectJson implements Closeable {
     }
 
     public void writeNumber(final double data) {
+        double number = data;
         if (data < 0) {
             writeRaw('-');
+            number = Math.abs(data);
         }
-        writeNumberRaw((long) data);
+        writeNumberRaw((long) number);
         buffer.put(DOT);
         var pos = buffer.position();
-        BigDecimal fractional = BigDecimal.valueOf(Math.abs(data)).remainder(BigDecimal.ONE);
+        BigDecimal fractional = BigDecimal.valueOf(number).remainder(BigDecimal.ONE);
         int decs = 0;
         while (!fractional.equals(BigDecimal.ZERO)) {
             fractional = fractional.movePointRight(1);

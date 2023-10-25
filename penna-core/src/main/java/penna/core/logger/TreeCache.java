@@ -30,9 +30,8 @@ public class TreeCache {
 
         static EntryData empty(Config config) { return new EntryData(null, config);}
 
-        private EntryData initialize(String... identifier) {
+        private void initialize(String... identifier) {
             this.logger = new PennaLogger(String.join(".", identifier), this.config);
-            return this;
         }
 
         void updateConfig(Config config) {
