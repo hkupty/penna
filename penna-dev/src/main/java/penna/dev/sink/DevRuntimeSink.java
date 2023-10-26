@@ -8,6 +8,7 @@ import penna.core.models.PennaLogEvent;
 import penna.core.sink.NonStandardSink;
 import penna.core.sink.Sink;
 import penna.core.slf4j.PennaMDCAdapter;
+import penna.dev.Formatter;
 import penna.dev.models.EnhancedLogEvent;
 
 import java.io.*;
@@ -93,7 +94,8 @@ public class DevRuntimeSink implements NonStandardSink, Closeable {
                 logData.append(" ");
             });
         }
-        logData.append(MessageFormatter.basicArrayFormat(logEvent.message, logEvent.arguments));
+
+        logData.append(Formatter.format(logEvent.message, logEvent.arguments));
 
         if(!logEvent.keyValuePairs.isEmpty()) {
             logData.append(colorize(" kvs{", Attribute.ITALIC()));
