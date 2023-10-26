@@ -2,7 +2,6 @@ package penna.core.internals;
 
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -111,5 +110,16 @@ class DirectJsonTests {
         var charset = StandardCharsets.UTF_8;
         var chars = charset.decode(directJson.buffer).toString();
         assertEquals("{\"message\":\"hello http:\\\\\\\\world.com\"}", chars);
+    }
+
+    @Test
+    void can_write_nulls_when_formatting_string(){
+        DirectJson directJson = new DirectJson();
+
+        directJson.writeRawFormatting("String with {} placeholder", new Object[]{null});
+        directJson.buffer.flip();
+        var charset = StandardCharsets.UTF_8;
+        var chars = charset.decode(directJson.buffer).toString();
+        assertEquals("String with null placeholder", chars);
     }
 }
