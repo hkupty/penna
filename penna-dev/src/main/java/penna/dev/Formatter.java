@@ -1,8 +1,10 @@
 package penna.dev;
 
+@SuppressWarnings("PMD.AssignmentInOperand")
 public class Formatter {
 
-    public static String format(String message, Object[] args) {
+    @SuppressWarnings("PMD.DataflowAnomalyAnalysis")
+    public static String format(String message, Object... args) {
         StringBuilder formattedMessage = new StringBuilder(message);
         int cursor = 0;
         int pos;
