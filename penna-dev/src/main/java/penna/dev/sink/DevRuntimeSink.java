@@ -18,6 +18,7 @@ import java.util.function.Supplier;
 import static com.diogonunes.jcolor.Ansi.colorize;
 
 public class DevRuntimeSink implements NonStandardSink, Closeable {
+    private static final int LOGGER_NAME_FOLDING_THRESHOLD = 25;
     FileOutputStream fos = new FileOutputStream(FileDescriptor.out);
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss.SSS").withZone(ZoneId.systemDefault());
     PrintStream ps = new PrintStream(fos, false);
@@ -41,6 +42,7 @@ public class DevRuntimeSink implements NonStandardSink, Closeable {
         return Attribute.TEXT_COLOR((Math.abs(key.hashCode()) % 155) + 40);
     }
 
+    @SuppressWarnings("PMD.DataflowAnomalyAnalysis")
     @Override
     public void write(PennaLogEvent logEvent) throws IOException {
         init();
@@ -54,14 +56,14 @@ public class DevRuntimeSink implements NonStandardSink, Closeable {
         logData.append(" ");
         logData.append(colorize(new String(logEvent.threadName), Attribute.BOLD()));
         var logger = new StringBuilder(new String(logEvent.logger));
-        if (logger.length() > 25) {
+        if (logEvent.logger.length > LOGGER_NAME_FOLDING_THRESHOLD) {
             var cursor = 0;
             while (cursor != -1) {
                 var off = logger.indexOf(".", cursor);
                 if (off == -1) break;
                 logger.delete(cursor + 1, off);
                 cursor = logger.indexOf(".", cursor) + 1;
-                if (logger.length() <= 25) break;
+                if (logger.length() <= LOGGER_NAME_FOLDING_THRESHOLD) break;
             }
         }
         logData.append(" ".repeat(Math.max(34 - logEvent.threadName.length - logger.length(), 1)));
