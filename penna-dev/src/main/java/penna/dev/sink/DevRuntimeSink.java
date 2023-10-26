@@ -18,7 +18,7 @@ import java.util.function.Supplier;
 import static com.diogonunes.jcolor.Ansi.colorize;
 
 public class DevRuntimeSink implements NonStandardSink, Closeable {
-    private static final int LOGGER_NAME_FOLDING_THRESHOLD = 25;
+    private static final int LOGGER_NAME_FOLDING_THRESHOLD = 50;
     FileOutputStream fos = new FileOutputStream(FileDescriptor.out);
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss.SSS").withZone(ZoneId.systemDefault());
     PrintStream ps = new PrintStream(fos, false);
