@@ -13,15 +13,7 @@ buildscript {
 rootProject.name = 'penna'
 include "penna-api"
 include "penna-core"
-include 'sample'
-include 'direct-sample'
-include 'throughput'
-include 'noop'
-include 'count'
-include 'penna-yaml-config'
+include "penna-dev"
+include "penna-yaml-config"
 
-project(":throughput").projectDir = file("tests/throughput")
-project(":noop").projectDir = file("tests/noop")
-project(":count").projectDir = file("tests/count")
-include 'playground'
 
