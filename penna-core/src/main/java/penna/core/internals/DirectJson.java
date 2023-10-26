@@ -96,9 +96,15 @@ public final class DirectJson implements Closeable {
                             (str.codePointAt(i - 1) != '\\' || str.codePointAt(i - 2) == '\\')
                     ) {
                         // Warning! Mismatch in arguments/template might cause exception.
-                        var argument = arguments[cursor++].toString();
-                        checkSpace(argument.length());
-                        writeRaw(argument);
+
+                        var argument = arguments[cursor++];
+                        if (argument == null) {
+                            writeRaw(NULL);
+                        } else {
+                            var argStr = argument.toString();
+                            checkSpace(argStr.length());
+                            writeRaw(argStr);
+                        }
 
                     } else {
                         int offset = str.codePointAt(i - 1) == '\\' ? 1 : 0;
