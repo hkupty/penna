@@ -32,12 +32,23 @@ the PATCH component is omitted when its value is `0`.
 - Move sinks and restructure output creation ([#59](https://github.com/hkupty/penna/pull/59))
 - Refactor integer to ascii logic ([#59](https://github.com/hkupty/penna/pull/59))
 - Various misc improvements for performance ([#59](https://github.com/hkupty/penna/pull/59))
+- Fix formatting for null arguments([#62](https://github.com/hkupty/penna/pull/62))
 
 ### `penna-yaml-config`
 
 #### Changed
 
 - Allow for configuring exception handling ([#53](https://github.com/hkupty/penna/pull/53))
+
+### `penna-dev`
+
+#### Added
+
+- Create dev runtime with enhanced readability for logs ([#61](https://github.com/hkupty/penna/pull/61))
+
+#### Changed
+
+- Fix formatting for null arguments([#62](https://github.com/hkupty/penna/pull/62))
 
 ## 0.6.2 - 2023-04-12
 
