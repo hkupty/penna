@@ -7,6 +7,8 @@ import java.math.BigDecimal;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
+
+import org.jetbrains.annotations.TestOnly;
 import org.jetbrains.annotations.VisibleForTesting;
 
 public final class DirectJson implements Closeable {
@@ -73,8 +75,8 @@ public final class DirectJson implements Closeable {
     // in JDK 10 the problem was solved. We are targeting JDK 17+, so the problem won't affect us.
     // Plus, any other alternative is significantly slower.
     @SuppressWarnings("PMD.AvoidFileStream")
-    @Deprecated() // Pass in a file channel instead
-    public DirectJson() {
+    @TestOnly
+    DirectJson() {
         this.backingOs = new FileOutputStream(FileDescriptor.out);
         this.channel = backingOs.getChannel();
     }
@@ -94,9 +96,15 @@ public final class DirectJson implements Closeable {
                             (str.codePointAt(i - 1) != '\\' || str.codePointAt(i - 2) == '\\')
                     ) {
                         // Warning! Mismatch in arguments/template might cause exception.
-                        var argument = arguments[cursor++].toString();
-                        checkSpace(argument.length());
-                        writeRaw(argument);
+
+                        var argument = arguments[cursor++];
+                        if (argument == null) {
+                            writeRaw(NULL);
+                        } else {
+                            var argStr = argument.toString();
+                            checkSpace(argStr.length());
+                            writeRaw(argStr);
+                        }
 
                     } else {
                         int offset = str.codePointAt(i - 1) == '\\' ? 1 : 0;
