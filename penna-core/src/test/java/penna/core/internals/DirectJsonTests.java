@@ -96,7 +96,21 @@ class DirectJsonTests {
         directJson.buffer.flip();
         var charset = StandardCharsets.UTF_8;
         var chars = charset.decode(directJson.buffer).toString();
-        assertEquals("{\"message\":\"hello \\{}\"}", chars);
+        assertEquals("{\"message\":\"hello {}\"}", chars);
+    }
+
+    @Test
+    void a_previous_escape_doesnt_break_formatting() {
+        DirectJson directJson = new DirectJson();
+
+        directJson.openObject();
+        directJson.writeStringValueFormatting("message", "hello \\| {}", "world");
+        directJson.closeObject();
+
+        directJson.buffer.flip();
+        var charset = StandardCharsets.UTF_8;
+        var chars = charset.decode(directJson.buffer).toString();
+        assertEquals("{\"message\":\"hello \\\\| world\"}", chars);
     }
     @Test
     void formats_double_escaped_format_blocks() {
@@ -120,6 +134,6 @@ class DirectJsonTests {
         directJson.buffer.flip();
         var charset = StandardCharsets.UTF_8;
         var chars = charset.decode(directJson.buffer).toString();
-        assertEquals("String with null placeholder", chars);
+        assertEquals("String with {} placeholder", chars);
     }
 }

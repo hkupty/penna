@@ -44,10 +44,11 @@ public final class PennaLogEventBuilder implements LoggingEventBuilder {
     Sink sink;
     private PennaLogEvent current;
 
-    public final static class Factory {
+    public static final class Factory {
 
         private Factory() {}
-        private final static ThreadLocal<PennaLogEventBuilder> pool = ThreadLocal.withInitial(PennaLogEventBuilder::new);
+
+        private static final ThreadLocal<PennaLogEventBuilder> pool = ThreadLocal.withInitial(PennaLogEventBuilder::new);
 
         public static void fromLoggingEvent(PennaLogger logger, LoggingEvent event) {
             var builder = pool.get();

@@ -7,8 +7,6 @@ plugins {
 
 group 'com.hkupty.penna'
 
-version '0.7.0-alpha2'
-
 pmd {
     sourceSets = [sourceSets.main]
     ruleSets("category/java/performance.xml", "category/java/bestpractices.xml", "category/java/errorprone.xml")
