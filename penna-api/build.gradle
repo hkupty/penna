@@ -6,8 +6,6 @@ plugins {
 
 group 'com.hkupty.penna'
 
-version '0.7.0-alpha2'
-
 repositories {
     mavenCentral()
 }
