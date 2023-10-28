@@ -3,8 +3,6 @@ package penna.dev.config;
 import penna.api.config.ConfigManager;
 import penna.api.config.Configurable;
 
-import java.util.ServiceLoader;
-
 public class DevConfigManager implements ConfigManager {
     Configurable configurable;
 
