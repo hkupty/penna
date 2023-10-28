@@ -1,15 +1,17 @@
 package penna.core.internals;
 
 
+import org.jetbrains.annotations.TestOnly;
+import org.jetbrains.annotations.VisibleForTesting;
 
-import java.io.*;
+import java.io.Closeable;
+import java.io.FileDescriptor;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
-
-import org.jetbrains.annotations.TestOnly;
-import org.jetbrains.annotations.VisibleForTesting;
 
 public final class DirectJson implements Closeable {
     private static final int INITIAL_BUFFER_SIZE = 32 * 1024;
@@ -84,37 +86,49 @@ public final class DirectJson implements Closeable {
     // --[ Write stuff to the buffer ]-- //
     public void writeRawFormatting(final String str, final Object... arguments) {
         int cursor = 0;
+        boolean isPlaceholder = false;
+        boolean escaped = false;
         for(int i = 0; i < str.length(); i++){
             var chr = str.codePointAt(i);
             switch (chr) {
-                case '\\' -> buffer.put(ESCAPE);
+                case '\\' -> {
+                    buffer.put(ESCAPE);
+                    // A placeholder is only escaped if precede by a single backslash
+                    // Therefore, if the previous character is not a backslash, we're "escaped"
+                    escaped = str.codePointBefore(i) != '\\';
+                }
                 case '\n' -> buffer.put(NEWLINE);
                 case '\r' -> buffer.put(LINEBREAK);
                 case '\t' -> buffer.put(TAB);
                 case DELIM_START -> {
-                    if (str.codePointAt(i + 1) == '}' &&
-                            (str.codePointAt(i - 1) != '\\' || str.codePointAt(i - 2) == '\\')
-                    ) {
-                        // Warning! Mismatch in arguments/template might cause exception.
+                    if (cursor < arguments.length &&
+                            str.codePointAt(i + 1) == '}') {
+                        // We only consider a curly braces to be a placeholder if not escaped,
+                        // but we double-check escaped as it could've happened further back
+                        isPlaceholder = !escaped || str.codePointBefore(i) != '\\';
+                        Object argument;
 
-                        var argument = arguments[cursor++];
-                        if (argument == null) {
-                            writeRaw(NULL);
+                        if (isPlaceholder && (argument = arguments[cursor++]) != null) {
+                                var argStr = argument.toString();
+                                checkSpace(argStr.length());
+                                writeRaw(argStr);
                         } else {
-                            var argStr = argument.toString();
-                            checkSpace(argStr.length());
-                            writeRaw(argStr);
+                            isPlaceholder = false; // if argument == null
+                            var offset = escaped ? 2 : 0;
+                            buffer.position(buffer.position() - offset);
+                            buffer.put(DELIM_START);
                         }
-
                     } else {
-                        int offset = str.codePointAt(i - 1) == '\\' ? 1 : 0;
-                        buffer.put(buffer.position() - offset, DELIM_START);
+                        buffer.put(DELIM_START);
                     }
                 }
                 case DELIM_STOP -> {
-                    if (str.codePointAt(i - 1)  != '{' ||
-                        (str.codePointAt(i - 2) == '\\' && str.codePointAt(i - 3) != '\\')) {
+                    if (!isPlaceholder) {
                         buffer.put(DELIM_STOP);
+                    }
+                    else {
+                        // End of placeholder, clean up
+                        isPlaceholder = false;
                     }
                 }
                 default -> {
