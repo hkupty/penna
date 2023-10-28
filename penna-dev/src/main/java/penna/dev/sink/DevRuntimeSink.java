@@ -12,6 +12,7 @@ import penna.dev.models.EnhancedLogEvent;
 import java.io.*;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.Optional;
 
 import static com.diogonunes.jcolor.Ansi.colorize;
 
@@ -65,6 +66,31 @@ public class DevRuntimeSink implements NonStandardSink, Closeable {
 
     }
 
+    private static void emitThrowable(StringBuilder log, PennaLogEvent logEvent) {
+        var thr = Optional.ofNullable(logEvent.throwable);
+
+        if (thr.isEmpty()) { return; }
+
+        log.append('\n')
+                .append(colorize(" ❌ ", Attribute.BOLD(), Attribute.BRIGHT_RED_TEXT()))
+                .append(colorize(logEvent.throwable.getClass().getName(), Attribute.YELLOW_TEXT()));
+
+        thr.map(Throwable::getMessage).ifPresent(message -> {
+            log.append(colorize(": ", Attribute.BOLD(), Attribute.YELLOW_TEXT()))
+                    .append(colorize(message, Attribute.YELLOW_TEXT()));
+        });
+
+       thr.map(Throwable::getStackTrace).ifPresent(stacktrace -> {
+           log.append('\n');
+           for(StackTraceElement ste : stacktrace) {
+               log.append('\t')
+                       .append(ste.toString())
+                       .append('\n');
+           }
+           log.deleteCharAt(log.length() - 1);
+       });
+    }
+
     @Override
     public void write(PennaLogEvent logEvent) throws IOException {
         init();
@@ -110,22 +136,7 @@ public class DevRuntimeSink implements NonStandardSink, Closeable {
                     .append(colorize("}", Attribute.ITALIC()));
         }
 
-
-        if (logEvent.throwable != null) {
-            var throwable = logEvent.throwable;
-            log.append('\n')
-                    .append(colorize(" ❌ ", Attribute.BOLD(), Attribute.BRIGHT_RED_TEXT()))
-                    .append(colorize(throwable.getClass().getName(), Attribute.YELLOW_TEXT()))
-                    .append(colorize(": ", Attribute.BOLD(), Attribute.YELLOW_TEXT()))
-                    .append(colorize(throwable.getMessage(), Attribute.YELLOW_TEXT()))
-                    .append('\n');
-            for(StackTraceElement ste : throwable.getStackTrace()) {
-                log.append('\t')
-                        .append(ste.toString())
-                        .append('\n');
-            }
-            log.deleteCharAt(log.length() - 1);
-        }
+        emitThrowable(log, logEvent);
 
         ps.println(log);
         ps.flush();
