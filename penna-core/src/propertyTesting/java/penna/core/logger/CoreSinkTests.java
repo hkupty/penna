@@ -17,10 +17,13 @@ import penna.core.sink.SinkManager;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.security.SecureRandom;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
-class NativeCoreSinkTests {
+class CoreSinkTests {
 
     private static final ObjectMapper om = new ObjectMapper();
     @Provide
@@ -61,6 +64,15 @@ class NativeCoreSinkTests {
                 .ofMinSize(0)
                 .ofMaxSize(4);
 
+        Arbitrary<List<String>> arguments = Arbitraries
+                .strings()
+                .alpha()
+                .ofMinLength(1)
+                .ofMaxLength(20)
+                .list()
+                .ofMinSize(0)
+                .ofMaxSize(128);
+
         Arbitrary<String> keys = Arbitraries.strings().alpha().ofMinLength(3).ofMaxLength(5);
         Arbitrary<List<KeyValuePair>> kvps = Arbitraries
                 .strings()
@@ -70,8 +82,28 @@ class NativeCoreSinkTests {
                 .list();
         Arbitrary<Level> levels = Arbitraries.of(Level.class);
 
+        Random random = new SecureRandom();
+
         return Builders.withBuilder(PennaLogEvent::new)
                 .use(messages).in((evt, m) -> {evt.message = m; return evt;})
+                .use(arguments).in((evt, args) -> {
+                    var msg = new StringBuilder(evt.message);
+                    random.ints(random.nextInt(
+                                            Math.max(args.size() - 1, 0),
+                                            args.size() + 1
+                                    ),
+                                    0,
+                                    msg.length())
+                            .boxed()
+                            .sorted(Comparator.reverseOrder())
+                            .forEach(index -> msg.replace(index, index, "{}"));
+
+                    evt.message = msg.toString();
+                    for (var arg: args) {
+                        evt.addArgument(arg);
+                    }
+                    return evt;
+                })
                 .use(markers).in((evt, m) -> {evt.markers.addAll(m); return evt;})
                 .use(kvps).in((evt, m) -> {evt.keyValuePairs.addAll(m); return evt;})
                 .use(levels).in((evt, m) -> {evt.level = m; return evt;})
