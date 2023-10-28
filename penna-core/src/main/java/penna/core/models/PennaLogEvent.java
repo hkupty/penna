@@ -70,7 +70,7 @@ public class PennaLogEvent implements LoggingEvent {
     }
 
     public void addArgument(Object argument) {
-        if (cursor + 1 > arguments.length) {
+        if (cursor + 1 >= arguments.length) {
             arguments = Arrays.copyOf(arguments, arguments.length * 2);
         }
         arguments[cursor++] = argument;
