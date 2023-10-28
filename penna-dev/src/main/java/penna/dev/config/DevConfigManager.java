@@ -6,34 +6,24 @@ import penna.api.config.Configurable;
 import java.util.ServiceLoader;
 
 public class DevConfigManager implements ConfigManager {
-    final ConfigManager proxied;
+    Configurable configurable;
 
     public DevConfigManager() {
-        ServiceLoader<ConfigManager> serviceLoader = ServiceLoader.load(ConfigManager.class);
-        var other = serviceLoader.stream()
-                .filter(configManagerProvider -> configManagerProvider.type() != DevConfigManager.class)
-                .findFirst()
-                .map(ServiceLoader.Provider::get);
-
-        if (other.isPresent()) {
-            proxied = new ProxyDevConfigManager(other.get());
-        } else {
-            proxied = new StandalondeDevConfigManager();
-        }
+        PennaRuntimeConfigManager.register(this);
     }
 
     @Override
     public void bind(Configurable configurable) {
-        proxied.bind(configurable);
+        this.configurable = configurable;
     }
 
     @Override
     public void configure() {
-        proxied.configure();
+        configurable.configure(StandardConfigs.DevOptimized);
     }
 
     @Override
     public void updateConfigs(ConfigItem... configItems) {
-        proxied.updateConfigs(configItems);
+        configurable.configure(configItems);
     }
 }
