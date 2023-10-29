@@ -1,6 +1,6 @@
 {{ define "main" }}
   <div class="box">
-    <article class="pb-5">
+    <article class="pb-1">
       <span class="icon-text">
         <ion-icon name="{{ .Params.icon }}" class="icon has-text-link"></ion-icon>
         <h1 class="subtitle is-5">{{ .Title }}</h1>
@@ -12,7 +12,7 @@
     <ul>
       <!-- Ranges through content/posts/*.md -->
       {{ range .Pages }}
-        <li>
+        <li class="py-2">
           <a href="{{ .Permalink }}">{{ .Date.Format "2006-01-02" }} | {{ .Title }}</a>
         </li>
       {{ end }}
