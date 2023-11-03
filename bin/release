@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+cd "$(git rev-parse --show-toplevel)" && {
+  body=$(awk '/^## / { section = 0 } /^## Unreleased/ { section = 1; next } section { print }' CHANGELOG.md)
+  version=$(awk -F= '$1 == "version" {print $2}' gradle.properties)
+
+  ./gradlew publish
+
+  hub release create -oc -m "${version}\n${body}" "${version}"
+}

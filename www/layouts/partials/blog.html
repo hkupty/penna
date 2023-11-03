@@ -5,11 +5,11 @@
       <ion-icon name="{{.Params.Icon}}" class="icon has-text-link"></ion-icon>
       <span class="subtitle is-5">{{.Title}}</span>
     </span>
-    <p class="py-5">{{ .Content }}</p>
+    <p>{{ .Content }}</p>
   </span>
   <ul>
   {{ range .Pages }}
-    <li>
+    <li class="py-2">
     <a href="{{ .Permalink }}">{{ .Date.Format "2006-01-02" }} | {{.Title }}</a>
     <br />
     {{ .Summary }} <a href="{{ .Permalink }}">Read more</a>
