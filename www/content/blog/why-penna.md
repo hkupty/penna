@@ -12,6 +12,8 @@ description: "Featherweight JSON Logging for the JVM"
 Back in January this year I started asking myself this question: "Can I make logging better?".
 Well, better is a fun word, as it seams to mean so much, and yet nothing concrete at the same time.
 
+<!--more-->
+
 Better, in this case, meant "specialized". I wanted structured logging, only. Json logs by default.
 
 I mean, it is 2023 after all. I've been using loki in production for many months with great success, and have seen
