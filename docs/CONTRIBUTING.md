@@ -7,7 +7,7 @@ Penna is build from the ground up with two principles in mind:
 - Sane defaults/lightweight configuration;
 - Unobtrusiveness/lightweight runtime;
 
-The third pillar, structured logging, can also be interpreted as "specialized", in the sense of being focused to 
+The third pillar, structured logging, can also be interpreted as "specialized", in the sense of being focused to
 deliver a great solution for json log messages.
 This means that penna shouldn't do more than it needs. The `penna-core` module holds the necessary code for the runtime
 and nothing else. There's no need to add more functionality there than necessary.
@@ -46,7 +46,7 @@ The choice of this word is intentional as it captures both the throughput aspect
 so we can't notice it running) and the memory usage aspect (even under load, if I measure my application,
 I won't notice penna).
 
-Logging is one of the most critical aspects of observing an application, like a health monitor, so it shouldn't 
+Logging is one of the most critical aspects of observing an application, like a health monitor, so it shouldn't
 be as stable as possible, as predictive as possible and should not fail when the application critically needs it.
 
 Increased memory consumption, when under load, snowballs and slows down the application, so the mere act of trying
