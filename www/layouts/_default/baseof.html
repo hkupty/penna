@@ -3,6 +3,14 @@
 <head>
     {{- partial "head.html" . }}
 </head>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-5HL59YCDT2"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-5HL59YCDT2');
+</script>
 <body>
     {{- partialCached "header.html" . .Page -}}
     <main class="main">
