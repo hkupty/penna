@@ -4,7 +4,7 @@
 
 [![version](https://img.shields.io/maven-central/v/com.hkupty.penna/penna-core?style=flat-square)](https://mvnrepository.com/artifact/com.hkupty.penna)
 [![Maintainability](https://api.codeclimate.com/v1/badges/646db2db253b2610143d/maintainability)](https://codeclimate.com/github/hkupty/penna/maintainability)
-[![CircleCI](https://dl.circleci.com/status-badge/img/gh/hkupty/penna/tree/dev/0.6.2.svg?style=svg)](https://dl.circleci.com/status-badge/redirect/gh/hkupty/penna/tree/dev/0.6.2)
+[![CircleCI](https://dl.circleci.com/status-badge/img/gh/hkupty/penna/tree/dev/0.7.svg?style=svg)](https://dl.circleci.com/status-badge/redirect/gh/hkupty/penna/tree/dev/0.7)
 
 Penna is an opinionated backend for [slf4j](https://github.com/qos-ch/slf4j/) that focuses on doing one thing right: Logging structured logs in json format to the console.
 
@@ -14,38 +14,38 @@ Penna is currently in alpha and, while usable, *has not been tested in productio
 
 Please use with caution. Feedback, however, is very welcome.
 
-## Why use penna?
+## Why use Penna?
 
 Penna presents itself as an alternative to [logback](https://logback.qos.ch/).
 It is designed for a specific use case: When you want to have [structured logging](https://stackify.com/what-is-structured-logging-and-why-developers-need-it/), straight to the console.
 This might be a common use-case for jvm apps running in kubernetes.
-If that is your use case, you might prefer penna over logback because:
+If that is your use case, you might prefer Penna over logback because:
 
 - Penna is specialized for this use-case, working out of the box with sane defaults;
 - It does not require any json library (or any dependency other than slf4j);
 - It is very optimized, with impressive performance when compared to logback;
 - It is also designed not consume almost any runtime memory, so it won't cause GC pressure;
-- If you want to configure, the extension config library [penna-yaml-config](penna-yaml-config/README.md) allows you to configure penna in yaml,
+- If you want to configure, the extension config library [penna-yaml-config](penna-yaml-config/README.md) allows you to configure Penna in yaml,
 which might be a more native configuration format for its runtime environment (i.e. kubernetes);
 
-However, penna doesn't try to replace logback for all its use cases. If you have to log in multiple formats, to a file or any other target, logback might still be your tool of choice.
+However, Penna doesn't try to replace logback for all its use cases. If you have to log in multiple formats, to a file or any other target, logback might still be your tool of choice.
 
 
 ## Usage
 
 Penna is a backend for slf4j, so you don't need to interact with it directly.
 
-In order to use it, add it to the [build manager of your preference](https://mvnrepository.com/artifact/com.hkupty.penna/penna-core/0.6.2), for example:
+In order to use it, add it to the [build manager of your preference](https://mvnrepository.com/artifact/com.hkupty.penna/penna-core/0.7.0), for example:
 
 ```groovy
 // gradle
-runtimeOnly 'com.hkupty.penna:penna-core:0.6.2'
+runtimeOnly 'com.hkupty.penna:penna-core:0.7.0'
 
 // Penna doesn't have any strict dependencies aside from slf4j.
-implementation 'org.slf4j:slf4j-api:2.0.6'
+implementation 'org.slf4j:slf4j-api:2.0.9'
 ```
 
-:warning: Note that penna is built targeting JVM 17+.
+:warning: Note that Penna is built targeting JVM 17+.
 
 By default, you will get log level `INFO` enabled as well as the following fields:
 - `timestamp`
@@ -61,7 +61,7 @@ By default, you will get log level `INFO` enabled as well as the following field
 Penna has support for logging also a `Counter` to each message, individually marking each message with a monotonically increasing
 `long` counting from process startup, but that is disabled by default.
 
-If you want to configure it, penna provides a separate convenience library for configuring your log levels in yaml files:
+If you want to configure it, Penna provides a separate convenience library for configuring your log levels in yaml files:
 ```yaml
 # resources/penna.yaml
 
@@ -95,19 +95,31 @@ penna:
         - logger
         - message
         - throwable
-        - counter
 ```
 
 If you want to use [penna-yaml-config](penna-yaml-config/README.md), you have to add it as a dependency:
 
 ```groovy
-runtimeOnly 'com.hkupty.penna:penna-yaml-config:0.6.2'
+runtimeOnly 'com.hkupty.penna:penna-yaml-config:0.7.0'
 
 // We have to add a yaml parser to the classpath for `penna-yaml-config` to work properly.
 // Currently we only support `jackson-dataformat-yaml`, but we plan on adding support for other libraries.
 runtimeOnly 'com.fasterxml.jackson.core:jackson-core:2.14.2'
 runtimeOnly 'com.fasterxml.jackson.core:jackson-databind:2.14.2'
 runtimeOnly 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.14.2'
+```
+
+## Test logs
+
+Starting from Penna 0.7, Penna offers a `penna-dev` module which reformats the log to standard formatted strings instead of json.
+By adding `penna-dev` to your test runtime it will automatically bind the new logger on top of `penna-core`
+
+```groovy
+// penna-core is still needed as a runtime dependency
+runtimeOnly 'com.hkupty.penna:penna-core:0.7.0'
+
+// penna-dev should only be added to the test runtime
+testRuntimeOnly 'com.hkupty.penna:penna-dev:0.7.0'
 ```
 
 ## Principles
@@ -129,7 +141,7 @@ logging without having to set up any configuration.
 ### Unobtrusiveness
 
 The logging framework should not draw out much attention. It should just work.
-With that in mind, penna tries to be a simple yet effective component in your architecture.
+With that in mind, Penna tries to be a simple yet effective component in your architecture.
 It should not require you to add in more dependencies. Instead, it should work with whatever you have available.
 Also, it should make its best effort to consume the fewer resources as possible, being efficient and sparing your app of GC pauses
 when under heavy load. [Read more on our performance tests.](performance/)
