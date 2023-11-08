@@ -1,0 +1,12 @@
+{{ with .Site.GetPage "/getting-started" }}
+<div class="box">
+  <span class="content">
+      <span class="icon-text">
+      <ion-icon name="{{.Params.Icon}}" class="icon has-text-link"></ion-icon>
+      <span class="subtitle is-5">{{.Title}}</span>
+    </span>
+    <p>{{ .Summary }}</p>
+    <p><a href="{{ .Permalink }}">Continue reading</a></p>
+  </span>
+</div>
+{{ end }}
