@@ -47,6 +47,7 @@ testing {
                 }
             }
         }
+
         jmh(JvmTestSuite) {
             testType = TestSuiteType.PERFORMANCE_TEST
             dependencies {
@@ -66,6 +67,12 @@ testing {
                 implementation 'net.logstash.logback:logstash-logback-encoder:7.4'
 
                 annotationProcessor libs.jmh.annotations
+            }
+
+            java {
+                toolchain {
+                    languageVersion.set(JavaLanguageVersion.of(21))
+                }
             }
 
             targets {
