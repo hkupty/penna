@@ -124,6 +124,7 @@ public final class CoreSink implements Sink, Closeable {
             var filter = config.filter();
             for (int index = 0; index < Math.min(frames.length, config.stacktraceDepth()); index++) {
                 filter.hash(filterHashes, frames[index]);
+                jsonGenerator.checkSpace(128);
                 writeStackFrame(frames[index]);
                 jsonGenerator.writeRaw(',');
                 if (filter.check(filterHashes)) {
