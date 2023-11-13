@@ -1,63 +1,63 @@
 package penna.core.slf4j;
 
 import org.slf4j.spi.MDCAdapter;
-import penna.core.slf4j.mdc.MDCNode;
+import penna.core.slf4j.mdc.Mdc;
 
-import java.util.*;
+import java.util.Deque;
+import java.util.Map;
 import java.util.function.BiConsumer;
 
 public final class PennaMDCAdapter implements MDCAdapter {
 
-    private final ThreadLocal<MDCNode> threadLocalTree = ThreadLocal.withInitial(MDCNode::create);
-
     public void forEach(BiConsumer<String, String> action) {
-        var node = threadLocalTree.get();
+        var node = Mdc.Inner.mdcStorage.get();
         node.forEach(action);
     }
 
     public boolean isNotEmpty() {
-        return threadLocalTree.get().isNotEmpty();
+        Mdc inner = Mdc.Inner.mdcStorage.get();
+        return inner.isNotEmpty();
     }
 
     @Override
     public void put(String key, String val) {
-        var node = threadLocalTree.get();
-        node.put(key, val);
+        Mdc inner = Mdc.Inner.mdcStorage.get();
+        inner.put(key, val);
     }
 
     @Override
     public String get(String key) {
-        var node = threadLocalTree.get();
-        return node.get(key);
+        Mdc inner = Mdc.Inner.mdcStorage.get();
+        return inner.get(key);
     }
 
     @Override
     public void remove(String key) {
-        var node = threadLocalTree.get();
-        node.remove(key);
+        Mdc inner = Mdc.Inner.mdcStorage.get();
+        inner.remove(key);
     }
 
     @Override
     public void clear() {
-        var node = threadLocalTree.get();
-        node.clear();
+        Mdc inner = Mdc.Inner.mdcStorage.get();
+        inner.clear();
     }
 
     @Override
     public Map<String, String> getCopyOfContextMap() {
-        var node = threadLocalTree.get();
-        return node.getCopyOfContextMap();
+        Mdc inner = Mdc.Inner.mdcStorage.get();
+        return inner.getCopyOfContextMap();
     }
 
     @Override
     public void setContextMap(Map<String, String> contextMap) {
-        var node = threadLocalTree.get();
-        node.setContextMap(contextMap);
+        Mdc inner = Mdc.Inner.mdcStorage.get();
+        inner.setContextMap(contextMap);
     }
 
     @Override
     public void pushByKey(String key, String value) {
-    // Intentionally left black, not supported at the moment
+        // Intentionally left black, not supported at the moment
     }
 
     @Override
