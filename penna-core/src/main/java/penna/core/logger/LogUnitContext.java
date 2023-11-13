@@ -3,6 +3,7 @@ package penna.core.logger;
 import org.slf4j.Marker;
 import org.slf4j.event.KeyValuePair;
 import org.slf4j.event.Level;
+import org.slf4j.event.LoggingEvent;
 import org.slf4j.spi.LoggingEventBuilder;
 import penna.core.internals.Clock;
 import penna.core.internals.ObjectPool;
@@ -19,6 +20,20 @@ public record LogUnitContext(
         Sink sink,
         PennaLogEvent logEvent
 ) implements LoggingEventBuilder {
+
+    public void fromLoggingEvent(LoggingEvent event) {
+        setCause(event.getThrowable());
+        setMessage(event.getMessage());
+        addArguments(event.getArgumentArray());
+        for (var kvp : event.getKeyValuePairs()) {
+            addKeyValue(kvp.key, kvp.value);
+        }
+        for (var marker : event.getMarkers()) {
+            addMarker(marker);
+        }
+
+        log();
+    }
 
     private void release() {
         pool.release(selfReference);

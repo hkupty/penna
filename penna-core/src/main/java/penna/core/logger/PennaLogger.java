@@ -350,6 +350,6 @@ public final class PennaLogger implements IPennaLogger {
     @SuppressWarnings("PMD.GuardLogStatement")
     @Override
     public void log(LoggingEvent event) {
-        PennaLogEventBuilder.Factory.fromLoggingEvent(this, event);
+        levelGuard.get(this, event.getLevel()).fromLoggingEvent(event);
     }
 }

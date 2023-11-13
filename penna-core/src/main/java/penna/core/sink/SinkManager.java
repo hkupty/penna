@@ -1,11 +1,7 @@
 package penna.core.sink;
 
-import penna.core.logger.PennaLogEventBuilder;
-
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Supplier;
 
 public final class SinkManager {
