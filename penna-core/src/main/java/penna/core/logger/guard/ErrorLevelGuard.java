@@ -61,6 +61,6 @@ public final class ErrorLevelGuard implements LevelGuard {
 
     @Override
     public LoggingEventBuilder error(PennaLogger logger) {
-        return PennaLogEventBuilder.Factory.get(logger, Level.ERROR);
+        return get(logger, Level.ERROR);
     }
 }

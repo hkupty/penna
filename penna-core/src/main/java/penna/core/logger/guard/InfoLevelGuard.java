@@ -40,7 +40,7 @@ public final class InfoLevelGuard implements LevelGuard {
 
     @Override
     public LoggingEventBuilder info(PennaLogger logger) {
-        return PennaLogEventBuilder.Factory.get(logger, Level.INFO);
+        return get(logger, Level.INFO);
     }
 
     @Override
@@ -50,7 +50,7 @@ public final class InfoLevelGuard implements LevelGuard {
 
     @Override
     public LoggingEventBuilder warn(PennaLogger logger) {
-        return PennaLogEventBuilder.Factory.get(logger, Level.WARN);
+        return get(logger, Level.WARN);
     }
 
     @Override
@@ -60,6 +60,6 @@ public final class InfoLevelGuard implements LevelGuard {
 
     @Override
     public LoggingEventBuilder error(PennaLogger logger) {
-        return PennaLogEventBuilder.Factory.get(logger, Level.ERROR);
+        return get(logger, Level.ERROR);
     }
 }

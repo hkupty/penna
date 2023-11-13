@@ -1,6 +1,7 @@
 package penna.core.logger.guard;
 
 import penna.api.config.Config;
+import penna.core.internals.ObjectPool;
 import penna.core.logger.PennaLogEventBuilder;
 import penna.core.logger.PennaLogger;
 import org.slf4j.event.Level;
@@ -25,6 +26,9 @@ public sealed interface LevelGuard permits
         ErrorLevelGuard
 {
 
+    final class Shared {
+        private static final ObjectPool logUnits = new ObjectPool();
+    }
     final class FromConfig {
 
         private FromConfig() {}
@@ -42,8 +46,16 @@ public sealed interface LevelGuard permits
         public static LevelGuard get(Config config) {
             return levelMapping.getOrDefault(config.level(), NOPGuard.singleton());
         }
-
     }
+
+
+    default LoggingEventBuilder get(PennaLogger logger, Level level) {
+        var eventBuilder = Shared.logUnits.get();
+        eventBuilder.reset(logger, level);
+
+        return eventBuilder;
+    }
+
 
     boolean isTraceEnabled();
     LoggingEventBuilder trace(PennaLogger logger);
