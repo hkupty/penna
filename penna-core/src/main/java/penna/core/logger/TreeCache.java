@@ -8,6 +8,8 @@ import penna.api.config.ConfigManager;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 
 /**
@@ -53,9 +55,13 @@ public class TreeCache {
         }
     }
 
-    private record Entry(String[] identifier, EntryData data, ArrayList<Entry> children){
+    private record Entry(
+            String[] identifier,
+            EntryData data,
+            ArrayList<Entry> children,
+            Lock lock){
         static Entry create(String[] identifier, Config config) {
-            return new Entry(identifier, EntryData.empty(config), new ArrayList<>());
+            return new Entry(identifier, EntryData.empty(config), new ArrayList<>(), new ReentrantLock(true));
         }
 
         void initialize() {
@@ -111,12 +117,14 @@ public class TreeCache {
      Entry getOrCreate(String... identifier){
         var cursor = ROOT;
         for(int index = 0; index < identifier.length; index++) {
+            cursor.lock.lock();
             var child = search(cursor, identifier[index], index);
             if (Objects.isNull(child)) {
                 var slicedIdentifier = Arrays.copyOfRange(identifier, 0, index + 1);
                 child = Entry.create(slicedIdentifier, cursor.data.config);
                 cursor.children.add(child);
             }
+            cursor.lock.unlock();
             cursor = child;
         }
 
