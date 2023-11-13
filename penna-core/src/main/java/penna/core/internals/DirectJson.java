@@ -14,7 +14,7 @@ import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
 
 public final class DirectJson implements Closeable {
-    private static final int INITIAL_BUFFER_SIZE = 32 * 1024;
+    private static final int INITIAL_BUFFER_SIZE = 2 * 1024;
     private int highWatermark = (int) Math.ceil(INITIAL_BUFFER_SIZE * 0.8);
     private static final byte[] LINE_BREAK = System.getProperty("line.separator").getBytes(StandardCharsets.UTF_8);
     private static final byte QUOTE = '"';
