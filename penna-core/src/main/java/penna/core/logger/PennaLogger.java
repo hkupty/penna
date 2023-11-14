@@ -1,10 +1,10 @@
 package penna.core.logger;
 
-import penna.api.config.Config;
-import penna.core.logger.guard.LevelGuard;
 import org.slf4j.Marker;
 import org.slf4j.event.LoggingEvent;
 import org.slf4j.spi.LoggingEventBuilder;
+import penna.api.config.Config;
+import penna.core.logger.guard.LevelGuard;
 import penna.core.models.LogConfig;
 
 
@@ -32,7 +32,9 @@ public final class PennaLogger implements IPennaLogger {
     }
 
     @Override
-    public LoggingEventBuilder atTrace() { return levelGuard.trace(this); }
+    public LoggingEventBuilder atTrace() {
+        return levelGuard.trace(this);
+    }
 
     @Override
     public boolean isTraceEnabled() {
@@ -95,7 +97,9 @@ public final class PennaLogger implements IPennaLogger {
     }
 
     @Override
-    public LoggingEventBuilder atDebug() { return levelGuard.debug(this); }
+    public LoggingEventBuilder atDebug() {
+        return levelGuard.debug(this);
+    }
 
     @Override
     public boolean isDebugEnabled() {
@@ -158,7 +162,9 @@ public final class PennaLogger implements IPennaLogger {
     }
 
     @Override
-    public LoggingEventBuilder atInfo() { return levelGuard.info(this); }
+    public LoggingEventBuilder atInfo() {
+        return levelGuard.info(this);
+    }
 
     @Override
     public boolean isInfoEnabled() {
@@ -221,7 +227,9 @@ public final class PennaLogger implements IPennaLogger {
     }
 
     @Override
-    public LoggingEventBuilder atWarn() { return levelGuard.warn(this); }
+    public LoggingEventBuilder atWarn() {
+        return levelGuard.warn(this);
+    }
 
     @Override
     public boolean isWarnEnabled() {
@@ -284,7 +292,9 @@ public final class PennaLogger implements IPennaLogger {
     }
 
     @Override
-    public LoggingEventBuilder atError() { return levelGuard.error(this); }
+    public LoggingEventBuilder atError() {
+        return levelGuard.error(this);
+    }
 
     @Override
     public boolean isErrorEnabled() {
@@ -350,6 +360,6 @@ public final class PennaLogger implements IPennaLogger {
     @SuppressWarnings("PMD.GuardLogStatement")
     @Override
     public void log(LoggingEvent event) {
-        PennaLogEventBuilder.Factory.fromLoggingEvent(this, event);
+        levelGuard.get(this, event.getLevel()).fromLoggingEvent(event);
     }
 }

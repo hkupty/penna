@@ -28,7 +28,8 @@ class LoggerTests {
             @JsonProperty("class") String throwable,
             String message,
             List<String> stacktrace
-    ) {}
+    ) {
+    }
 
     record LogMessage(
             long timestamp,
@@ -40,7 +41,8 @@ class LoggerTests {
             List<String> tags,
             Map<String, Object> data,
             ThrowableLog throwable
-    ) {}
+    ) {
+    }
 
     private static final ObjectMapper om = new ObjectMapper();
 
@@ -48,7 +50,7 @@ class LoggerTests {
     void log_levels_are_respected() {
         var cache = new TreeCache(Config.getDefault());
         PennaLogger pennaLogger = cache.getLoggerAt("test");
-        String[] ref = new String[] {"test"};
+        String[] ref = new String[]{"test"};
 
         // null-level, no logs
         cache.updateConfig(ref, config -> config.replaceLevel(null));
@@ -176,4 +178,5 @@ class LoggerTests {
         testFile.deleteOnExit();
         fos.close();
     }
+
 }

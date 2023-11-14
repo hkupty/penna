@@ -1,5 +1,7 @@
 package penna.core.internals;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
@@ -52,17 +54,17 @@ public record MapWrapperTicket(int ticket, Map<String, String> inner) implements
     }
 
     @Override
-    public Set<String> keySet() {
+    public @NotNull Set<String> keySet() {
         return inner.keySet();
     }
 
     @Override
-    public Collection<String> values() {
+    public @NotNull Collection<String> values() {
         return inner.values();
     }
 
     @Override
-    public Set<Entry<String, String>> entrySet() {
+    public @NotNull Set<Entry<String, String>> entrySet() {
         return inner.entrySet();
     }
 }

@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class PennaLogEvent implements LoggingEvent {
+public final class PennaLogEvent implements LoggingEvent {
     private int cursor;
     public Object[] arguments = new Object[8];
     public List<Marker> markers = new ArrayList<>();
@@ -106,5 +106,23 @@ public class PennaLogEvent implements LoggingEvent {
     @Override
     public String getThreadName() {
         return new String(threadName);
+    }
+
+    @Override
+    public String toString() {
+        return "PennaLogEvent{" +
+                "cursor=" + cursor +
+                ", arguments=" + Arrays.toString(arguments) +
+                ", markers=" + markers +
+                ", keyValuePairs=" + keyValuePairs +
+                ", extra=" + extra +
+                ", level=" + level +
+                ", message='" + message + '\'' +
+                ", threadName=" + Arrays.toString(threadName) +
+                ", throwable=" + throwable +
+                ", logger=" + Arrays.toString(logger) +
+                ", config=" + config +
+                ", timestamp=" + timestamp +
+                '}';
     }
 }

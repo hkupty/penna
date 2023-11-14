@@ -8,6 +8,14 @@ the PATCH component is omitted when its value is `0`.
 
 ## Unreleased
 
+### `penna-core`
+
+#### Changed
+
+- Restructured internal controls for better thread safety ([#70](https://github.com/hkupty/penna/pull/70))
+
+## 0.7
+
 ### `penna-api`
 
 #### Changed

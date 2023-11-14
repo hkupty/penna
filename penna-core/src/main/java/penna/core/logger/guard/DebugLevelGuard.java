@@ -1,15 +1,16 @@
 package penna.core.logger.guard;
 
-import penna.core.logger.PennaLogger;
-import penna.core.logger.PennaLogEventBuilder;
 import org.slf4j.event.Level;
 import org.slf4j.spi.LoggingEventBuilder;
 import org.slf4j.spi.NOPLoggingEventBuilder;
+import penna.core.logger.PennaLogger;
 
 public final class DebugLevelGuard implements LevelGuard {
-    private DebugLevelGuard(){}
+    private DebugLevelGuard() {
+    }
 
     private static final LevelGuard instance = new DebugLevelGuard();
+
     public static LevelGuard singleton() {
         return instance;
     }
@@ -31,7 +32,7 @@ public final class DebugLevelGuard implements LevelGuard {
 
     @Override
     public LoggingEventBuilder debug(PennaLogger logger) {
-        return PennaLogEventBuilder.Factory.get(logger, Level.DEBUG);
+        return get(logger, Level.DEBUG);
     }
 
     @Override
@@ -41,7 +42,7 @@ public final class DebugLevelGuard implements LevelGuard {
 
     @Override
     public LoggingEventBuilder info(PennaLogger logger) {
-        return PennaLogEventBuilder.Factory.get(logger, Level.INFO);
+        return get(logger, Level.INFO);
     }
 
     @Override
@@ -51,7 +52,7 @@ public final class DebugLevelGuard implements LevelGuard {
 
     @Override
     public LoggingEventBuilder warn(PennaLogger logger) {
-        return PennaLogEventBuilder.Factory.get(logger, Level.WARN);
+        return get(logger, Level.WARN);
     }
 
     @Override
@@ -61,6 +62,6 @@ public final class DebugLevelGuard implements LevelGuard {
 
     @Override
     public LoggingEventBuilder error(PennaLogger logger) {
-        return PennaLogEventBuilder.Factory.get(logger, Level.ERROR);
+        return get(logger, Level.ERROR);
     }
 }

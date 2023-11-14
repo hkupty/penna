@@ -26,6 +26,7 @@ import java.util.Random;
 class CoreSinkTests {
 
     private static final ObjectMapper om = new ObjectMapper();
+
     @Provide
     Arbitrary<LogField[]> fields() {
         return Arbitraries.of(LogField.class).array(LogField[].class).uniqueElements();
@@ -85,7 +86,10 @@ class CoreSinkTests {
         Random random = new SecureRandom();
 
         return Builders.withBuilder(PennaLogEvent::new)
-                .use(messages).in((evt, m) -> {evt.message = m; return evt;})
+                .use(messages).in((evt, m) -> {
+                    evt.message = m;
+                    return evt;
+                })
                 .use(arguments).in((evt, args) -> {
                     var msg = new StringBuilder(evt.message);
                     random.ints(random.nextInt(
@@ -99,16 +103,31 @@ class CoreSinkTests {
                             .forEach(index -> msg.replace(index, index, "{}"));
 
                     evt.message = msg.toString();
-                    for (var arg: args) {
+                    for (var arg : args) {
                         evt.addArgument(arg);
                     }
                     return evt;
                 })
-                .use(markers).in((evt, m) -> {evt.markers.addAll(m); return evt;})
-                .use(kvps).in((evt, m) -> {evt.keyValuePairs.addAll(m); return evt;})
-                .use(levels).in((evt, m) -> {evt.level = m; return evt;})
-                .use(threads).in((evt, m) -> {evt.threadName = m.getBytes(); return evt;})
-                .use(throwableArbitrary()).withProbability(0.3).in((evt, t) -> {evt.throwable = t; return evt;})
+                .use(markers).in((evt, m) -> {
+                    evt.markers.addAll(m);
+                    return evt;
+                })
+                .use(kvps).in((evt, m) -> {
+                    evt.keyValuePairs.addAll(m);
+                    return evt;
+                })
+                .use(levels).in((evt, m) -> {
+                    evt.level = m;
+                    return evt;
+                })
+                .use(threads).in((evt, m) -> {
+                    evt.threadName = m.getBytes();
+                    return evt;
+                })
+                .use(throwableArbitrary()).withProbability(0.3).in((evt, t) -> {
+                    evt.throwable = t;
+                    return evt;
+                })
                 .build();
     }
 

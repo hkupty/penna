@@ -1,19 +1,21 @@
 package penna.core.logger.guard;
 
-import penna.core.logger.PennaLogger;
-import penna.core.logger.PennaLogEventBuilder;
 import org.slf4j.event.Level;
 import org.slf4j.spi.LoggingEventBuilder;
 import org.slf4j.spi.NOPLoggingEventBuilder;
+import penna.core.logger.PennaLogger;
 
 public final class WarnLevelGuard implements LevelGuard {
 
-    private WarnLevelGuard(){}
+    private WarnLevelGuard() {
+    }
 
     private static final LevelGuard instance = new WarnLevelGuard();
+
     public static LevelGuard singleton() {
         return instance;
     }
+
     @Override
     public boolean isTraceEnabled() {
         return false;
@@ -51,7 +53,7 @@ public final class WarnLevelGuard implements LevelGuard {
 
     @Override
     public LoggingEventBuilder warn(PennaLogger logger) {
-        return PennaLogEventBuilder.Factory.get(logger, Level.WARN);
+        return get(logger, Level.WARN);
     }
 
     @Override
@@ -61,6 +63,6 @@ public final class WarnLevelGuard implements LevelGuard {
 
     @Override
     public LoggingEventBuilder error(PennaLogger logger) {
-        return PennaLogEventBuilder.Factory.get(logger, Level.ERROR);
+        return get(logger, Level.ERROR);
     }
 }

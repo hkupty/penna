@@ -8,6 +8,8 @@ import penna.api.config.ConfigManager;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 
 /**
@@ -18,9 +20,9 @@ import java.util.function.Consumer;
  * from {@link penna.core.slf4j.PennaLoggerFactory}, at the cost of a small memory footprint, while we have an
  * easily traversable storage of the loggers.
  */
-public class TreeCache {
+public final class TreeCache {
 
-    static class EntryData{
+    static final class EntryData {
         PennaLogger logger;
         Config config;
 
@@ -29,7 +31,9 @@ public class TreeCache {
             this.config = config;
         }
 
-        static EntryData empty(Config config) { return new EntryData(null, config);}
+        static EntryData empty(Config config) {
+            return new EntryData(null, config);
+        }
 
         private void initialize(String... identifier) {
             this.logger = new PennaLogger(String.join(".", identifier), this.config);
@@ -53,9 +57,13 @@ public class TreeCache {
         }
     }
 
-    private record Entry(String[] identifier, EntryData data, ArrayList<Entry> children){
+    private record Entry(
+            String[] identifier,
+            EntryData data,
+            ArrayList<Entry> children,
+            Lock lock) {
         static Entry create(String[] identifier, Config config) {
-            return new Entry(identifier, EntryData.empty(config), new ArrayList<>());
+            return new Entry(identifier, EntryData.empty(config), new ArrayList<>(), new ReentrantLock(true));
         }
 
         void initialize() {
@@ -99,8 +107,8 @@ public class TreeCache {
         ROOT = Entry.create(new String[]{}, config);
     }
 
-    private Entry search(Entry cursor, String key, int index){
-        for(var childEntry : cursor.children) {
+    private Entry search(Entry cursor, String key, int index) {
+        for (var childEntry : cursor.children) {
             if (childEntry.identifier.length > index && childEntry.identifier[index].equals(key)) {
                 return childEntry;
             }
@@ -108,15 +116,17 @@ public class TreeCache {
         return null;
     }
 
-     Entry getOrCreate(String... identifier){
+    Entry getOrCreate(String... identifier) {
         var cursor = ROOT;
-        for(int index = 0; index < identifier.length; index++) {
+        for (int index = 0; index < identifier.length; index++) {
+            cursor.lock.lock();
             var child = search(cursor, identifier[index], index);
             if (Objects.isNull(child)) {
                 var slicedIdentifier = Arrays.copyOfRange(identifier, 0, index + 1);
                 child = Entry.create(slicedIdentifier, cursor.data.config);
                 cursor.children.add(child);
             }
+            cursor.lock.unlock();
             cursor = child;
         }
 
@@ -132,7 +142,7 @@ public class TreeCache {
     @VisibleForTesting
     void traverse(Entry base, Consumer<EntryData> update) {
         update.accept(base.data);
-        for (int index = 0; index < base.children.size(); index++){
+        for (int index = 0; index < base.children.size(); index++) {
             traverse(base.children.get(index), update);
         }
     }

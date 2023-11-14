@@ -2,13 +2,17 @@ package penna.core.sink;
 
 import org.slf4j.MDC;
 import penna.api.models.LogField;
-import penna.core.internals.*;
+import penna.core.internals.DirectJson;
+import penna.core.internals.StackTraceBloomFilter;
 import penna.core.minilog.MiniLogger;
 import penna.core.models.LogConfig;
 import penna.core.models.PennaLogEvent;
 import penna.core.slf4j.PennaMDCAdapter;
 
-import java.io.*;
+import java.io.Closeable;
+import java.io.FileDescriptor;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
@@ -25,7 +29,7 @@ public final class CoreSink implements Sink, Closeable {
     private static final byte[] NATIVE = "Native Method".getBytes();
     private static final byte[] UNKNOWN = "Unknown Source".getBytes();
 
-    private static final byte[][] LEVEL_ENUM_MAP = new byte[][] {
+    private static final byte[][] LEVEL_ENUM_MAP = new byte[][]{
             "ERROR".getBytes(),
             "WARN".getBytes(),
             "INFO".getBytes(),
@@ -47,7 +51,9 @@ public final class CoreSink implements Sink, Closeable {
     // in JDK 10 the problem was solved. We are targeting JDK 17+, so the problem won't affect us.
     // Plus, any other alternative is significantly slower.
     @SuppressWarnings("PMD.AvoidFileStream")
-    public CoreSink() { this(new FileOutputStream(FileDescriptor.out)); }
+    public CoreSink() {
+        this(new FileOutputStream(FileDescriptor.out));
+    }
 
     public CoreSink(FileOutputStream fos) {
         if (MDC.getMDCAdapter() instanceof PennaMDCAdapter adapter) {
@@ -56,7 +62,7 @@ public final class CoreSink implements Sink, Closeable {
             MiniLogger.error("Not using PennaMDCAdapter for some reason! MDC will be off");
             mdcAdapter = null;
         }
-        this.fos = fos ;
+        this.fos = fos;
         jsonGenerator = new DirectJson(fos.getChannel());
         mdcWriter = jsonGenerator::writeStringValue;
 
@@ -71,6 +77,7 @@ public final class CoreSink implements Sink, Closeable {
         jsonGenerator.close();
         fos.close();
     }
+
     // Hand-crafted based on from StackTraceElement::toString
     // ClassLoader is intentionally removed
     private void writeStackFrame(StackTraceElement frame) {
@@ -85,7 +92,7 @@ public final class CoreSink implements Sink, Closeable {
 
         if ((fileName = frame.getFileName()) != null && !fileName.isEmpty()) {
             jsonGenerator.writeUnsafe(fileName);
-            if (frame.getLineNumber() > 0){
+            if (frame.getLineNumber() > 0) {
                 jsonGenerator.writeRaw(':');
                 jsonGenerator.writeNumberRaw(frame.getLineNumber());
             }
@@ -112,7 +119,7 @@ public final class CoreSink implements Sink, Closeable {
         var classname = throwable.getClass().getName();
         jsonGenerator.writeUnsafeString(classname);
 
-        if((message = throwable.getMessage()) != null) {
+        if ((message = throwable.getMessage()) != null) {
             jsonGenerator.writeKey(MESSAGE);
             jsonGenerator.writeString(message);
         }
@@ -124,6 +131,7 @@ public final class CoreSink implements Sink, Closeable {
             var filter = config.filter();
             for (int index = 0; index < Math.min(frames.length, config.stacktraceDepth()); index++) {
                 filter.hash(filterHashes, frames[index]);
+                jsonGenerator.checkSpace(128);
                 writeStackFrame(frames[index]);
                 jsonGenerator.writeRaw(',');
                 if (filter.check(filterHashes)) {
@@ -166,9 +174,12 @@ public final class CoreSink implements Sink, Closeable {
     }
 
     private void writeMap(LogConfig config, final Map map) throws IOException {
+        jsonGenerator.checkSpace(4);
         jsonGenerator.openObject();
         for (var key : map.keySet()) {
-            jsonGenerator.writeString(key.toString());
+            var keystr = key.toString();
+            jsonGenerator.checkSpace(keystr.length());
+            jsonGenerator.writeString(keystr);
             jsonGenerator.writeEntrySep();
             writeObject(config, map.get(key));
             jsonGenerator.writeSep();
@@ -187,6 +198,7 @@ public final class CoreSink implements Sink, Closeable {
     }
 
     private void writeArray(LogConfig config, final Object... lst) throws IOException {
+        jsonGenerator.checkSpace(3);
         jsonGenerator.openArray();
         for (Object o : lst) {
             writeObject(config, o);
@@ -205,18 +217,26 @@ public final class CoreSink implements Sink, Closeable {
             writeArray(config, lst);
         } else if (object instanceof Object[] lst) {
             writeArray(config, lst);
-        } else if (object instanceof String str){
+        } else if (object instanceof String str) {
+            jsonGenerator.checkSpace(str.length());
             jsonGenerator.writeString(str);
-        } else if (object instanceof Long num){
+        } else if (object instanceof Long num) {
+            // Long.MIN_SIZE will yield 20 chars
+            jsonGenerator.checkSpace(20);
             jsonGenerator.writeNumber(num);
-        } else if (object instanceof Integer num){
+        } else if (object instanceof Integer num) {
+            jsonGenerator.checkSpace(11);
             jsonGenerator.writeNumber(num);
-        } else if (object instanceof Float num){
+        } else if (object instanceof Float num) {
+            jsonGenerator.checkSpace(32);
             jsonGenerator.writeNumber(num);
-        } else if (object instanceof Double num){
+        } else if (object instanceof Double num) {
+            jsonGenerator.checkSpace(64);
             jsonGenerator.writeNumber(num);
         } else {
-            jsonGenerator.writeString(object.toString());
+            var str = object.toString();
+            jsonGenerator.checkSpace(str.length());
+            jsonGenerator.writeString(str);
         }
     }
 
@@ -276,7 +296,9 @@ public final class CoreSink implements Sink, Closeable {
         if (!logEvent.markers.isEmpty()) {
             jsonGenerator.openArray(LogField.MARKERS.fieldName);
             for (int i = 0; i < logEvent.markers.size(); i++) {
-                jsonGenerator.writeString(logEvent.markers.get(i).getName());
+                var marker = logEvent.markers.get(i).getName();
+                jsonGenerator.checkSpace(4 + marker.length());
+                jsonGenerator.writeString(marker);
             }
             jsonGenerator.closeArray();
             jsonGenerator.writeSep();
@@ -294,10 +316,12 @@ public final class CoreSink implements Sink, Closeable {
     }
 
     private void emitKeyValuePair(final PennaLogEvent logEvent) throws IOException {
+        jsonGenerator.checkSpace(16);
         if (!logEvent.keyValuePairs.isEmpty()) {
             jsonGenerator.openObject(LogField.KEY_VALUE_PAIRS.fieldName);
             for (int i = 0; i < logEvent.keyValuePairs.size(); i++) {
                 var kvp = logEvent.keyValuePairs.get(i);
+                jsonGenerator.checkSpace(kvp.key.length() + 4);
                 jsonGenerator.writeString(kvp.key);
                 jsonGenerator.writeEntrySep();
                 writeObject(logEvent.config, kvp.value);
@@ -307,7 +331,7 @@ public final class CoreSink implements Sink, Closeable {
         }
     }
 
-    private void emitExtra (final PennaLogEvent logEvent) throws IOException {
+    private void emitExtra(final PennaLogEvent logEvent) throws IOException {
         if (logEvent.extra != null) {
             jsonGenerator.openObject(LogField.THROWABLE.fieldName);
             writeObject(logEvent.config, logEvent.throwable);
@@ -323,8 +347,8 @@ public final class CoreSink implements Sink, Closeable {
         // This should be safe to do here since this is thread local
         var fields = logEvent.config.fields();
 
-        for (int i = 0; i < fields.length; i++){
-            switch (fields[i]){
+        for (int i = 0; i < fields.length; i++) {
+            switch (fields[i]) {
                 case LEVEL -> emitLevel(logEvent);
                 case COUNTER -> emitCounter(logEvent);
                 case LOGGER_NAME -> emitLogger(logEvent);

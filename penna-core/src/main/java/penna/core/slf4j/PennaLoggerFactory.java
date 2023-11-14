@@ -1,11 +1,11 @@
 package penna.core.slf4j;
 
-import penna.api.config.ConfigManager;
-import penna.api.config.Configurable;
-import penna.api.config.Config;
-import penna.core.logger.TreeCache;
 import org.slf4j.ILoggerFactory;
 import org.slf4j.Logger;
+import penna.api.config.Config;
+import penna.api.config.ConfigManager;
+import penna.api.config.Configurable;
+import penna.core.logger.TreeCache;
 
 import java.util.regex.Pattern;
 
@@ -14,7 +14,7 @@ public final class PennaLoggerFactory implements ILoggerFactory, Configurable {
     private static final PennaLoggerFactory singleton = new PennaLoggerFactory();
     private transient final TreeCache cache;
 
-    public static PennaLoggerFactory getInstance(){
+    public static PennaLoggerFactory getInstance() {
         return singleton;
     }
 
@@ -25,7 +25,7 @@ public final class PennaLoggerFactory implements ILoggerFactory, Configurable {
         }
     }
 
-    private PennaLoggerFactory(){
+    private PennaLoggerFactory() {
         cache = new TreeCache(Config.getDefault());
     }
 
