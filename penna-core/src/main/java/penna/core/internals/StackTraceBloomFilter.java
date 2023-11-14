@@ -14,9 +14,8 @@ public record StackTraceBloomFilter(BitSet bitSet) implements StackTraceFilter {
     }
 
     @Override
-    public StackTraceFilter reset() {
+    public void reset() {
         bitSet.clear();
-        return this;
     }
 
     @Override

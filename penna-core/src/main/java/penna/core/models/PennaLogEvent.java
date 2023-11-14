@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class PennaLogEvent implements LoggingEvent {
+public final class PennaLogEvent implements LoggingEvent {
     private int cursor;
     public Object[] arguments = new Object[8];
     public List<Marker> markers = new ArrayList<>();

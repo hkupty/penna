@@ -1,8 +1,8 @@
 package penna.core.internals;
 
-public interface StackTraceFilter {
+public sealed interface StackTraceFilter permits PassThroughFilter, StackTraceBloomFilter {
 
-    StackTraceFilter reset();
+    void reset();
 
     void hash(int[] positions, StackTraceElement element);
 
