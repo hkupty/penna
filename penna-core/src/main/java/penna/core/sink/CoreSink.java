@@ -167,9 +167,12 @@ public final class CoreSink implements Sink, Closeable {
     }
 
     private void writeMap(LogConfig config, final Map map) throws IOException {
+        jsonGenerator.checkSpace(4);
         jsonGenerator.openObject();
         for (var key : map.keySet()) {
-            jsonGenerator.writeString(key.toString());
+            var keystr = key.toString();
+            jsonGenerator.checkSpace(keystr.length());
+            jsonGenerator.writeString(keystr);
             jsonGenerator.writeEntrySep();
             writeObject(config, map.get(key));
             jsonGenerator.writeSep();
@@ -188,6 +191,7 @@ public final class CoreSink implements Sink, Closeable {
     }
 
     private void writeArray(LogConfig config, final Object... lst) throws IOException {
+        jsonGenerator.checkSpace(3);
         jsonGenerator.openArray();
         for (Object o : lst) {
             writeObject(config, o);
@@ -206,18 +210,26 @@ public final class CoreSink implements Sink, Closeable {
             writeArray(config, lst);
         } else if (object instanceof Object[] lst) {
             writeArray(config, lst);
-        } else if (object instanceof String str){
+        } else if (object instanceof String str) {
+            jsonGenerator.checkSpace(str.length());
             jsonGenerator.writeString(str);
-        } else if (object instanceof Long num){
+        } else if (object instanceof Long num) {
+            // Long.MIN_SIZE will yield 20 chars
+            jsonGenerator.checkSpace(20);
             jsonGenerator.writeNumber(num);
-        } else if (object instanceof Integer num){
+        } else if (object instanceof Integer num) {
+            jsonGenerator.checkSpace(11);
             jsonGenerator.writeNumber(num);
-        } else if (object instanceof Float num){
+        } else if (object instanceof Float num) {
+            jsonGenerator.checkSpace(32);
             jsonGenerator.writeNumber(num);
-        } else if (object instanceof Double num){
+        } else if (object instanceof Double num) {
+            jsonGenerator.checkSpace(64);
             jsonGenerator.writeNumber(num);
         } else {
-            jsonGenerator.writeString(object.toString());
+            var str = object.toString();
+            jsonGenerator.checkSpace(str.length());
+            jsonGenerator.writeString(str);
         }
     }
 
@@ -277,7 +289,9 @@ public final class CoreSink implements Sink, Closeable {
         if (!logEvent.markers.isEmpty()) {
             jsonGenerator.openArray(LogField.MARKERS.fieldName);
             for (int i = 0; i < logEvent.markers.size(); i++) {
-                jsonGenerator.writeString(logEvent.markers.get(i).getName());
+                var marker = logEvent.markers.get(i).getName();
+                jsonGenerator.checkSpace(4 + marker.length());
+                jsonGenerator.writeString(marker);
             }
             jsonGenerator.closeArray();
             jsonGenerator.writeSep();
@@ -295,10 +309,12 @@ public final class CoreSink implements Sink, Closeable {
     }
 
     private void emitKeyValuePair(final PennaLogEvent logEvent) throws IOException {
+        jsonGenerator.checkSpace(16);
         if (!logEvent.keyValuePairs.isEmpty()) {
             jsonGenerator.openObject(LogField.KEY_VALUE_PAIRS.fieldName);
             for (int i = 0; i < logEvent.keyValuePairs.size(); i++) {
                 var kvp = logEvent.keyValuePairs.get(i);
+                jsonGenerator.checkSpace(kvp.key.length() + 4);
                 jsonGenerator.writeString(kvp.key);
                 jsonGenerator.writeEntrySep();
                 writeObject(logEvent.config, kvp.value);
