@@ -133,7 +133,9 @@ public final class DirectJson implements Closeable {
                 }
                 default -> {
                     if (chr >= 0x80 && chr <= 0x10FFFF) {
-                        buffer.put(String.valueOf(str.charAt(i)).getBytes());
+                        var utf8str = String.valueOf(str.charAt(i)).getBytes();
+                        checkSpace(utf8str.length);
+                        buffer.put(utf8str);
                     } else if (chr > 0x1F) buffer.put((byte) chr);
                 }
             }
@@ -149,7 +151,9 @@ public final class DirectJson implements Closeable {
                 case '\t' -> buffer.put(TAB);
                 default -> {
                     if (chr >= 0x80 && chr <= 0x10FFFF) {
-                        buffer.put(String.valueOf(str.charAt(i)).getBytes());
+                        var utf8str = String.valueOf(str.charAt(i)).getBytes();
+                        checkSpace(utf8str.length);
+                        buffer.put(utf8str);
                     } else if (chr > 0x1F) buffer.put((byte) chr);
                 }
             }
