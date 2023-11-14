@@ -1,14 +1,16 @@
 package penna.core.logger.guard;
 
-import penna.core.logger.PennaLogger;
 import org.slf4j.event.Level;
 import org.slf4j.spi.LoggingEventBuilder;
 import org.slf4j.spi.NOPLoggingEventBuilder;
+import penna.core.logger.PennaLogger;
 
 public final class DebugLevelGuard implements LevelGuard {
-    private DebugLevelGuard(){}
+    private DebugLevelGuard() {
+    }
 
     private static final LevelGuard instance = new DebugLevelGuard();
+
     public static LevelGuard singleton() {
         return instance;
     }

@@ -2,13 +2,17 @@ package penna.core.sink;
 
 import org.slf4j.MDC;
 import penna.api.models.LogField;
-import penna.core.internals.*;
+import penna.core.internals.DirectJson;
+import penna.core.internals.StackTraceBloomFilter;
 import penna.core.minilog.MiniLogger;
 import penna.core.models.LogConfig;
 import penna.core.models.PennaLogEvent;
 import penna.core.slf4j.PennaMDCAdapter;
 
-import java.io.*;
+import java.io.Closeable;
+import java.io.FileDescriptor;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
@@ -25,7 +29,7 @@ public final class CoreSink implements Sink, Closeable {
     private static final byte[] NATIVE = "Native Method".getBytes();
     private static final byte[] UNKNOWN = "Unknown Source".getBytes();
 
-    private static final byte[][] LEVEL_ENUM_MAP = new byte[][] {
+    private static final byte[][] LEVEL_ENUM_MAP = new byte[][]{
             "ERROR".getBytes(),
             "WARN".getBytes(),
             "INFO".getBytes(),
@@ -47,7 +51,9 @@ public final class CoreSink implements Sink, Closeable {
     // in JDK 10 the problem was solved. We are targeting JDK 17+, so the problem won't affect us.
     // Plus, any other alternative is significantly slower.
     @SuppressWarnings("PMD.AvoidFileStream")
-    public CoreSink() { this(new FileOutputStream(FileDescriptor.out)); }
+    public CoreSink() {
+        this(new FileOutputStream(FileDescriptor.out));
+    }
 
     public CoreSink(FileOutputStream fos) {
         if (MDC.getMDCAdapter() instanceof PennaMDCAdapter adapter) {
@@ -56,7 +62,7 @@ public final class CoreSink implements Sink, Closeable {
             MiniLogger.error("Not using PennaMDCAdapter for some reason! MDC will be off");
             mdcAdapter = null;
         }
-        this.fos = fos ;
+        this.fos = fos;
         jsonGenerator = new DirectJson(fos.getChannel());
         mdcWriter = jsonGenerator::writeStringValue;
 
@@ -71,6 +77,7 @@ public final class CoreSink implements Sink, Closeable {
         jsonGenerator.close();
         fos.close();
     }
+
     // Hand-crafted based on from StackTraceElement::toString
     // ClassLoader is intentionally removed
     private void writeStackFrame(StackTraceElement frame) {
@@ -85,7 +92,7 @@ public final class CoreSink implements Sink, Closeable {
 
         if ((fileName = frame.getFileName()) != null && !fileName.isEmpty()) {
             jsonGenerator.writeUnsafe(fileName);
-            if (frame.getLineNumber() > 0){
+            if (frame.getLineNumber() > 0) {
                 jsonGenerator.writeRaw(':');
                 jsonGenerator.writeNumberRaw(frame.getLineNumber());
             }
@@ -112,7 +119,7 @@ public final class CoreSink implements Sink, Closeable {
         var classname = throwable.getClass().getName();
         jsonGenerator.writeUnsafeString(classname);
 
-        if((message = throwable.getMessage()) != null) {
+        if ((message = throwable.getMessage()) != null) {
             jsonGenerator.writeKey(MESSAGE);
             jsonGenerator.writeString(message);
         }
@@ -324,7 +331,7 @@ public final class CoreSink implements Sink, Closeable {
         }
     }
 
-    private void emitExtra (final PennaLogEvent logEvent) throws IOException {
+    private void emitExtra(final PennaLogEvent logEvent) throws IOException {
         if (logEvent.extra != null) {
             jsonGenerator.openObject(LogField.THROWABLE.fieldName);
             writeObject(logEvent.config, logEvent.throwable);
@@ -340,8 +347,8 @@ public final class CoreSink implements Sink, Closeable {
         // This should be safe to do here since this is thread local
         var fields = logEvent.config.fields();
 
-        for (int i = 0; i < fields.length; i++){
-            switch (fields[i]){
+        for (int i = 0; i < fields.length; i++) {
+            switch (fields[i]) {
                 case LEVEL -> emitLevel(logEvent);
                 case COUNTER -> emitCounter(logEvent);
                 case LOGGER_NAME -> emitLogger(logEvent);

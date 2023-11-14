@@ -1,11 +1,11 @@
 package penna.core.logger.guard;
 
+import org.slf4j.event.Level;
+import org.slf4j.spi.LoggingEventBuilder;
 import penna.api.config.Config;
 import penna.core.internals.ObjectPool;
 import penna.core.logger.LogUnitContext;
 import penna.core.logger.PennaLogger;
-import org.slf4j.event.Level;
-import org.slf4j.spi.LoggingEventBuilder;
 
 import java.util.EnumMap;
 
@@ -23,15 +23,16 @@ public sealed interface LevelGuard permits
         DebugLevelGuard,
         InfoLevelGuard,
         WarnLevelGuard,
-        ErrorLevelGuard
-{
+        ErrorLevelGuard {
 
     final class Shared {
         private static final ObjectPool logUnits = new ObjectPool();
     }
+
     final class FromConfig {
 
-        private FromConfig() {}
+        private FromConfig() {
+        }
 
         private static final EnumMap<Level, LevelGuard> levelMapping = new EnumMap<>(Level.class);
 
@@ -58,17 +59,22 @@ public sealed interface LevelGuard permits
 
 
     boolean isTraceEnabled();
+
     LoggingEventBuilder trace(PennaLogger logger);
 
     boolean isDebugEnabled();
+
     LoggingEventBuilder debug(PennaLogger logger);
 
     boolean isInfoEnabled();
+
     LoggingEventBuilder info(PennaLogger logger);
 
     boolean isWarnEnabled();
+
     LoggingEventBuilder warn(PennaLogger logger);
 
     boolean isErrorEnabled();
+
     LoggingEventBuilder error(PennaLogger logger);
 }

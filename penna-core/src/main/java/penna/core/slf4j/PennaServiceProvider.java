@@ -1,12 +1,12 @@
 package penna.core.slf4j;
 
-import penna.api.config.ConfigManager;
-import penna.core.config.ConfigManagerFactory;
 import org.slf4j.ILoggerFactory;
 import org.slf4j.IMarkerFactory;
 import org.slf4j.helpers.BasicMarkerFactory;
 import org.slf4j.spi.MDCAdapter;
 import org.slf4j.spi.SLF4JServiceProvider;
+import penna.api.config.ConfigManager;
+import penna.core.config.ConfigManagerFactory;
 import penna.core.sink.NonStandardSink;
 import penna.core.sink.SinkManager;
 
@@ -28,16 +28,24 @@ public final class PennaServiceProvider implements SLF4JServiceProvider {
     private MDCAdapter mdcAdapter;
 
     @Override
-    public ILoggerFactory getLoggerFactory() { return loggerFactory; }
+    public ILoggerFactory getLoggerFactory() {
+        return loggerFactory;
+    }
 
     @Override
-    public IMarkerFactory getMarkerFactory() { return markerFactory; }
+    public IMarkerFactory getMarkerFactory() {
+        return markerFactory;
+    }
 
     @Override
-    public MDCAdapter getMDCAdapter() { return mdcAdapter; }
+    public MDCAdapter getMDCAdapter() {
+        return mdcAdapter;
+    }
 
     @Override
-    public String getRequestedApiVersion() { return REQUESTED_API_VERSION; }
+    public String getRequestedApiVersion() {
+        return REQUESTED_API_VERSION;
+    }
 
     private Optional<ServiceLoader.Provider<NonStandardSink>> getOverridingSink() {
         ServiceLoader<NonStandardSink> sinkProvider = ServiceLoader.load(NonStandardSink.class);

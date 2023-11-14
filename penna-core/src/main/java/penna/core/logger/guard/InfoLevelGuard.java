@@ -1,17 +1,20 @@
 package penna.core.logger.guard;
 
-import penna.core.logger.PennaLogger;
 import org.slf4j.event.Level;
 import org.slf4j.spi.LoggingEventBuilder;
 import org.slf4j.spi.NOPLoggingEventBuilder;
+import penna.core.logger.PennaLogger;
 
 public final class InfoLevelGuard implements LevelGuard {
-    private InfoLevelGuard(){}
+    private InfoLevelGuard() {
+    }
 
     private static final LevelGuard instance = new InfoLevelGuard();
+
     public static LevelGuard singleton() {
         return instance;
     }
+
     @Override
     public boolean isTraceEnabled() {
         return false;

@@ -4,7 +4,6 @@ import penna.core.models.PennaLogEvent;
 
 import java.io.IOException;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 public final class TestSink implements NonStandardSink {
 
