@@ -42,6 +42,6 @@ public final class IntToAscii {
     void longToAscii(long num, ByteBuffer buffer) {
         // Check if it can be optimized by doing it in a single pass
         int sz = longToAscii(num, innerBuffer);
-        buffer.put(innerBuffer, 0, sz);
+        buffer.put(innerBuffer, innerBuffer.length - sz, sz);
     }
 }
