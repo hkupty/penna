@@ -26,36 +26,36 @@ public final class DirectJson implements Closeable {
     private static final byte OPEN_ARR = '[';
     private static final byte CLOSE_ARR = ']';
 
-    private static final byte[] NEWLINE = new byte[] {
+    private static final byte[] NEWLINE = new byte[]{
             '\\',
             'n',
     };
-    private static final byte[] ESCAPE = new byte[] {
+    private static final byte[] ESCAPE = new byte[]{
             '\\',
             '\\',
     };
-    private static final byte[] LINEBREAK = new byte[] {
+    private static final byte[] LINEBREAK = new byte[]{
             '\\',
             'r',
     };
-    private static final byte[] TAB = new byte[] {
+    private static final byte[] TAB = new byte[]{
             '\\',
             't',
     };
-    private static final byte[] TRUE = new byte[] {
+    private static final byte[] TRUE = new byte[]{
             't',
             'r',
             'u',
             'e'
     };
-    private static final byte[] FALSE = new byte[] {
+    private static final byte[] FALSE = new byte[]{
             'f',
             'a',
             'l',
             's',
             'e'
     };
-    private static final byte[] NULL = new byte[] {
+    private static final byte[] NULL = new byte[]{
             'n',
             'u',
             'l',
@@ -68,11 +68,13 @@ public final class DirectJson implements Closeable {
 
     @VisibleForTesting
     ByteBuffer buffer = ByteBuffer.allocateDirect(INITIAL_BUFFER_SIZE);
+    private final IntToAscii intToAscii = new IntToAscii();
 
     public DirectJson(FileChannel channel) {
         this.backingOs = null;
         this.channel = channel;
     }
+
     // From the same ticket that PMD references, https://bugs.openjdk.org/browse/JDK-8080225, it is noted that
     // in JDK 10 the problem was solved. We are targeting JDK 17+, so the problem won't affect us.
     // Plus, any other alternative is significantly slower.
@@ -88,7 +90,7 @@ public final class DirectJson implements Closeable {
         int cursor = 0;
         boolean isPlaceholder = false;
         boolean escaped = false;
-        for(int i = 0; i < str.length(); i++){
+        for (int i = 0; i < str.length(); i++) {
             var chr = str.codePointAt(i);
             switch (chr) {
                 case '\\' -> {
@@ -109,9 +111,9 @@ public final class DirectJson implements Closeable {
                         Object argument;
 
                         if (isPlaceholder && (argument = arguments[cursor++]) != null) {
-                                var argStr = argument.toString();
-                                checkSpace(argStr.length());
-                                writeRaw(argStr);
+                            var argStr = argument.toString();
+                            checkSpace(argStr.length());
+                            writeRaw(argStr);
                         } else {
                             isPlaceholder = false; // if argument == null
                             var offset = escaped ? 2 : 0;
@@ -125,8 +127,7 @@ public final class DirectJson implements Closeable {
                 case DELIM_STOP -> {
                     if (!isPlaceholder) {
                         buffer.put(DELIM_STOP);
-                    }
-                    else {
+                    } else {
                         // End of placeholder, clean up
                         isPlaceholder = false;
                     }
@@ -141,8 +142,9 @@ public final class DirectJson implements Closeable {
             }
         }
     }
+
     public void writeRaw(final String str) {
-        for(int i = 0; i < str.length(); i++ ){
+        for (int i = 0; i < str.length(); i++) {
             var chr = str.codePointAt(i);
             switch (chr) {
                 case '\\' -> buffer.put(ESCAPE);
@@ -160,11 +162,21 @@ public final class DirectJson implements Closeable {
         }
     }
 
-    public void writeRaw(final char chr) { buffer.put((byte) chr); }
-    public void writeRaw(final byte[] chars) { buffer.put(chars); }
+    public void writeRaw(final char chr) {
+        buffer.put((byte) chr);
+    }
 
-    public void openObject() { buffer.put(OPEN_OBJ); }
-    public void openArray() { buffer.put(OPEN_ARR); }
+    public void writeRaw(final byte[] chars) {
+        buffer.put(chars);
+    }
+
+    public void openObject() {
+        buffer.put(OPEN_OBJ);
+    }
+
+    public void openArray() {
+        buffer.put(OPEN_ARR);
+    }
 
     public void openObject(String str) {
         writeKey(str);
@@ -205,12 +217,14 @@ public final class DirectJson implements Closeable {
     }
 
     public void writeUnsafe(final String str) {
-        for(int i = 0; i < str.length(); i++){
+        for (int i = 0; i < str.length(); i++) {
             buffer.put((byte) str.codePointAt(i));
         }
     }
 
-    public void writeQuote() { buffer.put(QUOTE); }
+    public void writeQuote() {
+        buffer.put(QUOTE);
+    }
 
     // --[ 2nd level; based on the level above ]-- //
 
@@ -259,10 +273,12 @@ public final class DirectJson implements Closeable {
         buffer.put(KV_SEP);
     }
 
-    public void writeSep() { buffer.put(KV_SEP); }
+    public void writeSep() {
+        buffer.put(KV_SEP);
+    }
 
     public void writeNumberRaw(final long data) {
-        IntToAscii.longToAscii(data, buffer);
+        intToAscii.longToAscii(data, buffer);
     }
 
     public void writeNumber(final long data) {
@@ -297,7 +313,9 @@ public final class DirectJson implements Closeable {
         buffer.put(KV_SEP);
     }
 
-    public void writeEntrySep() { buffer.put(buffer.position() - 1, ENTRY_SEP); }
+    public void writeEntrySep() {
+        buffer.put(buffer.position() - 1, ENTRY_SEP);
+    }
 
     public void writeStringValue(final String key, final String value) {
         checkSpace(key.length() + value.length() + 5);
