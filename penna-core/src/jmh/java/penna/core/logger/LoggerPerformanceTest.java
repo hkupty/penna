@@ -5,6 +5,7 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.encoder.JsonEncoder;
 import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.classic.util.LogbackMDCAdapter;
 import ch.qos.logback.core.OutputStreamAppender;
 import ch.qos.logback.core.encoder.Encoder;
 import net.logstash.logback.encoder.LogstashEncoder;
@@ -99,6 +100,7 @@ public class LoggerPerformanceTest {
         @Setup
         public void setup() {
             context.setName("JMH");
+            context.setMDCAdapter(new LogbackMDCAdapter());
             logger = context.getLogger("jmh.test.logback");
             logger.setLevel(Level.INFO);
             OutputStreamAppender<ILoggingEvent> appender = new LogbackDevNullAppender();
@@ -140,6 +142,7 @@ public class LoggerPerformanceTest {
 
             logger = cache.getLoggerAt("jmh", "test", "penna");
         }
+
         @TearDown
         public void tearDown() throws IOException {
             fos.close();
@@ -151,10 +154,10 @@ public class LoggerPerformanceTest {
         tb.log(state.logger);
     }
 
-//    @Benchmark
-//    public void logback(LogbackState state, TestBehavior tb) throws IOException {
-//        tb.log(state.logger);
-//    }
+    @Benchmark
+    public void logback(LogbackState state, TestBehavior tb) throws IOException {
+        tb.log(state.logger);
+    }
 
     @Test
     public void runBenchmarks() throws Exception {
@@ -171,7 +174,7 @@ public class LoggerPerformanceTest {
                 .addProfiler("gc")
                 .addProfiler("perfnorm")
                 .addProfiler("perfasm", "tooBigThreshold=2100")
-                .threads(4)
+                .threads(1)
                 .jvm("/usr/lib/jvm/java-21-jetbrains/bin/java")
                 .jvmArgs("-Xmx8192m")
                 .build();
