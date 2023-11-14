@@ -6,7 +6,7 @@ import org.slf4j.event.Level;
 import org.slf4j.event.LoggingEvent;
 import org.slf4j.spi.LoggingEventBuilder;
 import penna.core.internals.Clock;
-import penna.core.internals.ObjectPool;
+import penna.core.internals.LogUnitContextPool;
 import penna.core.minilog.MiniLogger;
 import penna.core.models.PennaLogEvent;
 import penna.core.sink.Sink;
@@ -15,7 +15,7 @@ import java.io.IOException;
 import java.util.function.Supplier;
 
 public record LogUnitContext(
-        ObjectPool pool,
+        LogUnitContextPool pool,
         int selfReference,
         Sink sink,
         PennaLogEvent logEvent
@@ -47,6 +47,7 @@ public record LogUnitContext(
         logEvent.threadName = Thread.currentThread().getName().getBytes();
         logEvent.timestamp = Clock.getTimestamp();
     }
+
     @Override
     public LoggingEventBuilder setCause(Throwable cause) {
         logEvent.throwable = cause;

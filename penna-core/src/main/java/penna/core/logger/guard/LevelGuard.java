@@ -3,7 +3,7 @@ package penna.core.logger.guard;
 import org.slf4j.event.Level;
 import org.slf4j.spi.LoggingEventBuilder;
 import penna.api.config.Config;
-import penna.core.internals.ObjectPool;
+import penna.core.internals.LogUnitContextPool;
 import penna.core.logger.LogUnitContext;
 import penna.core.logger.PennaLogger;
 
@@ -26,7 +26,7 @@ public sealed interface LevelGuard permits
         ErrorLevelGuard {
 
     final class Shared {
-        private static final ObjectPool logUnits = new ObjectPool();
+        private static final LogUnitContextPool logUnits = new LogUnitContextPool();
     }
 
     final class FromConfig {
