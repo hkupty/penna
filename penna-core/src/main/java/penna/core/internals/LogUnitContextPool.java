@@ -10,7 +10,7 @@ import java.util.concurrent.locks.ReentrantLock;
 /**
  * This Object Pool ensures each thread will have access to a single pooled {@link LogUnitContext},
  * without requiring {@link ThreadLocal}.
- * </br>
+ * <br/>
  * It does so by locking each object through its {@link LogUnitContextPool#locks}.
  */
 public final class LogUnitContextPool {
