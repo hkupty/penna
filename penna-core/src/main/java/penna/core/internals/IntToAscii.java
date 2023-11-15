@@ -4,7 +4,7 @@ import java.nio.ByteBuffer;
 
 /**
  * Utility helper to transform numbers to their equivalent ascii values.
- * </br>
+ * <br/>
  * Utilizes "fast" math (relies on JVM optimizations though) to efficiently extract each digit and convert it to
  * ascii by applying `| 0x30` to it.
  */
