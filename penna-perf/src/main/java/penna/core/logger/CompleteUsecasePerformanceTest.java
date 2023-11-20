@@ -1,85 +1,71 @@
 package penna.core.logger;
 
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.Logger;
-import ch.qos.logback.classic.LoggerContext;
-import ch.qos.logback.classic.encoder.JsonEncoder;
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.classic.util.LogbackMDCAdapter;
-import ch.qos.logback.core.OutputStreamAppender;
-import org.junit.jupiter.api.Test;
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.runner.Runner;
+import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 import org.openjdk.jmh.runner.options.TimeValue;
-import penna.api.config.Config;
-import penna.core.logger.utils.LogbackDevNullAppender;
-import penna.core.sink.CoreSink;
-import penna.core.sink.SinkManager;
+import org.slf4j.Logger;
+import penna.core.logger.utils.PerfTestLoggerFactory;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.LockSupport;
-import java.util.regex.Pattern;
 
 public class CompleteUsecasePerformanceTest {
 
-    @State(Scope.Thread)
-    public static class PennaState {
-        private static final Pattern DOT_SPLIT = Pattern.compile("\\.");
 
+    @State(Scope.Thread)
+    public static class TestState {
+
+        public Random random = new Random();
+        public String[] randomLoggers;
         @Param({
-                "1",
-//                "4",
+//                "1",
+                "4",
 //                "16",
 //                "64",
 //                "256"
         })
         int threads;
 
-        public final Random random = new Random();
-        private FileOutputStream fos;
-        TreeCache cache = new TreeCache(Config.getDefault());
+        PerfTestLoggerFactory factory;
 
         @Setup
-        public void setup() {
-            var devnull = new File("/dev/null");
-            try {
-                fos = new FileOutputStream(devnull);
-            } catch (FileNotFoundException e) {
-                throw new RuntimeException("Dev null doesn't exist!", e);
-            }
+        public void setUp() {
+            factory = PerfTestLoggerFactory.Factory.get(PerfTestLoggerFactory.Implementation.Logback);
+            factory.setup();
 
-            SinkManager.Instance.replace(() -> new CoreSink(fos));
+            randomLoggers = random.ints(threads, 0, (int) Math.ceil(threads * 1.6))
+                    .boxed()
+                    .map(ix -> "jmh.task.child-" + ix)
+                    .toArray(String[]::new);
         }
+
+        Logger getLogger(String name) {
+            return factory.getLogger(name);
+        }
+
         @TearDown
         public void tearDown() throws IOException {
-            fos.close();
+            factory.close();
         }
 
-
-        public org.slf4j.Logger getLogger(String name) {
-            return cache.getLoggerAt(DOT_SPLIT.split(name));
-        }
     }
 
     @Benchmark
-    public void penna(PennaState state) throws InterruptedException {
+    public void alwaysNewLogger(TestState state) throws InterruptedException {
         CountDownLatch latch = new CountDownLatch(state.threads);
 
         for (int i = 0; i < state.threads; i++) {
             int index = i;
-             Thread.ofVirtual()
-                    .name("jmh-penna-", i)
+            Thread.ofVirtual()
+                    .name("jmh-", i)
                     .start(() -> {
                         try {
-                            var logger = state.getLogger("jmh.penna.task" + index);
+                            var logger = state.getLogger("jmh.task-" + index);
                             logger.info("Message 1");
                             logger.info("Message 2");
                             logger.info("Message 3");
@@ -93,12 +79,12 @@ public class CompleteUsecasePerformanceTest {
         latch.await();
     }
 
-    @Test
-    public void runBenchmarks() throws Exception {
+    public static void main(String[] args) throws RunnerException {
         Options options = new OptionsBuilder()
-                .include(this.getClass().getName() + ".*")
+                .include(CompleteUsecasePerformanceTest.class.getName() + ".*")
                 .mode(Mode.Throughput)
                 .timeUnit(TimeUnit.SECONDS)
+                .measurementTime(TimeValue.seconds(50))
                 .warmupTime(TimeValue.seconds(20))
                 .warmupIterations(3)
                 .measurementIterations(3)

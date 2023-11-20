@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="warn" name="JsonPerfTest">
+    <Appenders>
+        <File name="MyFile" fileName="/dev/null">
+            <JsonTemplateLayout eventTemplateUri="classpath:LogstashJsonEventLayoutV1.json"/>
+        </File>
+        <Async name="Async">
+            <AppenderRef ref="MyFile"/>
+        </Async>
+    </Appenders>
+    <Loggers>
+        <Root level="debug">
+            <AppenderRef ref="Async"/>
+        </Root>
+    </Loggers>
+</Configuration>

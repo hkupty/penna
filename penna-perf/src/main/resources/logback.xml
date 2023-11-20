@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <appender name="devnull" class="penna.core.logger.utils.LogbackDevNullAppender">
+        <encoder class="ch.qos.logback.classic.encoder.JsonEncoder"/>
+    </appender>
+
+    <root level="debug">
+        <appender-ref ref="devnull"/>
+    </root>
+</configuration>
