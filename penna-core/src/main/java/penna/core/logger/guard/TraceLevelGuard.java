@@ -35,33 +35,4 @@ public final class TraceLevelGuard implements LevelGuard {
         return get(logger, Level.DEBUG);
     }
 
-    @Override
-    public boolean isInfoEnabled() {
-        return true;
-    }
-
-    @Override
-    public LoggingEventBuilder info(PennaLogger logger) {
-        return get(logger, Level.INFO);
-    }
-
-    @Override
-    public boolean isWarnEnabled() {
-        return true;
-    }
-
-    @Override
-    public LoggingEventBuilder warn(PennaLogger logger) {
-        return get(logger, Level.WARN);
-    }
-
-    @Override
-    public boolean isErrorEnabled() {
-        return true;
-    }
-
-    @Override
-    public LoggingEventBuilder error(PennaLogger logger) {
-        return get(logger, Level.ERROR);
-    }
 }

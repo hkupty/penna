@@ -16,26 +16,6 @@ public final class NOPGuard implements LevelGuard {
     }
 
     @Override
-    public boolean isTraceEnabled() {
-        return false;
-    }
-
-    @Override
-    public LoggingEventBuilder trace(PennaLogger logger) {
-        return NOPLoggingEventBuilder.singleton();
-    }
-
-    @Override
-    public boolean isDebugEnabled() {
-        return false;
-    }
-
-    @Override
-    public LoggingEventBuilder debug(PennaLogger logger) {
-        return NOPLoggingEventBuilder.singleton();
-    }
-
-    @Override
     public boolean isInfoEnabled() {
         return false;
     }
@@ -64,4 +44,5 @@ public final class NOPGuard implements LevelGuard {
     public LoggingEventBuilder error(PennaLogger logger) {
         return NOPLoggingEventBuilder.singleton();
     }
+
 }

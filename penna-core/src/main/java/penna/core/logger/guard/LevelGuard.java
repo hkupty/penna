@@ -2,6 +2,7 @@ package penna.core.logger.guard;
 
 import org.slf4j.event.Level;
 import org.slf4j.spi.LoggingEventBuilder;
+import org.slf4j.spi.NOPLoggingEventBuilder;
 import penna.api.config.Config;
 import penna.core.internals.LogUnitContextPool;
 import penna.core.logger.LogUnitContext;
@@ -58,23 +59,43 @@ public sealed interface LevelGuard permits
     }
 
 
-    boolean isTraceEnabled();
+    default boolean isTraceEnabled() {
+        return false;
+    }
 
-    LoggingEventBuilder trace(PennaLogger logger);
+    default LoggingEventBuilder trace(PennaLogger logger) {
+        return NOPLoggingEventBuilder.singleton();
+    }
 
-    boolean isDebugEnabled();
+    default boolean isDebugEnabled() {
+        return false;
+    }
 
-    LoggingEventBuilder debug(PennaLogger logger);
+    default LoggingEventBuilder debug(PennaLogger logger) {
+        return NOPLoggingEventBuilder.singleton();
+    }
 
-    boolean isInfoEnabled();
+    default boolean isInfoEnabled() {
+        return true;
+    }
 
-    LoggingEventBuilder info(PennaLogger logger);
+    default LoggingEventBuilder info(PennaLogger logger) {
+        return get(logger, Level.INFO);
+    }
 
-    boolean isWarnEnabled();
+    default boolean isWarnEnabled() {
+        return true;
+    }
 
-    LoggingEventBuilder warn(PennaLogger logger);
+    default LoggingEventBuilder warn(PennaLogger logger) {
+        return get(logger, Level.WARN);
+    }
 
-    boolean isErrorEnabled();
+    default boolean isErrorEnabled() {
+        return true;
+    }
 
-    LoggingEventBuilder error(PennaLogger logger);
+    default LoggingEventBuilder error(PennaLogger logger) {
+        return get(logger, Level.ERROR);
+    }
 }
