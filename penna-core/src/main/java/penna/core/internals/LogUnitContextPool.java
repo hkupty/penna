@@ -53,7 +53,7 @@ public final class LogUnitContextPool {
             but never hitting the end of the array.
          */
 
-        var index = 0;
+        var index = Thread.currentThread().hashCode() & 0xF;
         while (!locks[index].tryLock()) {
             index = ++index & 0xF;
         }
