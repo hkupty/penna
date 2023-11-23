@@ -10,7 +10,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
+import java.nio.channels.WritableByteChannel;
 import java.nio.charset.StandardCharsets;
 
 public final class DirectJson implements Closeable {
@@ -64,13 +64,13 @@ public final class DirectJson implements Closeable {
     static final byte DELIM_START = '{';
     static final byte DELIM_STOP = '}';
     private final FileOutputStream backingOs;
-    private final FileChannel channel;
+    private final WritableByteChannel channel;
 
     @VisibleForTesting
     ByteBuffer buffer = ByteBuffer.allocateDirect(INITIAL_BUFFER_SIZE);
     private final IntToAscii intToAscii = new IntToAscii();
 
-    public DirectJson(FileChannel channel) {
+    public DirectJson(WritableByteChannel channel) {
         this.backingOs = null;
         this.channel = channel;
     }
@@ -285,7 +285,6 @@ public final class DirectJson implements Closeable {
         if (data < 0) {
             writeRaw('-');
         }
-
         writeNumberRaw(data);
         buffer.put(KV_SEP);
     }

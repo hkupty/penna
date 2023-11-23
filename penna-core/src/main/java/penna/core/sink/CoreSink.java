@@ -13,6 +13,7 @@ import java.io.Closeable;
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.channels.WritableByteChannel;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
@@ -41,7 +42,7 @@ public final class CoreSink implements Sink, Closeable {
 
     private final AtomicLong counter = new AtomicLong(0L);
 
-    private final FileOutputStream fos;
+    private FileOutputStream fos;
     private final DirectJson jsonGenerator;
 
     private final PennaMDCAdapter mdcAdapter;
@@ -56,16 +57,19 @@ public final class CoreSink implements Sink, Closeable {
     }
 
     public CoreSink(FileOutputStream fos) {
+        this(fos.getChannel());
+        this.fos = fos;
+    }
+
+    public CoreSink(WritableByteChannel channel) {
         if (MDC.getMDCAdapter() instanceof PennaMDCAdapter adapter) {
             mdcAdapter = adapter;
         } else {
             MiniLogger.error("Not using PennaMDCAdapter for some reason! MDC will be off");
             mdcAdapter = null;
         }
-        this.fos = fos;
-        jsonGenerator = new DirectJson(fos.getChannel());
+        jsonGenerator = new DirectJson(channel);
         mdcWriter = jsonGenerator::writeStringValue;
-
     }
 
     public static Sink getSink() {
@@ -75,7 +79,9 @@ public final class CoreSink implements Sink, Closeable {
     @Override
     public void close() throws IOException {
         jsonGenerator.close();
-        fos.close();
+        if (fos != null) {
+            fos.close();
+        }
     }
 
     // Hand-crafted based on from StackTraceElement::toString
