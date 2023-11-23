@@ -1,13 +1,12 @@
 package penna.core.logger;
 
 import org.slf4j.Marker;
-import org.slf4j.event.KeyValuePair;
 import org.slf4j.event.Level;
 import org.slf4j.event.LoggingEvent;
 import org.slf4j.spi.LoggingEventBuilder;
-import penna.core.internals.Clock;
 import penna.core.internals.LogUnitContextPool;
 import penna.core.minilog.MiniLogger;
+import penna.core.models.KeyValuePair;
 import penna.core.models.PennaLogEvent;
 import penna.core.sink.Sink;
 
@@ -22,6 +21,11 @@ public record LogUnitContext(
 ) implements LoggingEventBuilder {
 
     public void fromLoggingEvent(LoggingEvent event) {
+        if (event instanceof PennaLogEvent pennaLogEvent) {
+            fromPennaEvent(pennaLogEvent);
+            return;
+        }
+
         setCause(event.getThrowable());
         setMessage(event.getMessage());
         addArguments(event.getArgumentArray());
@@ -29,6 +33,20 @@ public record LogUnitContext(
             addKeyValue(kvp.key, kvp.value);
         }
         for (var marker : event.getMarkers()) {
+            addMarker(marker);
+        }
+
+        log();
+    }
+
+    private void fromPennaEvent(PennaLogEvent event) {
+        setCause(event.throwable);
+        setMessage(event.message);
+        addArguments(event.arguments);
+        for (var kvp : event.keyValuePairs) {
+            addKeyValue(kvp.key(), kvp.value());
+        }
+        for (var marker : event.markers) {
             addMarker(marker);
         }
 

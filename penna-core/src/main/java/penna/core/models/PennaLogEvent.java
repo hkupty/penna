@@ -100,8 +100,8 @@ public final class PennaLogEvent implements LoggingEvent {
     }
 
     @Override
-    public List<KeyValuePair> getKeyValuePairs() {
-        return keyValuePairs;
+    public List<org.slf4j.event.KeyValuePair> getKeyValuePairs() {
+        return keyValuePairs.stream().map(KeyValuePair::toSlf4j).toList();
     }
 
     @Override
