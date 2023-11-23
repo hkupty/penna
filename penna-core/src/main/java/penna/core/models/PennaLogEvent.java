@@ -1,9 +1,9 @@
 package penna.core.models;
 
 import org.slf4j.Marker;
-import org.slf4j.event.KeyValuePair;
 import org.slf4j.event.Level;
 import org.slf4j.event.LoggingEvent;
+import penna.core.internals.Clock;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,6 +23,8 @@ public final class PennaLogEvent implements LoggingEvent {
     public LogConfig config;
     public long timestamp;
 
+    private Thread thread;
+
     /**
      * Resets all the fields that will change during log creation.
      * <br />
@@ -30,7 +32,7 @@ public final class PennaLogEvent implements LoggingEvent {
      * This is because it is bound to the object pool in the LoggingEventBuilder and,
      * therefore, will never change.
      */
-    public void reset() {
+    public void reset(byte[] logger, LogConfig config, Level level, Thread holder) {
         markers.clear();
         cursor = 0;
         Arrays.fill(arguments, null);
@@ -39,8 +41,17 @@ public final class PennaLogEvent implements LoggingEvent {
         extra = null;
         message = null;
         throwable = null;
-        logger = null;
-        timestamp = 0;
+
+        this.logger = logger;
+        this.config = config;
+        this.level = level;
+
+        if (holder != this.thread) {
+            this.thread = holder;
+            this.threadName = holder.getName().getBytes();
+        }
+
+        timestamp = Clock.getTimestamp();
     }
 
     @Override

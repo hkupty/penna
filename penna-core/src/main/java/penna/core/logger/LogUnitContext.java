@@ -40,12 +40,7 @@ public record LogUnitContext(
     }
 
     public void reset(PennaLogger logger, Level level) {
-        logEvent.reset();
-        logEvent.logger = logger.nameAsChars;
-        logEvent.level = level;
-        logEvent.config = logger.config;
-        logEvent.threadName = Thread.currentThread().getName().getBytes();
-        logEvent.timestamp = Clock.getTimestamp();
+        logEvent.reset(logger.nameAsChars, logger.config, level, Thread.currentThread());
     }
 
     @Override
