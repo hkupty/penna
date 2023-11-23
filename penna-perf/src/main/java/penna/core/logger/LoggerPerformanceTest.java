@@ -1,6 +1,7 @@
 package penna.core.logger;
 
 import org.openjdk.jmh.annotations.*;
+import org.openjdk.jmh.infra.Blackhole;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
@@ -61,15 +62,14 @@ public class LoggerPerformanceTest {
 
     @State(Scope.Thread)
     public static class TestState {
-        @Param
-        PerfTestLoggerFactory.Implementation implementation;
+        PerfTestLoggerFactory.Implementation implementation = PerfTestLoggerFactory.Implementation.Penna;
         PerfTestLoggerFactory factory;
         Logger logger;
 
         @Setup
-        public void setUp() {
+        public void setUp(Blackhole bh) {
             factory = PerfTestLoggerFactory.Factory.get(implementation);
-            factory.setup();
+            factory.setup(bh);
             logger = factory.getLogger("jmh." + implementation.name() + ".loggerTest");
         }
 
@@ -91,15 +91,16 @@ public class LoggerPerformanceTest {
                 .include(LoggerPerformanceTest.class.getName() + ".*")
                 .mode(Mode.Throughput)
                 .timeUnit(TimeUnit.SECONDS)
-                .warmupTime(TimeValue.seconds(20))
+                .warmupTime(TimeValue.seconds(40))
                 .warmupIterations(3)
                 .measurementIterations(3)
+                .measurementTime(TimeValue.seconds(50))
                 .forks(1)
                 .shouldFailOnError(true)
                 .shouldDoGC(true)
                 .addProfiler("gc")
-//                .addProfiler("perfnorm")
-//                .addProfiler("perfasm", "tooBigThreshold=2100")
+                .addProfiler("perfnorm")
+                .addProfiler("perfasm", "tooBigThreshold=2100")
                 .threads(1)
                 .jvm("/usr/lib/jvm/java-21-jetbrains/bin/java")
                 .jvmArgs("-Xmx8192m")

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-    <appender name="devnull" class="penna.core.logger.utils.LogbackDevNullAppender">
+    <appender name="devnull" class="penna.core.logger.utils.LogbackBlackholeAppender">
         <encoder class="ch.qos.logback.classic.encoder.JsonEncoder"/>
     </appender>
 

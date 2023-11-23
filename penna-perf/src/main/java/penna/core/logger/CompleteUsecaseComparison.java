@@ -1,6 +1,7 @@
 package penna.core.logger;
 
 import org.openjdk.jmh.annotations.*;
+import org.openjdk.jmh.infra.Blackhole;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
@@ -35,9 +36,9 @@ public class CompleteUsecaseComparison {
         PerfTestLoggerFactory factory;
 
         @Setup
-        public void setUp() {
+        public void setUp(Blackhole bh) {
             factory = PerfTestLoggerFactory.Factory.get(implementation);
-            factory.setup();
+            factory.setup(bh);
 
             randomLoggers = random.ints(threads, 0, (int) Math.ceil(threads * 1.6))
                     .boxed()

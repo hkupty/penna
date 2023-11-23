@@ -30,9 +30,9 @@ public class LoggerCreationPerformanceTest {
         PerfTestLoggerFactory factory;
 
         @Setup
-        public void setUp() {
+        public void setUp(Blackhole bh) {
             factory = PerfTestLoggerFactory.Factory.get(implementation);
-            factory.setup();
+            factory.setup(bh);
 
             var collisions = random.ints(size / 2, 0, size / 4)
                     .boxed();

@@ -3,6 +3,7 @@ package penna.core.logger.utils;
 import ch.qos.logback.classic.spi.LogbackServiceProvider;
 import org.apache.logging.slf4j.Log4jLoggerFactory;
 import org.apache.logging.slf4j.Log4jMarkerFactory;
+import org.openjdk.jmh.infra.Blackhole;
 import org.slf4j.ILoggerFactory;
 import org.slf4j.Logger;
 import penna.api.config.Config;
@@ -10,7 +11,8 @@ import penna.core.logger.TreeCache;
 import penna.core.sink.CoreSink;
 import penna.core.sink.SinkManager;
 
-import java.io.*;
+import java.io.Closeable;
+import java.io.IOException;
 import java.util.regex.Pattern;
 
 public sealed interface PerfTestLoggerFactory extends Closeable {
@@ -29,7 +31,7 @@ public sealed interface PerfTestLoggerFactory extends Closeable {
 
     }
 
-    void setup();
+    void setup(Blackhole bh);
 
     org.slf4j.Logger getLogger(String name);
 
@@ -40,20 +42,12 @@ public sealed interface PerfTestLoggerFactory extends Closeable {
     }
 
     final class PennaFactory implements PerfTestLoggerFactory {
-        private FileOutputStream fos;
         TreeCache cache = new TreeCache(Config.getDefault());
         private static final Pattern DOT_SPLIT = Pattern.compile("\\.");
 
         @Override
-        public void setup() {
-            var devnull = new File("/dev/null");
-            try {
-                fos = new FileOutputStream(devnull);
-            } catch (FileNotFoundException e) {
-                throw new RuntimeException("Dev null doesn't exist!", e);
-            }
-
-            SinkManager.Instance.replace(() -> new CoreSink(fos));
+        public void setup(Blackhole bh) {
+            SinkManager.Instance.replace(() -> new CoreSink(new BlackholeChannel(bh)));
         }
 
         @Override
@@ -63,7 +57,6 @@ public sealed interface PerfTestLoggerFactory extends Closeable {
 
         @Override
         public void close() throws IOException {
-            fos.close();
         }
     }
 
@@ -72,7 +65,7 @@ public sealed interface PerfTestLoggerFactory extends Closeable {
         Log4jLoggerFactory loggerFactory;
 
         @Override
-        public void setup() {
+        public void setup(Blackhole bh) {
             System.setProperty("log4j.configurationFile", "log4j2.xml");
             var markerFactory = new Log4jMarkerFactory();
             loggerFactory = new Log4jLoggerFactory(markerFactory);
@@ -95,7 +88,8 @@ public sealed interface PerfTestLoggerFactory extends Closeable {
         ILoggerFactory loggerFactory;
 
         @Override
-        public void setup() {
+        public void setup(Blackhole bh) {
+            LogbackBlackholeAppender.bh = bh;
             System.setProperty("logback.configurationFile", "logback.xml");
             serviceProvider = new LogbackServiceProvider();
 
