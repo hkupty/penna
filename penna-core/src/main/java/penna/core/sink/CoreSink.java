@@ -134,8 +134,8 @@ public final class CoreSink implements Sink, Closeable {
             jsonGenerator.writeKey(STACKTRACE);
             jsonGenerator.openArray();
             var brokenOut = false;
-            var filter = config.filter();
-            for (int index = 0; index < Math.min(frames.length, config.stacktraceDepth()); index++) {
+            var filter = config.filter;
+            for (int index = 0; index < Math.min(frames.length, config.stacktraceDepth); index++) {
                 filter.hash(filterHashes, frames[index]);
                 jsonGenerator.checkSpace(128);
                 writeStackFrame(frames[index]);
@@ -148,7 +148,7 @@ public final class CoreSink implements Sink, Closeable {
                 filter.mark(filterHashes);
             }
 
-            if (!brokenOut && frames.length > config.stacktraceDepth()) {
+            if (!brokenOut && frames.length > config.stacktraceDepth) {
                 jsonGenerator.writeStringFromBytes(ELLIPSIS);
             }
 
@@ -156,7 +156,7 @@ public final class CoreSink implements Sink, Closeable {
             jsonGenerator.writeSep();
         }
 
-        if (++level < config.traverseDepth() && throwable.getSuppressed().length > 0) {
+        if (++level < config.traverseDepth && throwable.getSuppressed().length > 0) {
             jsonGenerator.openArray(SUPPRESSED);
             var suppressed = throwable.getSuppressed();
             for (int i = 0; i < suppressed.length; i++) {
@@ -170,7 +170,7 @@ public final class CoreSink implements Sink, Closeable {
             --level;
         }
 
-        if (++level < config.traverseDepth() && (cause = throwable.getCause()) != null) {
+        if (++level < config.traverseDepth && (cause = throwable.getCause()) != null) {
             jsonGenerator.writeKey(CAUSE);
             jsonGenerator.openObject();
             writeThrowable(cause, config, level);
@@ -215,7 +215,7 @@ public final class CoreSink implements Sink, Closeable {
 
     private void writeObject(LogConfig config, final Object object) throws IOException {
         if (object instanceof Throwable throwable) {
-            config.filter().reset();
+            config.filter.reset();
             writeThrowable(throwable, config, 0);
         } else if (object instanceof Map map) {
             writeMap(config, map);
@@ -313,7 +313,7 @@ public final class CoreSink implements Sink, Closeable {
 
     private void emitThrowable(final PennaLogEvent logEvent) {
         if (logEvent.throwable != null) {
-            logEvent.config.filter().reset();
+            logEvent.config.filter.reset();
             jsonGenerator.openObject(LogField.THROWABLE.fieldName);
             writeThrowable(logEvent.throwable, logEvent.config, 0);
             jsonGenerator.closeObject();
@@ -351,7 +351,7 @@ public final class CoreSink implements Sink, Closeable {
         jsonGenerator.openObject();
 
         // This should be safe to do here since this is thread local
-        var fields = logEvent.config.fields();
+        var fields = logEvent.config.fields;
 
         for (int i = 0; i < fields.length; i++) {
             switch (fields[i]) {
