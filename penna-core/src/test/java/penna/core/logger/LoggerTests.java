@@ -52,9 +52,6 @@ class LoggerTests {
         PennaLogger pennaLogger = cache.getLoggerAt("test");
         String[] ref = new String[]{"test"};
 
-        // null-level, no logs
-        cache.updateConfig(ref, config -> config.replaceLevel(null));
-        Assertions.assertEquals(NOPGuard.singleton(), pennaLogger.levelGuard);
 
         // Trace
         cache.updateConfig(ref, config -> config.replaceLevel(Level.TRACE));

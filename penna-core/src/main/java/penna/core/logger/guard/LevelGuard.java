@@ -1,5 +1,6 @@
 package penna.core.logger.guard;
 
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.event.Level;
 import org.slf4j.spi.LoggingEventBuilder;
 import org.slf4j.spi.NOPLoggingEventBuilder;
@@ -7,8 +8,6 @@ import penna.api.config.Config;
 import penna.core.internals.LogUnitContextPool;
 import penna.core.logger.LogUnitContext;
 import penna.core.logger.PennaLogger;
-
-import java.util.EnumMap;
 
 /**
  * The Level guard is a property of the {@link PennaLogger} that ensures a log only goes through
@@ -35,18 +34,14 @@ public sealed interface LevelGuard permits
         private FromConfig() {
         }
 
-        private static final EnumMap<Level, LevelGuard> levelMapping = new EnumMap<>(Level.class);
-
-        static {
-            levelMapping.put(Level.TRACE, TraceLevelGuard.singleton());
-            levelMapping.put(Level.DEBUG, DebugLevelGuard.singleton());
-            levelMapping.put(Level.INFO, InfoLevelGuard.singleton());
-            levelMapping.put(Level.WARN, WarnLevelGuard.singleton());
-            levelMapping.put(Level.ERROR, ErrorLevelGuard.singleton());
-        }
-
-        public static LevelGuard get(Config config) {
-            return levelMapping.getOrDefault(config.level(), NOPGuard.singleton());
+        public static LevelGuard get(@NotNull Config config) {
+            return switch (config.level()) {
+                case ERROR -> ErrorLevelGuard.singleton();
+                case WARN -> WarnLevelGuard.singleton();
+                case INFO -> InfoLevelGuard.singleton();
+                case DEBUG -> DebugLevelGuard.singleton();
+                case TRACE -> TraceLevelGuard.singleton();
+            };
         }
     }
 
