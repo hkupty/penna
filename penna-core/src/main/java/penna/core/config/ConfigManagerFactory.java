@@ -9,14 +9,14 @@ import java.util.ServiceLoader;
 
 public final class ConfigManagerFactory {
 
-    private ConfigManagerFactory() {}
+    private ConfigManagerFactory() {
+    }
 
     private static ConfigManager instance;
     static ServiceLoader<ConfigManager> loader = ServiceLoader.load(ConfigManager.class);
-    private static Iterator<ConfigManager> findConfigManagers(boolean refresh) {
-        if (refresh) {
-            loader.reload();
-        }
+
+    private static Iterator<ConfigManager> findConfigManagers() {
+        loader.reload();
         return loader.iterator();
     }
 
@@ -41,15 +41,15 @@ public final class ConfigManagerFactory {
         };
     }
 
-    public static ConfigManager getConfigManager(){
+    public static ConfigManager getConfigManager() {
         if (instance == null) {
-            Iterator<ConfigManager> managerCandidates = findConfigManagers(true);
+            Iterator<ConfigManager> managerCandidates = findConfigManagers();
             if (!managerCandidates.hasNext()) {
                 instance = inFlightConfigManager();
             } else {
                 do {
                     try {
-                        if((instance = managerCandidates.next()) != null) break;
+                        if ((instance = managerCandidates.next()) != null) break;
                     } catch (Exception ex) {
                         MiniLogger.error("Unable to start manager due to exception", ex);
                     }
