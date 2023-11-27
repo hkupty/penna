@@ -350,7 +350,6 @@ public final class CoreSink implements Sink, Closeable {
     public void write(final PennaLogEvent logEvent) throws IOException {
         jsonGenerator.openObject();
 
-        // This should be safe to do here since this is thread local
         var fields = logEvent.config.fields;
 
         for (int i = 0; i < fields.length; i++) {
