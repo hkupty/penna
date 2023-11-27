@@ -89,7 +89,7 @@ public final class PennaLogEvent implements LoggingEvent {
 
     public void addAllArguments(Object... newArguments) {
         if (cursor + newArguments.length > arguments.length) {
-            arguments = Arrays.copyOf(arguments, arguments.length + newArguments.length * 2);
+            arguments = Arrays.copyOf(arguments, (arguments.length + newArguments.length) * 2);
         }
         System.arraycopy(newArguments, 0, arguments, cursor, newArguments.length);
     }
