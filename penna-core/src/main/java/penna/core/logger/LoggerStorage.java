@@ -8,7 +8,6 @@ import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.function.Consumer;
 
 /**
  * Stores the logger instances for reuse in a Ternary Search Tree (TST) structure.
@@ -30,6 +29,12 @@ import java.util.function.Consumer;
  * loggers below a certain prefix;
  */
 public class LoggerStorage {
+
+    private record NodeAndConfig(
+            ComponentNode node,
+            Config config
+    ) {
+    }
 
     /**
      * Stores a section (component) of the full-qualified name for the logger class, so
@@ -85,10 +90,12 @@ public class LoggerStorage {
             configRef.set(config);
         }
 
+        void unsetConfig() {
+            configRef.set(null);
+        }
+
     }
 
-    private static final Consumer<ComponentNode> DO_NOTHING = componentNode -> {
-    };
     private final ComponentNode root = ComponentNode.create(new char[]{}, Config.getDefault());
 
     /**
@@ -101,15 +108,7 @@ public class LoggerStorage {
         return (-offset >>> 31) - (offset >>> 31);
     }
 
-    private ComponentNode find(ComponentNode node, String key) {
-        return find(node, key, DO_NOTHING);
-    }
-
-    private ComponentNode find(ComponentNode node, String key, Consumer<ComponentNode> processNode) {
-        if (key == null || key.isEmpty()) {
-            return node;
-        }
-
+    private char[][] componentsForLoggerName(String key) {
         char[] keyChars = key.toCharArray();
         char[][] components = new char[16][];
         int base = 0;
@@ -125,88 +124,71 @@ public class LoggerStorage {
         }
         components[componentIndex++] = Arrays.copyOfRange(keyChars, base, keyChars.length);
 
-        return find(node, Arrays.copyOfRange(components, 0, componentIndex), 0, processNode);
+        return Arrays.copyOfRange(components, 0, componentIndex);
+
     }
 
 
-    private ComponentNode find(ComponentNode node,
-                               char[][] key,
-                               int index,
-                               Consumer<ComponentNode> processNode
-    ) {
-        processNode.accept(node);
-        char[] chr = key[index];
-        int nodeIx = normalize(Arrays.compare(chr, node.component)) + 1;
-        if (nodeIx == 1 && key.length == index + 1) {
-            return node;
-        } else {
-            // We only advance the index if we're hitting the middle node.
-            int nextIx = index + (nodeIx & 0x1);
-            if (node.children[nodeIx] == null) {
-                node.lock.lock();
+    private NodeAndConfig find(ComponentNode node,
+                               char[][] key) {
+        int target = key.length - 1;
+
+        int nodeIx;
+        int index = 0;
+        ComponentNode cursor = node;
+        Config cfg = null;
+        char[] chr;
+
+        do {
+            chr = key[index];
+            Config tmpCfg;
+            if ((tmpCfg = cursor.configRef.get()) != null) {
+                cfg = tmpCfg;
+            }
+
+            nodeIx = normalize(Arrays.compare(chr, cursor.component)) + 1;
+            index = index + (nodeIx & 0x1);
+            if (cursor.children[nodeIx] == null) {
+                cursor.lock.lock();
                 try {
-                    if (node.children[nodeIx] == null) {
-                        node.children[nodeIx] = node.createChild(key[nextIx]);
+                    if (cursor.children[nodeIx] == null) {
+                        cursor.children[nodeIx] = cursor.createChild(key[index]);
                     }
                 } finally {
-                    node.lock.unlock();
+                    cursor.lock.unlock();
                 }
             }
-            ComponentNode next = node.children[nodeIx];
-            return find(next, key, nextIx, processNode);
-        }
+            cursor = cursor.children[nodeIx];
+        } while (index != target);
+        return new NodeAndConfig(cursor, cfg);
     }
 
 
     public PennaLogger getOrCreate(@NotNull String key) {
-        AtomicReference<Config> closestConfig = new AtomicReference<>();
-        ComponentNode node = find(root, key, componentNode -> {
-            Config nodesConfig;
-            if ((nodesConfig = componentNode.configRef.get()) != null) {
-                closestConfig.set(nodesConfig);
-            }
-        });
-        PennaLogger logger = node.loggerRef.getAcquire();
+        var ret = find(root, componentsForLoggerName(key));
+
+        PennaLogger logger = ret.node.loggerRef.getAcquire();
         if (logger == null) {
-            logger = new PennaLogger(key, closestConfig.get());
+            logger = new PennaLogger(key, ret.config);
         }
-        node.loggerRef.setRelease(logger);
+        ret.node.loggerRef.setRelease(logger);
 
         return logger;
-    }
-
-
-    private void traverse(LoggerStorage.ComponentNode node,
-                          Config config,
-                          ConfigManager.ConfigurationChange configurationChange
-    ) {
-        for (ComponentNode child : node.children) {
-            if (child != null) {
-                Config innerCfg = config;
-                if (child.configRef.get() != null) {
-                    innerCfg = child.updateConfig(configurationChange);
-                }
-
-                PennaLogger logger;
-                if ((logger = child.loggerRef.get()) != null) {
-                    logger.updateConfig(innerCfg);
-                }
-                traverse(child, innerCfg, configurationChange);
-            }
-        }
     }
 
     private void traverse(LoggerStorage.ComponentNode node, Config config) {
         for (ComponentNode child : node.children) {
             if (child != null) {
+
                 if (child.configRef.get() != null) {
-                    child.replaceConfig(config);
+                    return;
                 }
 
                 PennaLogger logger;
                 if ((logger = child.loggerRef.get()) != null) {
                     logger.updateConfig(config);
                 }
+
                 traverse(child, config);
             }
         }
@@ -215,15 +197,21 @@ public class LoggerStorage {
     public void updateConfig(
             @NotNull String prefix,
             @NotNull ConfigManager.ConfigurationChange configurationChange) {
-        ComponentNode updatePoint = find(root, prefix);
+        ComponentNode updatePoint = find(root, componentsForLoggerName(prefix)).node;
         Config newConfig = updatePoint.updateConfig(configurationChange);
-        traverse(updatePoint, newConfig, configurationChange);
+        traverse(updatePoint, newConfig);
     }
 
     public void replaceConfig(@NotNull String prefix,
                               @NotNull Config newConfig) {
-        ComponentNode updatePoint = find(root, prefix);
+        ComponentNode updatePoint = find(root, componentsForLoggerName(prefix)).node;
         updatePoint.replaceConfig(newConfig);
         traverse(updatePoint, newConfig);
+    }
+
+
+    public void unsetConfigPoint(@NotNull String prefix) {
+        ComponentNode updatePoint = find(root, componentsForLoggerName(prefix)).node;
+        updatePoint.unsetConfig();
     }
 }
