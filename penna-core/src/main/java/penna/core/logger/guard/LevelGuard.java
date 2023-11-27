@@ -17,13 +17,7 @@ import penna.core.logger.PennaLogger;
  * By introducing the {@link LevelGuard} as a thin proxy in the logger we allow better control over the behavior
  * for the log levels in the logger.
  */
-public sealed interface LevelGuard permits
-        NOPGuard,
-        TraceLevelGuard,
-        DebugLevelGuard,
-        InfoLevelGuard,
-        WarnLevelGuard,
-        ErrorLevelGuard {
+public sealed interface LevelGuard permits DebugLevelGuard, ErrorLevelGuard, InfoLevelGuard, NOPGuard, TraceLevelGuard, WarnLevelGuard {
 
     final class Shared {
         private static final LogUnitContextPool logUnits = new LogUnitContextPool();
@@ -53,6 +47,7 @@ public sealed interface LevelGuard permits
         return eventBuilder;
     }
 
+    Level level();
 
     default boolean isTraceEnabled() {
         return false;

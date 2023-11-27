@@ -1,5 +1,7 @@
 package penna.core.logger.guard;
 
+import org.slf4j.event.Level;
+
 public final class InfoLevelGuard implements LevelGuard {
     private InfoLevelGuard() {
     }
@@ -10,4 +12,8 @@ public final class InfoLevelGuard implements LevelGuard {
         return instance;
     }
 
+    @Override
+    public Level level() {
+        return Level.INFO;
+    }
 }

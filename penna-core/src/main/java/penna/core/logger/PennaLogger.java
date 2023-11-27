@@ -19,11 +19,14 @@ public final class PennaLogger implements IPennaLogger {
         this.name = name;
         this.nameAsChars = name.getBytes();
         this.config = new LogConfig();
-        this.updateConfig(config);
+        this.config.update(config);
+        levelGuard = LevelGuard.FromConfig.get(config);
     }
 
     public void updateConfig(Config config) {
-        levelGuard = LevelGuard.FromConfig.get(config);
+        if (config.level() != levelGuard.level()) {
+            levelGuard = LevelGuard.FromConfig.get(config);
+        }
         this.config.update(config);
     }
 

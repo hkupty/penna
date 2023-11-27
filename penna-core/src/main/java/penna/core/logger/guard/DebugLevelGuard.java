@@ -15,6 +15,11 @@ public final class DebugLevelGuard implements LevelGuard {
     }
 
     @Override
+    public Level level() {
+        return Level.DEBUG;
+    }
+
+    @Override
     public boolean isDebugEnabled() {
         return true;
     }

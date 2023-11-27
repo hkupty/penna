@@ -1,5 +1,6 @@
 package penna.core.logger.guard;
 
+import org.slf4j.event.Level;
 import org.slf4j.spi.LoggingEventBuilder;
 import org.slf4j.spi.NOPLoggingEventBuilder;
 import penna.core.logger.PennaLogger;
@@ -13,6 +14,11 @@ public final class WarnLevelGuard implements LevelGuard {
 
     public static LevelGuard singleton() {
         return instance;
+    }
+
+    @Override
+    public Level level() {
+        return Level.WARN;
     }
 
     @Override

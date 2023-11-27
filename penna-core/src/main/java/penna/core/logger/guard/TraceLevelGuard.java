@@ -16,6 +16,11 @@ public final class TraceLevelGuard implements LevelGuard {
     }
 
     @Override
+    public Level level() {
+        return Level.TRACE;
+    }
+
+    @Override
     public boolean isTraceEnabled() {
         return true;
     }
