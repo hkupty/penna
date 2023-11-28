@@ -7,13 +7,13 @@ import org.openjdk.jmh.infra.Blackhole;
 import org.slf4j.ILoggerFactory;
 import org.slf4j.Logger;
 import penna.api.config.Config;
+import penna.core.logger.LoggerStorage;
 import penna.core.logger.TreeCache;
 import penna.core.sink.CoreSink;
 import penna.core.sink.SinkManager;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.util.regex.Pattern;
 
 public sealed interface PerfTestLoggerFactory extends Closeable {
 
@@ -42,8 +42,8 @@ public sealed interface PerfTestLoggerFactory extends Closeable {
     }
 
     final class PennaFactory implements PerfTestLoggerFactory {
-        TreeCache cache = new TreeCache(Config.getDefault());
-        private static final Pattern DOT_SPLIT = Pattern.compile("\\.");
+        public LoggerStorage storage = new LoggerStorage();
+        public TreeCache cache = new TreeCache(Config.getDefault());
 
         @Override
         public void setup(Blackhole bh) {
@@ -52,7 +52,7 @@ public sealed interface PerfTestLoggerFactory extends Closeable {
 
         @Override
         public Logger getLogger(String name) {
-            return cache.getLoggerAt(DOT_SPLIT.split(name));
+            return storage.getOrCreate(name);
         }
 
         @Override
