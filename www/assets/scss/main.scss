@@ -50,3 +50,62 @@ body {
   background-color: #ffffff;
   background-image: url("{{ $pattern.RelPermalink }}");
 }
+
+.divider {
+
+  position: relative;
+  align-items: center;
+  text-transform: uppercase;
+  font-weight: $weight-semibold;
+  letter-spacing: .5rem;
+  flex-direction: column;
+  margin: 0 1rem;
+
+  &::after,&::before {
+    content: '';
+    display: block;
+    flex: 1;
+    width: 1px;
+    background-color: $danger;
+  }
+}
+
+
+.support-me {
+  position: fixed;
+  bottom: 0;
+  right: -12dvw;
+  width: 17dvw;
+  font-size: 0.8rem;
+  transition: right 0.8s; /* Add a smooth transition effect */
+
+  &:hover{
+    right: 0;
+  }
+
+  div {
+    display: flex;
+
+    .first {
+      width: 5dvw;
+      justify-content: center;
+
+      .icon-text {
+        justify-content: center;
+      }
+
+      .caption {
+        text-transform: uppercase;
+        font-size: 0.5rem;
+      }
+    }
+  }
+
+  span {
+    align-items: center;
+  }
+
+  & > * {
+    flex: 1;
+  }
+}
