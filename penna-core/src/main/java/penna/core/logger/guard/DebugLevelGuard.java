@@ -4,10 +4,7 @@ import org.slf4j.event.Level;
 import org.slf4j.spi.LoggingEventBuilder;
 import penna.core.logger.PennaLogger;
 
-public final class DebugLevelGuard implements LevelGuard {
-    private DebugLevelGuard() {
-    }
-
+public record DebugLevelGuard() implements LevelGuard {
     private static final LevelGuard instance = new DebugLevelGuard();
 
     public static LevelGuard singleton() {

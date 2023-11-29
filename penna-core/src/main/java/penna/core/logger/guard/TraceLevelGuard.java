@@ -4,10 +4,7 @@ import org.slf4j.event.Level;
 import org.slf4j.spi.LoggingEventBuilder;
 import penna.core.logger.PennaLogger;
 
-public final class TraceLevelGuard implements LevelGuard {
-
-    private TraceLevelGuard() {
-    }
+public record TraceLevelGuard() implements LevelGuard {
 
     private static final LevelGuard instance = new TraceLevelGuard();
 

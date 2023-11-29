@@ -5,10 +5,7 @@ import org.slf4j.spi.LoggingEventBuilder;
 import org.slf4j.spi.NOPLoggingEventBuilder;
 import penna.core.logger.PennaLogger;
 
-public final class NOPGuard implements LevelGuard {
-
-    private NOPGuard() {
-    }
+public record NOPGuard() implements LevelGuard {
 
     private static final LevelGuard instance = new NOPGuard();
 

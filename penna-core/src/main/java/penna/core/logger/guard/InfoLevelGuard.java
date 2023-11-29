@@ -2,9 +2,7 @@ package penna.core.logger.guard;
 
 import org.slf4j.event.Level;
 
-public final class InfoLevelGuard implements LevelGuard {
-    private InfoLevelGuard() {
-    }
+public record InfoLevelGuard() implements LevelGuard {
 
     private static final LevelGuard instance = new InfoLevelGuard();
 
