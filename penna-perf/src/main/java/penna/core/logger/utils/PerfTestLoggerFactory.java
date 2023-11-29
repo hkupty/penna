@@ -11,6 +11,7 @@ import penna.core.logger.LoggerStorage;
 import penna.core.logger.TreeCache;
 import penna.core.sink.CoreSink;
 import penna.core.sink.SinkManager;
+import penna.perf.misc.IfBasedLogger;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -24,6 +25,7 @@ public sealed interface PerfTestLoggerFactory extends Closeable {
         public static PerfTestLoggerFactory get(Implementation implementation) {
             return switch (implementation) {
                 case Penna -> new PennaFactory();
+                case IfBasedLogger -> new IfBasedLoggerFactory();
                 case Logback -> new LogbackFactory();
                 case Log4j -> new Log4JFactory();
             };
@@ -37,6 +39,7 @@ public sealed interface PerfTestLoggerFactory extends Closeable {
 
     enum Implementation {
         Penna,
+        IfBasedLogger,
         Logback,
         Log4j
     }
@@ -53,6 +56,23 @@ public sealed interface PerfTestLoggerFactory extends Closeable {
         @Override
         public Logger getLogger(String name) {
             return storage.getOrCreate(name);
+        }
+
+        @Override
+        public void close() throws IOException {
+        }
+    }
+
+    final class IfBasedLoggerFactory implements PerfTestLoggerFactory {
+
+        @Override
+        public void setup(Blackhole bh) {
+            SinkManager.Instance.replace(() -> new CoreSink(new BlackholeChannel(bh)));
+        }
+
+        @Override
+        public Logger getLogger(String name) {
+            return new IfBasedLogger(name, Config.getDefault());
         }
 
         @Override
