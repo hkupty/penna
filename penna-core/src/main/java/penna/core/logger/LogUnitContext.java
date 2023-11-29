@@ -150,8 +150,9 @@ public record LogUnitContext(
         log();
     }
 
-    public void addArguments(Object... args) {
+    public LoggingEventBuilder addArguments(Object... args) {
         logEvent.addAllArguments(args);
+        return this;
     }
 
     @Override
