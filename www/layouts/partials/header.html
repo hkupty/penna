@@ -43,8 +43,14 @@
     <div class="navbar-end">
       <div class="navbar-item">
         <div class="buttons">
-          <a class="button is-link" href="{{ .Site.Data.links.repoURL }}">
-          <ion-icon name="logo-github" class="icon has-text-link"></ion-icon>
+          <a
+            class="button is-link has-text-danger px-2"
+            target="_blank"
+            href="https://github.com/sponsors/hkupty">
+            <ion-icon name="heart-half-outline" class="icon"></ion-icon>
+          </a>
+          <a class="button is-link px-2" href="{{ .Site.Data.links.repoURL }}">
+            <ion-icon name="logo-github" class="icon has-text-link"></ion-icon>
           </a>
         </div>
       </div>
