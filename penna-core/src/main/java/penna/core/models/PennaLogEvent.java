@@ -27,12 +27,9 @@ public final class PennaLogEvent implements LoggingEvent {
 
     /**
      * Resets all the fields that will change during log creation.
-     * <br />
-     * Note! ThreadName is never changing for the lifetime of the log object.
-     * This is because it is bound to the object pool in the LoggingEventBuilder and,
-     * therefore, will never change.
      */
-    public void reset(byte[] logger, LogConfig config, Level level, Thread holder) {
+    @SuppressWarnings("PMD.ArrayIsStoredDirectly")
+    public void reset(final byte[] logger, LogConfig config, Level level, Thread holder) {
         markers.clear();
         cursor = 0;
         Arrays.fill(arguments, null);
