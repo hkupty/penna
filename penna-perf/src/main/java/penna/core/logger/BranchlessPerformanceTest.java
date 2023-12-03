@@ -7,14 +7,12 @@ import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 import org.openjdk.jmh.runner.options.TimeValue;
 import org.slf4j.Logger;
-import org.slf4j.MDC;
-import org.slf4j.MarkerFactory;
 import penna.core.logger.utils.PerfTestLoggerFactory;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
-public class LoggerPerformanceTest {
+public class BranchlessPerformanceTest {
 
     @State(Scope.Thread)
     public static class TestState {
