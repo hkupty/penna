@@ -69,7 +69,9 @@ public class DevRuntimeSink implements NonStandardSink, Closeable {
     private static void emitThrowable(StringBuilder log, PennaLogEvent logEvent) {
         var thr = Optional.ofNullable(logEvent.throwable);
 
-        if (thr.isEmpty()) { return; }
+        if (thr.isEmpty()) {
+            return;
+        }
 
         log.append('\n')
                 .append(colorize(" ❌ ", Attribute.BOLD(), Attribute.BRIGHT_RED_TEXT()))
@@ -80,15 +82,15 @@ public class DevRuntimeSink implements NonStandardSink, Closeable {
                     .append(colorize(message, Attribute.YELLOW_TEXT()));
         });
 
-       thr.map(Throwable::getStackTrace).ifPresent(stacktrace -> {
-           log.append('\n');
-           for(StackTraceElement ste : stacktrace) {
-               log.append('\t')
-                       .append(ste.toString())
-                       .append('\n');
-           }
-           log.deleteCharAt(log.length() - 1);
-       });
+        thr.map(Throwable::getStackTrace).ifPresent(stacktrace -> {
+            log.append('\n');
+            for (StackTraceElement ste : stacktrace) {
+                log.append('\t')
+                        .append(ste.toString())
+                        .append('\n');
+            }
+            log.deleteCharAt(log.length() - 1);
+        });
     }
 
     @Override
@@ -99,7 +101,7 @@ public class DevRuntimeSink implements NonStandardSink, Closeable {
         emitHeader(log, logEvent);
 
         // Metadata
-        if(mdcAdapter.isNotEmpty()) {
+        if (mdcAdapter.isNotEmpty()) {
             log.append(colorize("mdc{", Attribute.ITALIC()));
 
             mdcAdapter.forEach((key, value) -> {
@@ -112,7 +114,7 @@ public class DevRuntimeSink implements NonStandardSink, Closeable {
                     .append(colorize("}", Attribute.ITALIC()));
         }
 
-        if(!logEvent.markers.isEmpty()) {
+        if (!logEvent.markers.isEmpty()) {
             logEvent.markers.forEach(key -> {
                 var kvColor = getColor(key.getName());
                 log.append(colorize("#", Attribute.BOLD(), kvColor))
@@ -123,13 +125,13 @@ public class DevRuntimeSink implements NonStandardSink, Closeable {
 
         log.append(Formatter.format(logEvent.message, logEvent.arguments));
 
-        if(!logEvent.keyValuePairs.isEmpty()) {
+        if (!logEvent.keyValuePairs.isEmpty()) {
             log.append(colorize(" kvs{", Attribute.ITALIC()));
 
             logEvent.keyValuePairs.forEach((kvp) -> {
-                log.append(colorize(kvp.key, Attribute.BOLD(), getColor(kvp.key)))
+                log.append(colorize(kvp.key(), Attribute.BOLD(), getColor(kvp.key())))
                         .append('=')
-                        .append(colorize(kvp.value.toString(), Attribute.BOLD()))
+                        .append(colorize(kvp.value().toString(), Attribute.BOLD()))
                         .append(' ');
             });
             log.deleteCharAt(log.length() - 1)
