@@ -57,15 +57,6 @@ public interface ConfigManager {
         ConfigurationChange updateFn();
 
         /**
-         * This is the direct implementation of {@link ConfigItem} and doesn't do anything other than holding the values.
-         *
-         * @param loggerPath Specific point in the config hierarchy where the update function will be applied.
-         * @param updateFn   Function that will update (or overwrite) the existing configuration.
-         */
-        record LoggerPathConfigItem(String loggerPath, ConfigurationChange updateFn) implements ConfigItem {
-        }
-
-        /**
          * Convenience record that takes the logger name instead and breaks it into the required {@link #loggerPath()}.
          *
          * @param loggerName Name of the logger being configured.
