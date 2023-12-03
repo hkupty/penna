@@ -17,6 +17,8 @@ public final class LogConfig {
         cfg.deduplicate = config.exceptionHandling().deduplication();
         if (cfg.deduplicate) {
             cfg.filter = StackTraceFilter.Shared.getBloomFilter();
+        } else {
+            cfg.filter = StackTraceFilter.Shared.getPassThroughFilter();
         }
         cfg.update(config);
 
