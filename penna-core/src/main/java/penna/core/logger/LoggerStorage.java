@@ -69,7 +69,7 @@ public class LoggerStorage {
             );
         }
 
-        ComponentNode createChild(char[] component) {
+        ComponentNode createChild(char... component) {
             return new ComponentNode(
                     component,
                     new ComponentNode[3],
@@ -130,7 +130,7 @@ public class LoggerStorage {
 
 
     private NodeAndConfig find(ComponentNode node,
-                               char[][] key) {
+                               char[]... key) {
         int target = key.length - 1;
 
         int nodeIx;
