@@ -10,6 +10,7 @@ import java.io.IOException;
 
 public class LogbackDevNullAppender extends OutputStreamAppender<ILoggingEvent> {
     FileOutputStream os;
+
     @Override
     public void start() {
         var file = new File("/dev/null");

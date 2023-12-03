@@ -13,6 +13,7 @@ import java.io.Closeable;
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.channels.WritableByteChannel;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
@@ -41,7 +42,7 @@ public final class CoreSink implements Sink, Closeable {
 
     private final AtomicLong counter = new AtomicLong(0L);
 
-    private final FileOutputStream fos;
+    private FileOutputStream fos;
     private final DirectJson jsonGenerator;
 
     private final PennaMDCAdapter mdcAdapter;
@@ -56,16 +57,19 @@ public final class CoreSink implements Sink, Closeable {
     }
 
     public CoreSink(FileOutputStream fos) {
+        this(fos.getChannel());
+        this.fos = fos;
+    }
+
+    public CoreSink(WritableByteChannel channel) {
         if (MDC.getMDCAdapter() instanceof PennaMDCAdapter adapter) {
             mdcAdapter = adapter;
         } else {
             MiniLogger.error("Not using PennaMDCAdapter for some reason! MDC will be off");
             mdcAdapter = null;
         }
-        this.fos = fos;
-        jsonGenerator = new DirectJson(fos.getChannel());
+        jsonGenerator = new DirectJson(channel);
         mdcWriter = jsonGenerator::writeStringValue;
-
     }
 
     public static Sink getSink() {
@@ -75,7 +79,9 @@ public final class CoreSink implements Sink, Closeable {
     @Override
     public void close() throws IOException {
         jsonGenerator.close();
-        fos.close();
+        if (fos != null) {
+            fos.close();
+        }
     }
 
     // Hand-crafted based on from StackTraceElement::toString
@@ -128,8 +134,8 @@ public final class CoreSink implements Sink, Closeable {
             jsonGenerator.writeKey(STACKTRACE);
             jsonGenerator.openArray();
             var brokenOut = false;
-            var filter = config.filter();
-            for (int index = 0; index < Math.min(frames.length, config.stacktraceDepth()); index++) {
+            var filter = config.filter;
+            for (int index = 0; index < Math.min(frames.length, config.stacktraceDepth); index++) {
                 filter.hash(filterHashes, frames[index]);
                 jsonGenerator.checkSpace(128);
                 writeStackFrame(frames[index]);
@@ -142,7 +148,7 @@ public final class CoreSink implements Sink, Closeable {
                 filter.mark(filterHashes);
             }
 
-            if (!brokenOut && frames.length > config.stacktraceDepth()) {
+            if (!brokenOut && frames.length > config.stacktraceDepth) {
                 jsonGenerator.writeStringFromBytes(ELLIPSIS);
             }
 
@@ -150,7 +156,7 @@ public final class CoreSink implements Sink, Closeable {
             jsonGenerator.writeSep();
         }
 
-        if (++level < config.traverseDepth() && throwable.getSuppressed().length > 0) {
+        if (++level < config.traverseDepth && throwable.getSuppressed().length > 0) {
             jsonGenerator.openArray(SUPPRESSED);
             var suppressed = throwable.getSuppressed();
             for (int i = 0; i < suppressed.length; i++) {
@@ -164,7 +170,7 @@ public final class CoreSink implements Sink, Closeable {
             --level;
         }
 
-        if (++level < config.traverseDepth() && (cause = throwable.getCause()) != null) {
+        if (++level < config.traverseDepth && (cause = throwable.getCause()) != null) {
             jsonGenerator.writeKey(CAUSE);
             jsonGenerator.openObject();
             writeThrowable(cause, config, level);
@@ -209,7 +215,7 @@ public final class CoreSink implements Sink, Closeable {
 
     private void writeObject(LogConfig config, final Object object) throws IOException {
         if (object instanceof Throwable throwable) {
-            config.filter().reset();
+            config.filter.reset();
             writeThrowable(throwable, config, 0);
         } else if (object instanceof Map map) {
             writeMap(config, map);
@@ -307,7 +313,7 @@ public final class CoreSink implements Sink, Closeable {
 
     private void emitThrowable(final PennaLogEvent logEvent) {
         if (logEvent.throwable != null) {
-            logEvent.config.filter().reset();
+            logEvent.config.filter.reset();
             jsonGenerator.openObject(LogField.THROWABLE.fieldName);
             writeThrowable(logEvent.throwable, logEvent.config, 0);
             jsonGenerator.closeObject();
@@ -321,10 +327,10 @@ public final class CoreSink implements Sink, Closeable {
             jsonGenerator.openObject(LogField.KEY_VALUE_PAIRS.fieldName);
             for (int i = 0; i < logEvent.keyValuePairs.size(); i++) {
                 var kvp = logEvent.keyValuePairs.get(i);
-                jsonGenerator.checkSpace(kvp.key.length() + 4);
-                jsonGenerator.writeString(kvp.key);
+                jsonGenerator.checkSpace(kvp.key().length() + 4);
+                jsonGenerator.writeString(kvp.key());
                 jsonGenerator.writeEntrySep();
-                writeObject(logEvent.config, kvp.value);
+                writeObject(logEvent.config, kvp.value());
             }
             jsonGenerator.closeObject();
             jsonGenerator.writeSep();
@@ -344,8 +350,7 @@ public final class CoreSink implements Sink, Closeable {
     public void write(final PennaLogEvent logEvent) throws IOException {
         jsonGenerator.openObject();
 
-        // This should be safe to do here since this is thread local
-        var fields = logEvent.config.fields();
+        var fields = logEvent.config.fields;
 
         for (int i = 0; i < fields.length; i++) {
             switch (fields[i]) {

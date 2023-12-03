@@ -1,9 +1,9 @@
 package penna.core.models;
 
 import org.slf4j.Marker;
-import org.slf4j.event.KeyValuePair;
 import org.slf4j.event.Level;
 import org.slf4j.event.LoggingEvent;
+import penna.core.internals.Clock;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,14 +23,13 @@ public final class PennaLogEvent implements LoggingEvent {
     public LogConfig config;
     public long timestamp;
 
+    private Thread thread;
+
     /**
      * Resets all the fields that will change during log creation.
-     * <br />
-     * Note! ThreadName is never changing for the lifetime of the log object.
-     * This is because it is bound to the object pool in the LoggingEventBuilder and,
-     * therefore, will never change.
      */
-    public void reset() {
+    @SuppressWarnings("PMD.ArrayIsStoredDirectly")
+    public void reset(final byte[] logger, LogConfig config, Level level, Thread holder) {
         markers.clear();
         cursor = 0;
         Arrays.fill(arguments, null);
@@ -39,8 +38,17 @@ public final class PennaLogEvent implements LoggingEvent {
         extra = null;
         message = null;
         throwable = null;
-        logger = null;
-        timestamp = 0;
+
+        this.logger = logger;
+        this.config = config;
+        this.level = level;
+
+        if (holder != this.thread) {
+            this.thread = holder;
+            this.threadName = holder.getName().getBytes();
+        }
+
+        timestamp = Clock.getTimestamp();
     }
 
     @Override
@@ -78,7 +86,7 @@ public final class PennaLogEvent implements LoggingEvent {
 
     public void addAllArguments(Object... newArguments) {
         if (cursor + newArguments.length > arguments.length) {
-            arguments = Arrays.copyOf(arguments, arguments.length + newArguments.length * 2);
+            arguments = Arrays.copyOf(arguments, (arguments.length + newArguments.length) * 2);
         }
         System.arraycopy(newArguments, 0, arguments, cursor, newArguments.length);
     }
@@ -89,8 +97,8 @@ public final class PennaLogEvent implements LoggingEvent {
     }
 
     @Override
-    public List<KeyValuePair> getKeyValuePairs() {
-        return keyValuePairs;
+    public List<org.slf4j.event.KeyValuePair> getKeyValuePairs() {
+        return keyValuePairs.stream().map(KeyValuePair::toSlf4j).toList();
     }
 
     @Override

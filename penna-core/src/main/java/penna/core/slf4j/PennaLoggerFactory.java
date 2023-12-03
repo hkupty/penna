@@ -2,17 +2,14 @@ package penna.core.slf4j;
 
 import org.slf4j.ILoggerFactory;
 import org.slf4j.Logger;
-import penna.api.config.Config;
 import penna.api.config.ConfigManager;
 import penna.api.config.Configurable;
-import penna.core.logger.TreeCache;
+import penna.core.logger.LoggerStorage;
 
-import java.util.regex.Pattern;
 
 public final class PennaLoggerFactory implements ILoggerFactory, Configurable {
-    private static final Pattern DOT_SPLIT = Pattern.compile("\\.");
     private static final PennaLoggerFactory singleton = new PennaLoggerFactory();
-    private transient final TreeCache cache;
+    private transient final LoggerStorage cache;
 
     public static PennaLoggerFactory getInstance() {
         return singleton;
@@ -26,11 +23,11 @@ public final class PennaLoggerFactory implements ILoggerFactory, Configurable {
     }
 
     private PennaLoggerFactory() {
-        cache = new TreeCache(Config.getDefault());
+        cache = new LoggerStorage();
     }
 
     @Override
     public Logger getLogger(String name) {
-        return cache.getLoggerAt(DOT_SPLIT.split(name));
+        return cache.getOrCreate(name);
     }
 }

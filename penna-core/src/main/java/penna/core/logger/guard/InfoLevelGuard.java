@@ -1,13 +1,8 @@
 package penna.core.logger.guard;
 
 import org.slf4j.event.Level;
-import org.slf4j.spi.LoggingEventBuilder;
-import org.slf4j.spi.NOPLoggingEventBuilder;
-import penna.core.logger.PennaLogger;
 
-public final class InfoLevelGuard implements LevelGuard {
-    private InfoLevelGuard() {
-    }
+public record InfoLevelGuard() implements LevelGuard {
 
     private static final LevelGuard instance = new InfoLevelGuard();
 
@@ -16,52 +11,7 @@ public final class InfoLevelGuard implements LevelGuard {
     }
 
     @Override
-    public boolean isTraceEnabled() {
-        return false;
-    }
-
-    @Override
-    public LoggingEventBuilder trace(PennaLogger logger) {
-        return NOPLoggingEventBuilder.singleton();
-    }
-
-    @Override
-    public boolean isDebugEnabled() {
-        return false;
-    }
-
-    @Override
-    public LoggingEventBuilder debug(PennaLogger logger) {
-        return NOPLoggingEventBuilder.singleton();
-    }
-
-    @Override
-    public boolean isInfoEnabled() {
-        return true;
-    }
-
-    @Override
-    public LoggingEventBuilder info(PennaLogger logger) {
-        return get(logger, Level.INFO);
-    }
-
-    @Override
-    public boolean isWarnEnabled() {
-        return true;
-    }
-
-    @Override
-    public LoggingEventBuilder warn(PennaLogger logger) {
-        return get(logger, Level.WARN);
-    }
-
-    @Override
-    public boolean isErrorEnabled() {
-        return true;
-    }
-
-    @Override
-    public LoggingEventBuilder error(PennaLogger logger) {
-        return get(logger, Level.ERROR);
+    public Level level() {
+        return Level.INFO;
     }
 }

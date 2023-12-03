@@ -1,13 +1,13 @@
 package penna.core.logger.guard;
 
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.event.Level;
 import org.slf4j.spi.LoggingEventBuilder;
+import org.slf4j.spi.NOPLoggingEventBuilder;
 import penna.api.config.Config;
 import penna.core.internals.LogUnitContextPool;
 import penna.core.logger.LogUnitContext;
 import penna.core.logger.PennaLogger;
-
-import java.util.EnumMap;
 
 /**
  * The Level guard is a property of the {@link PennaLogger} that ensures a log only goes through
@@ -17,13 +17,7 @@ import java.util.EnumMap;
  * By introducing the {@link LevelGuard} as a thin proxy in the logger we allow better control over the behavior
  * for the log levels in the logger.
  */
-public sealed interface LevelGuard permits
-        NOPGuard,
-        TraceLevelGuard,
-        DebugLevelGuard,
-        InfoLevelGuard,
-        WarnLevelGuard,
-        ErrorLevelGuard {
+public sealed interface LevelGuard permits DebugLevelGuard, ErrorLevelGuard, InfoLevelGuard, NOPGuard, TraceLevelGuard, WarnLevelGuard {
 
     final class Shared {
         private static final LogUnitContextPool logUnits = new LogUnitContextPool();
@@ -34,18 +28,14 @@ public sealed interface LevelGuard permits
         private FromConfig() {
         }
 
-        private static final EnumMap<Level, LevelGuard> levelMapping = new EnumMap<>(Level.class);
-
-        static {
-            levelMapping.put(Level.TRACE, TraceLevelGuard.singleton());
-            levelMapping.put(Level.DEBUG, DebugLevelGuard.singleton());
-            levelMapping.put(Level.INFO, InfoLevelGuard.singleton());
-            levelMapping.put(Level.WARN, WarnLevelGuard.singleton());
-            levelMapping.put(Level.ERROR, ErrorLevelGuard.singleton());
-        }
-
-        public static LevelGuard get(Config config) {
-            return levelMapping.getOrDefault(config.level(), NOPGuard.singleton());
+        public static LevelGuard get(@NotNull Config config) {
+            return switch (config.level()) {
+                case ERROR -> ErrorLevelGuard.singleton();
+                case WARN -> WarnLevelGuard.singleton();
+                case INFO -> InfoLevelGuard.singleton();
+                case DEBUG -> DebugLevelGuard.singleton();
+                case TRACE -> TraceLevelGuard.singleton();
+            };
         }
     }
 
@@ -57,24 +47,45 @@ public sealed interface LevelGuard permits
         return eventBuilder;
     }
 
+    Level level();
 
-    boolean isTraceEnabled();
+    default boolean isTraceEnabled() {
+        return false;
+    }
 
-    LoggingEventBuilder trace(PennaLogger logger);
+    default LoggingEventBuilder trace(PennaLogger logger) {
+        return NOPLoggingEventBuilder.singleton();
+    }
 
-    boolean isDebugEnabled();
+    default boolean isDebugEnabled() {
+        return false;
+    }
 
-    LoggingEventBuilder debug(PennaLogger logger);
+    default LoggingEventBuilder debug(PennaLogger logger) {
+        return NOPLoggingEventBuilder.singleton();
+    }
 
-    boolean isInfoEnabled();
+    default boolean isInfoEnabled() {
+        return true;
+    }
 
-    LoggingEventBuilder info(PennaLogger logger);
+    default LoggingEventBuilder info(PennaLogger logger) {
+        return get(logger, Level.INFO);
+    }
 
-    boolean isWarnEnabled();
+    default boolean isWarnEnabled() {
+        return true;
+    }
 
-    LoggingEventBuilder warn(PennaLogger logger);
+    default LoggingEventBuilder warn(PennaLogger logger) {
+        return get(logger, Level.WARN);
+    }
 
-    boolean isErrorEnabled();
+    default boolean isErrorEnabled() {
+        return true;
+    }
 
-    LoggingEventBuilder error(PennaLogger logger);
+    default LoggingEventBuilder error(PennaLogger logger) {
+        return get(logger, Level.ERROR);
+    }
 }

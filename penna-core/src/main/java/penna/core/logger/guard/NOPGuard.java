@@ -1,13 +1,11 @@
 package penna.core.logger.guard;
 
+import org.slf4j.event.Level;
 import org.slf4j.spi.LoggingEventBuilder;
 import org.slf4j.spi.NOPLoggingEventBuilder;
 import penna.core.logger.PennaLogger;
 
-public final class NOPGuard implements LevelGuard {
-
-    private NOPGuard() {
-    }
+public record NOPGuard() implements LevelGuard {
 
     private static final LevelGuard instance = new NOPGuard();
 
@@ -16,23 +14,8 @@ public final class NOPGuard implements LevelGuard {
     }
 
     @Override
-    public boolean isTraceEnabled() {
-        return false;
-    }
-
-    @Override
-    public LoggingEventBuilder trace(PennaLogger logger) {
-        return NOPLoggingEventBuilder.singleton();
-    }
-
-    @Override
-    public boolean isDebugEnabled() {
-        return false;
-    }
-
-    @Override
-    public LoggingEventBuilder debug(PennaLogger logger) {
-        return NOPLoggingEventBuilder.singleton();
+    public Level level() {
+        return null;
     }
 
     @Override
@@ -64,4 +47,5 @@ public final class NOPGuard implements LevelGuard {
     public LoggingEventBuilder error(PennaLogger logger) {
         return NOPLoggingEventBuilder.singleton();
     }
+
 }

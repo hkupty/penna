@@ -158,6 +158,6 @@ public final class TreeCache {
         } else {
             base = getOrCreate(hierarchyIdentifier);
         }
-        traverse(base, data -> data.updateConfig(configUpdateFn.applyUpdate(data.config)));
+        traverse(base, data -> data.updateConfig(configUpdateFn.apply(data.config)));
     }
 }

@@ -2,7 +2,6 @@ package penna.core.logger.mdc;
 
 import ch.qos.logback.classic.util.LogbackMDCAdapter;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.junit.jupiter.api.Test;
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.infra.Blackhole;
 import org.openjdk.jmh.runner.Runner;
@@ -63,9 +62,17 @@ public class MdcAdapterPerformanceTest {
         String[] get;
         int ixGet;
 
-        public int nextKv() {return ixKv++; }
-        public int nextRem() {return ixRem++; }
-        public int nextGet() {return ixGet++; }
+        public int nextKv() {
+            return ixKv++;
+        }
+
+        public int nextRem() {
+            return ixRem++;
+        }
+
+        public int nextGet() {
+            return ixGet++;
+        }
 
         @Setup
         public void setup() {
@@ -79,7 +86,7 @@ public class MdcAdapterPerformanceTest {
             }
 
 
-            for(int i = 0; i < size / 4; i++) {
+            for (int i = 0; i < size / 4; i++) {
                 if (random.nextBoolean()) {
                     get[i] = keys[random.nextInt((i + 1) * 4)];
                 } else {
@@ -87,7 +94,7 @@ public class MdcAdapterPerformanceTest {
                 }
             }
 
-            for(int i = 0; i < size / 8; i++) {
+            for (int i = 0; i < size / 8; i++) {
                 if (random.nextBoolean()) {
                     remove[i] = keys[random.nextInt((i + 1) * 8)];
                 } else {
@@ -106,13 +113,13 @@ public class MdcAdapterPerformanceTest {
     }
 
 
-//    @Benchmark
+    //    @Benchmark
 //    @OutputTimeUnit(TimeUnit.NANOSECONDS)
     public void mdcThreadsTest(MDCProxy adapter) throws IOException {
         MDCAdapter mdc = adapter.adapter;
         mdc.put("simple", "value");
         Thread thread = new Thread(() -> {
-                mdc.put("simple", "replace");
+            mdc.put("simple", "replace");
             mdc.put("other", "value");
         });
         thread.start();
@@ -126,7 +133,7 @@ public class MdcAdapterPerformanceTest {
         mdc.setContextMap(context);
     }
 
-//    @Benchmark
+    //    @Benchmark
 //    @OutputTimeUnit(TimeUnit.NANOSECONDS)
     public void sizedComplete(Blackhole bh, MDCProxy adapter, MDCData data) throws IOException {
         MDCAdapter mdc = adapter.adapter;
@@ -173,11 +180,9 @@ public class MdcAdapterPerformanceTest {
     }
 
 
-
-    @Test
-    public void runBenchmarks() throws Exception {
+    public static void main(String[] args) throws Exception {
         Options options = new OptionsBuilder()
-                .include(this.getClass().getName() + ".*")
+                .include(MdcAdapterPerformanceTest.class.getName() + ".*")
                 .mode(Mode.AverageTime)
                 .warmupTime(TimeValue.seconds(20))
                 .warmupIterations(3)

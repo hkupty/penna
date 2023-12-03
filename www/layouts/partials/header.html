@@ -6,14 +6,14 @@
     {{ end }}
     </a>
 
-    <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarBasicExample">
+    <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navMenu">
       <span aria-hidden="true"></span>
       <span aria-hidden="true"></span>
       <span aria-hidden="true"></span>
     </a>
   </div>
 
-  <div class="navbar-menu">
+  <div class="navbar-menu" id="navMenu">
     <div class="navbar-start">
       <a class="navbar-item" href="{{ .Site.BaseURL }}">
         Home
@@ -43,8 +43,14 @@
     <div class="navbar-end">
       <div class="navbar-item">
         <div class="buttons">
-          <a class="button is-link" href="{{ .Site.Data.links.repoURL }}">
-          <ion-icon name="logo-github" class="icon has-text-link"></ion-icon>
+          <a
+            class="button is-link has-text-danger px-2"
+            target="_blank"
+            href="https://github.com/sponsors/hkupty">
+            <ion-icon name="heart-half-outline" class="icon"></ion-icon>
+          </a>
+          <a class="button is-link px-2" href="{{ .Site.Data.links.repoURL }}">
+            <ion-icon name="logo-github" class="icon has-text-link"></ion-icon>
           </a>
         </div>
       </div>

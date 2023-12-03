@@ -4,15 +4,17 @@ import org.slf4j.event.Level;
 import org.slf4j.spi.LoggingEventBuilder;
 import penna.core.logger.PennaLogger;
 
-public final class TraceLevelGuard implements LevelGuard {
-
-    private TraceLevelGuard() {
-    }
+public record TraceLevelGuard() implements LevelGuard {
 
     private static final LevelGuard instance = new TraceLevelGuard();
 
     public static LevelGuard singleton() {
         return instance;
+    }
+
+    @Override
+    public Level level() {
+        return Level.TRACE;
     }
 
     @Override
@@ -35,33 +37,4 @@ public final class TraceLevelGuard implements LevelGuard {
         return get(logger, Level.DEBUG);
     }
 
-    @Override
-    public boolean isInfoEnabled() {
-        return true;
-    }
-
-    @Override
-    public LoggingEventBuilder info(PennaLogger logger) {
-        return get(logger, Level.INFO);
-    }
-
-    @Override
-    public boolean isWarnEnabled() {
-        return true;
-    }
-
-    @Override
-    public LoggingEventBuilder warn(PennaLogger logger) {
-        return get(logger, Level.WARN);
-    }
-
-    @Override
-    public boolean isErrorEnabled() {
-        return true;
-    }
-
-    @Override
-    public LoggingEventBuilder error(PennaLogger logger) {
-        return get(logger, Level.ERROR);
-    }
 }
