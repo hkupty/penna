@@ -18,8 +18,7 @@ public final class PennaLogger implements IPennaLogger {
     PennaLogger(String name, Config config) {
         this.name = name;
         this.nameAsChars = name.getBytes();
-        this.config = new LogConfig();
-        this.config.update(config);
+        this.config = LogConfig.fromConfig(config);
         levelGuard = LevelGuard.FromConfig.get(config);
     }
 
