@@ -4,39 +4,13 @@
 <svg
    width="512"
    height="512"
-   viewBox="0 0 135.46667 135.46667"
    version="1.1"
-   id="svg911"
-   inkscape:version="1.2.2 (b0a8486541, 2022-12-01)"
-   sodipodi:docname="logo.svg"
+   id="favicon"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns="http://www.w3.org/2000/svg"
-   xmlns:svg="http://www.w3.org/2000/svg">
-  <sodipodi:namedview
-     id="namedview913"
-     pagecolor="#ffffff"
-     bordercolor="#000000"
-     borderopacity="0.25"
-     inkscape:showpageshadow="2"
-     inkscape:pageopacity="0.0"
-     inkscape:pagecheckerboard="0"
-     inkscape:deskcolor="#d1d1d1"
-     inkscape:document-units="mm"
-     showgrid="false"
-     inkscape:lockguides="true"
-     inkscape:zoom="0.5946522"
-     inkscape:cx="801.30873"
-     inkscape:cy="633.1432"
-     inkscape:window-width="2552"
-     inkscape:window-height="1408"
-     inkscape:window-x="0"
-     inkscape:window-y="0"
-     inkscape:window-maximized="1"
-     inkscape:current-layer="layer1"
-     inkscape:export-bgcolor="#ffffffff" />
-  <defs
-     id="defs908" />
+   xmlns:svg="http://www.w3.org/2000/svg"
+   style="background-color:#ffffff">
   <g
      id="g15872-3"
      transform="matrix(1.0421326,0,0,1.0421326,-62.397919,-4.6362797)"
