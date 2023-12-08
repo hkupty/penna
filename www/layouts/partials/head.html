@@ -2,6 +2,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="google-site-verification" content="QMy1Dqk6bClKLYCFsUNuN-6b9CRU1zqqDv3bPsY2TPA" />
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta http-equiv="content-language" content="en">
 {{- if hugo.IsProduction | or (eq site.Params.env "production") | and (ne .Params.robotsNoIndex true) }}
 <meta name="robots" content="index, follow">
 {{- else }}
@@ -23,13 +24,10 @@
     {{- .Summary | default (printf "%s - %s" .Title  site.Title) }}{{- else }}
     {{- with site.Params.description }}{{ . }}{{- end }}{{- end }}{{- end -}}">
 <link rel="canonical" href="{{ if .Params.canonicalURL -}} {{ trim .Params.canonicalURL " " }} {{- else -}} {{ .Permalink }} {{- end }}">
-{{- if site.Params.analytics.google.SiteVerificationTag }}
-<meta name="google-site-verification" content="{{ site.Params.analytics.google.SiteVerificationTag }}">
-{{- end }}
 {{ $css := resources.Get "scss/main.scss" }}
 {{ $css = $css | resources.ExecuteAsTemplate "" . | toCSS | resources.Minify }}
 <link rel="stylesheet" href="{{ $css.RelPermalink }}">
-
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
 {{ if .IsHome }}
   {{ with resources.Get "scss/index.scss" }}
     {{ $pageCss := . | toCSS | resources.Minify }}
