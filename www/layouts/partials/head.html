@@ -27,7 +27,7 @@
 {{ $css := resources.Get "scss/main.scss" }}
 {{ $css = $css | resources.ExecuteAsTemplate "" . | toCSS | resources.Minify }}
 <link rel="stylesheet" href="{{ $css.RelPermalink }}">
-<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/penna/favicon.svg" type="image/svg+xml">
 {{ if .IsHome }}
   {{ with resources.Get "scss/index.scss" }}
     {{ $pageCss := . | toCSS | resources.Minify }}
