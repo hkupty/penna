@@ -4,7 +4,9 @@ import org.jetbrains.annotations.NotNull;
 import penna.api.config.Config;
 import penna.api.config.ConfigManager;
 
+import java.util.ArrayDeque;
 import java.util.Arrays;
+import java.util.Deque;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -15,6 +17,15 @@ import java.util.concurrent.locks.ReentrantLock;
  * Given namespaces naturally hierarchical structure, it is more space-efficient and performant
  * to store each namespace component (section preceded/followed by a dot) as a node in the
  * TST, instead of doing the traditional char-by-char trie/TST.
+ * <br/>
+ * <br/>
+ * This TST can store two kinds of values: {@link PennaLogger} and {@link Config}.
+ * The loggers exist on some leaf nodes, as they're likely class names: `* -> io -> app -> controller -> MyController`,
+ * with `MyController` being a leaf object pointing to a {@link PennaLogger}.
+ * <br/>
+ * The {@link Config} references can live in the middle of the TST. For example `* -> io -> app -> controller` can hold
+ * a reference to a {@link Config} where the log level is {@link org.slf4j.event.Level#DEBUG} whereas the rest of the
+ * Logger references will be under {@link Config#getDefault()}, which is stored in the root of the TST.
  * <br/>
  * <br/>
  * The logger storage exposes three public methods:
@@ -30,10 +41,77 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class LoggerStorage {
 
-    private record NodeAndConfig(
-            ComponentNode node,
-            Config config
-    ) {
+    private static class Cursor {
+        public ComponentNode node;
+        public Config config;
+        public int index;
+        public int nextIndex;
+        public boolean isMatch;
+        public boolean earlyFinish;
+        public char[][] path;
+        private final int target;
+
+        @SuppressWarnings("PMD.ArrayIsStoredDirectly")
+        public Cursor(ComponentNode node, char[]... path) {
+            this.path = path;
+            this.index = 0;
+            this.target = path.length;
+            this.isMatch = false;
+            this.earlyFinish = false;
+            setNode(node);
+        }
+
+        private void setNode(ComponentNode node) {
+            if (node == null) {
+                this.earlyFinish = true;
+                return;
+            }
+
+            Config cfg;
+            if ((cfg = node.configRef.get()) != null) {
+                this.config = cfg;
+            }
+            this.node = node;
+
+        }
+
+        /**
+         * Ensures the values are within the range of [-1, 1], then makes them an array-accessor by incrementing
+         *
+         * @param offset Diff between two characters
+         * @return a number in the range of [0, 2]
+         */
+        private int normalize(int offset) {
+            return ((-offset >>> 31) - (offset >>> 31)) + 1;
+        }
+
+        public boolean next() {
+            var key = path[index];
+            nextIndex = normalize(Arrays.compare(key, node.component));
+            index += (nextIndex & 0x1);
+            isMatch = nextIndex == 1;
+            if (index < target) setNode(node.children[nextIndex]);
+            return index < target && !earlyFinish;
+        }
+
+        public boolean exactMatch() {
+            return index >= target && isMatch && !earlyFinish;
+        }
+
+        public void createRemaining() {
+            for (; index < target; index++) {
+                node.lock.lock();
+                try {
+                    if (node.children[nextIndex] == null) {
+                        node.children[nextIndex] = node.createChild(path[index]);
+                    }
+                } finally {
+                    node.lock.unlock();
+                    setNode(node.children[nextIndex]);
+                    this.nextIndex = 1;
+                }
+            }
+        }
     }
 
     /**
@@ -59,6 +137,13 @@ public class LoggerStorage {
 
     ) {
 
+        /**
+         * Static factory for creating a node with the correct values.
+         *
+         * @param component the char-array representing that node
+         * @param config    the configuration for that segment
+         * @return a new {@link ComponentNode} instance
+         */
         static ComponentNode create(char[] component, Config config) {
             return new ComponentNode(
                     component,
@@ -69,6 +154,12 @@ public class LoggerStorage {
             );
         }
 
+        /**
+         * This is a convenience factory method for creating a child node.
+         *
+         * @param component The char-array representing that node.
+         * @return a new {@link ComponentNode} instance.
+         */
         ComponentNode createChild(char... component) {
             return new ComponentNode(
                     component,
@@ -79,35 +170,63 @@ public class LoggerStorage {
             );
         }
 
-        Config updateConfig(ConfigManager.ConfigurationChange configurationChange) {
+        /**
+         * Updates a configuration value that is stored in a {@link ComponentNode#configRef}.
+         *
+         * @param configurationChange a {@link ConfigManager.ConfigurationChange} lambda.
+         * @return the updated configuration value.
+         */
+        Config updateConfigReference(ConfigManager.ConfigurationChange configurationChange) {
             var cfg = configRef.getAcquire();
             var updated = configurationChange.apply(cfg);
             configRef.setRelease(cfg);
             return updated;
         }
 
-        void replaceConfig(Config config) {
+        /**
+         * If this node contains a logger reference, updates its config.
+         *
+         * @param config the new configuration to be applied to that logger reference.
+         */
+        void updateLoggerConfig(Config config) {
+            PennaLogger logger;
+            if ((logger = loggerRef.get()) != null) {
+                logger.updateConfig(config);
+            }
+        }
+
+        /**
+         * Set (or replace if existing) the configuration reference for this node.
+         *
+         * @param config the new configuration to be held by this node.
+         */
+        void replaceConfigReference(Config config) {
             configRef.set(config);
         }
 
+        /**
+         * Removes any configuration reference associated with this node.
+         */
         void unsetConfig() {
             configRef.set(null);
         }
 
     }
 
+    /**
+     * The root of the TST. This is a special node that doesn't have any component, therefore all children of this node will
+     * live on the left children.
+     */
     private final ComponentNode root = ComponentNode.create(new char[]{}, Config.getDefault());
 
     /**
-     * Ensures the values are within the range of [-1, 1]
+     * Transforms a FQ string into an array of components, being each component an array of chars.
+     * For example, the string `io.app.controller.MyController` becomes
+     * `[[i,o],[a,p,p],[c,o,n,t,r,o,l,l,e,r],[M,y,C,o,n,t,r,o,l,l,e,r]]`.
      *
-     * @param offset Diff between two characters
-     * @return a number in the range of [-1, 1]
+     * @param key a FQ string, like the logger name.
+     * @return an array of char arrays containing the components of the name.
      */
-    private int normalize(int offset) {
-        return (-offset >>> 31) - (offset >>> 31);
-    }
-
     private char[][] componentsForLoggerName(String key) {
         char[] keyChars = key.toCharArray();
         char[][] components = new char[16][];
@@ -128,44 +247,19 @@ public class LoggerStorage {
 
     }
 
-
-    private NodeAndConfig find(ComponentNode node,
-                               char[]... key) {
-        int target = key.length - 1;
-
-        int nodeIx;
-        int index = 0;
-        ComponentNode cursor = node;
-        Config cfg = null;
-        char[] chr;
-
-        do {
-            chr = key[index];
-            Config tmpCfg;
-            if ((tmpCfg = cursor.configRef.get()) != null) {
-                cfg = tmpCfg;
-            }
-
-            nodeIx = normalize(Arrays.compare(chr, cursor.component)) + 1;
-            index = index + (nodeIx & 0x1);
-            if (cursor.children[nodeIx] == null) {
-                cursor.lock.lock();
-                try {
-                    if (cursor.children[nodeIx] == null) {
-                        cursor.children[nodeIx] = cursor.createChild(key[index]);
-                    }
-                } finally {
-                    cursor.lock.unlock();
-                }
-            }
-            cursor = cursor.children[nodeIx];
-        } while (index != target);
-        return new NodeAndConfig(cursor, cfg);
+    private Cursor find(char[]... key) {
+        Cursor cursor = new Cursor(root, key);
+        while (cursor.next()) {}
+        return cursor;
     }
 
 
     public PennaLogger getOrCreate(@NotNull String key) {
-        var ret = find(root, componentsForLoggerName(key));
+        var ret = find(componentsForLoggerName(key));
+
+        if (!ret.exactMatch()) {
+            ret.createRemaining();
+        }
 
         PennaLogger logger = ret.node.loggerRef.getAcquire();
         if (logger == null) {
@@ -177,41 +271,75 @@ public class LoggerStorage {
     }
 
     private void traverse(LoggerStorage.ComponentNode node, Config config) {
+        Deque<ComponentNode> nodes = new ArrayDeque<>();
+        ComponentNode next;
         for (ComponentNode child : node.children) {
             if (child != null) {
+                nodes.push(child);
+            }
+        }
 
-                if (child.configRef.get() != null) {
-                    return;
+        while ((next = nodes.poll()) != null) {
+            if (next.configRef.get() != null) {
+                continue;
+            }
+            next.updateLoggerConfig(config);
+            for (ComponentNode child : next.children) {
+                if (child != null) {
+                    nodes.push(child);
                 }
-
-                PennaLogger logger;
-                if ((logger = child.loggerRef.get()) != null) {
-                    logger.updateConfig(config);
-                }
-
-                traverse(child, config);
             }
         }
     }
 
+
     public void updateConfig(
             @NotNull String prefix,
             @NotNull ConfigManager.ConfigurationChange configurationChange) {
-        ComponentNode updatePoint = find(root, componentsForLoggerName(prefix)).node;
-        Config newConfig = updatePoint.updateConfig(configurationChange);
-        traverse(updatePoint, newConfig);
+        Cursor updatePoint = find(componentsForLoggerName(prefix));
+
+        if (!updatePoint.exactMatch()) {
+            // TODO handle correctly
+            return;
+        }
+
+        Config newConfig = updatePoint.node.updateConfigReference(configurationChange);
+        updatePoint.node.updateLoggerConfig(newConfig);
+        var child = updatePoint.node.children[1]; // Only the middle child of the matched prefix should be traversed
+        if (child != null) {
+            child.updateLoggerConfig(newConfig);
+            traverse(child, newConfig);
+        }
     }
 
     public void replaceConfig(@NotNull String prefix,
                               @NotNull Config newConfig) {
-        ComponentNode updatePoint = find(root, componentsForLoggerName(prefix)).node;
-        updatePoint.replaceConfig(newConfig);
-        traverse(updatePoint, newConfig);
+        Cursor cursor = find(componentsForLoggerName(prefix));
+
+        if (!cursor.exactMatch()) {
+            // TODO handle correctly
+            return;
+        }
+
+        ComponentNode updatePoint = cursor.node;
+
+        updatePoint.replaceConfigReference(newConfig);
+        updatePoint.updateLoggerConfig(newConfig);
+        var child = updatePoint.children[1]; // Only the middle child of the matched prefix should be traversed
+        if (child != null) {
+            child.updateLoggerConfig(newConfig);
+            traverse(child, newConfig);
+        }
+    }
+
+    public void replaceConfig(@NotNull Config newConfig) {
+        root.replaceConfigReference(newConfig);
+        traverse(root, newConfig);
     }
 
 
     public void unsetConfigPoint(@NotNull String prefix) {
-        ComponentNode updatePoint = find(root, componentsForLoggerName(prefix)).node;
+        ComponentNode updatePoint = find(componentsForLoggerName(prefix)).node;
         updatePoint.unsetConfig();
     }
 }
