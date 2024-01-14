@@ -126,8 +126,8 @@ public class LoggerStorage {
                 if (next == null) {
                     cursor.lock.lock();
                     try {
-                        next = new Node(view.toString());
-                        cursor.children[nodeIndex] = next;
+                        cursor.children[nodeIndex] = new Node(view.toString());
+                        next = cursor.children[nodeIndex];
                     } finally {
                         cursor.lock.unlock();
                     }
