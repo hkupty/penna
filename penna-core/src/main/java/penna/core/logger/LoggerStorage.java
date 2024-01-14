@@ -2,6 +2,7 @@ package penna.core.logger;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.VisibleForTesting;
 import penna.api.config.Config;
 import penna.api.config.ConfigManager;
 import penna.core.internals.StringNavigator;
@@ -45,7 +46,8 @@ public class LoggerStorage {
      * This node can also serve as a config point in the hierarchy. If that's the case, all children loggers will
      * inherit the config of the nearest config point.
      */
-    private static class Node {
+    @VisibleForTesting
+    static class Node {
         private Node(String component) {this.component = component;}
 
         public static Node create(String component, Config config) {
@@ -102,102 +104,76 @@ public class LoggerStorage {
      * The root of the TST. This is a special node that doesn't have any component, therefore all children of this node will
      * live on the left children.
      */
-    private final Node root = Node.create("", Config.getDefault());
-
+    @VisibleForTesting
+    final Node root = Node.create("", Config.getDefault());
 
     public PennaLogger getOrCreate(@NotNull String key) {
-        var path = new StringNavigator(key);
-        var cursor = root;
-        var pathIndex = 0;
-        int nodeIndex;
+        StringNavigator path = new StringNavigator(key);
+        Node cursor = root;
         Config config = root.configRef;
-        do {
-            nodeIndex = path.indexCompare(pathIndex, cursor.component);
-            pathIndex += (nodeIndex & 0x1);
-            if (pathIndex < path.target) {
-                Node node;
-                if ((node = cursor.children[nodeIndex]) != null) {
-                    cursor = node;
-                    var cfg = node.configRef;
-                    if (cfg != null) {
-                        config = cfg;
-                    }
-                } else {
-                    break;
-                }
-            } else break;
-        } while (true);
+        int nodeIndex = 2; // Anything will be greater than ""
 
-        while (pathIndex < path.target) {
-            cursor.lock.lock();
-            try {
-                if (cursor.children[nodeIndex] == null) {
-                    cursor.children[nodeIndex] = new Node(path.chunk(pathIndex++).toString());
+        while (path.hasNext()) {
+            StringNavigator.StringView view = path.next();
+            do {
+                var next = cursor.children[nodeIndex];
+                if (next == null) {
+                    cursor.lock.lock();
+                    try {
+                        next = new Node(view.toString());
+                        cursor.children[nodeIndex] = next;
+                    } finally {
+                        cursor.lock.unlock();
+                    }
                 }
-            } finally {
-                cursor.lock.unlock();
-                cursor = cursor.children[nodeIndex];
-                nodeIndex = 1;
+                cursor = next;
+            } while ((nodeIndex = view.indexCompare(cursor.component)) != 1);
+            if (cursor.configRef != null) {
+                config = cursor.configRef;
             }
         }
 
-        PennaLogger logger = cursor.loggerRef;
-        if (logger == null) {
-            logger = new PennaLogger(key, config);
+        if (cursor.loggerRef == null) {
+            cursor.loggerRef = new PennaLogger(key, config);
         }
-        cursor.loggerRef = logger;
-        return logger;
+
+        return cursor.loggerRef;
     }
 
     public void replaceConfig(@NotNull String prefix,
                               @NotNull Config newConfig) {
-        var path = new StringNavigator(prefix);
-        var cursor = root;
-        var pathIndex = 0;
-        int nodeIndex;
-        do {
-            nodeIndex = path.indexCompare(pathIndex, cursor.component);
-            pathIndex += (nodeIndex & 0x1);
-            if (pathIndex < path.target) {
-                Node node;
-                if ((node = cursor.children[nodeIndex]) != null) {
-                    cursor = node;
-                } else {
-
-                    break;
-                }
-            } else break;
-        } while (true);
-
-        cursor.setConfigAndUpdateRecursively(newConfig, null);
+        StringNavigator path = new StringNavigator(prefix);
+        Node cursor = root;
+        int nodeIndex = 2; // Anything will be greater than ""
+        while (cursor != null && path.hasNext()) {
+            StringNavigator.StringView view = path.next();
+            do {
+                cursor = cursor.children[nodeIndex];
+            } while (cursor != null && (nodeIndex = view.indexCompare(cursor.component)) != 1);
+        }
+        if (cursor != null) {
+            cursor.setConfigAndUpdateRecursively(newConfig, null);
+        }
     }
 
     public void updateConfig(@NotNull String prefix,
                              @NotNull ConfigManager.ConfigurationChange configUpdateFn) {
         var path = new StringNavigator(prefix);
         var cursor = root;
-        var pathIndex = 0;
-        int nodeIndex;
         Config config = root.configRef;
-        do {
-            nodeIndex = path.indexCompare(pathIndex, cursor.component);
-            pathIndex += (nodeIndex & 0x1);
-            if (pathIndex < path.target) {
-                Node node;
-                if ((node = cursor.children[nodeIndex]) != null) {
-                    cursor = node;
-                    var cfg = node.configRef;
-                    if (cfg != null) {
-                        config = cfg;
-                    }
-                } else {
-
-                    break;
-                }
-            } else break;
-        } while (true);
-
-        cursor.setConfigAndUpdateRecursively(configUpdateFn.apply(config), configUpdateFn);
+        int nodeIndex = 2; // Anything will be greater than ""
+        while (cursor != null && path.hasNext()) {
+            StringNavigator.StringView view = path.next();
+            do {
+                cursor = cursor.children[nodeIndex];
+            } while (cursor != null && (nodeIndex = view.indexCompare(cursor.component)) != 1);
+            if (cursor != null && cursor.configRef != null) {
+                config = cursor.configRef;
+            }
+        }
+        if (cursor != null) {
+            cursor.setConfigAndUpdateRecursively(configUpdateFn.apply(config), configUpdateFn);
+        }
     }
 
     public void replaceConfig(@NotNull Config newConfig) {

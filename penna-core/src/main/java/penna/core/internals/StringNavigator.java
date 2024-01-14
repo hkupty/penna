@@ -2,14 +2,40 @@ package penna.core.internals;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Arrays;
+import java.util.Iterator;
 
-public class StringNavigator {
+public class StringNavigator implements Iterator<StringNavigator.StringView> {
     public static final int DOT = 0x2E;
     public static final int DOLLAR = 0x24;
     public final String base;
-    public final StringView[] views;
-    public final int target;
+    public int startIndex;
+    public int nextIndex;
+    public boolean hasNext = true;
+    public int symbol = DOT;
+
+
+    @Override
+    public boolean hasNext() {
+        return hasNext;
+    }
+
+    @Override
+    public StringView next() {
+        StringView view;
+        nextIndex = base.indexOf(symbol, startIndex);
+        if (nextIndex == -1 && symbol == DOT) {
+            symbol = DOLLAR;
+            nextIndex = base.indexOf(symbol, startIndex);
+        }
+        if (nextIndex == -1) {
+            hasNext = false;
+            view = new StringView(base, startIndex, base.length() - startIndex);
+        } else {
+            view = new StringView(base, startIndex, nextIndex - startIndex);
+            startIndex = nextIndex + 1;
+        }
+        return view;
+    }
 
     public record StringView(String base, int startingPoint, int length) implements CharSequence {
 
@@ -39,44 +65,14 @@ public class StringNavigator {
 
     public StringNavigator(final String base) {
         this.base = base;
-        var views = new StringView[6];
-        int index = -1;
-        int chunks = 0;
-        while (true) {
-            var previousIndex = index + 1;
-            index = base.indexOf(DOT, previousIndex);
-            if (chunks == views.length) {
-                views = Arrays.copyOf(views, views.length * 2);
-            }
-            if (index > 0) {
-                views[chunks++] = new StringView(base, previousIndex, index - previousIndex);
-            } else {
-                views[chunks++] = new StringView(base, previousIndex, base.length() - previousIndex);
-                previousIndex = index + 1;
-                while ((index = base.indexOf(DOLLAR, previousIndex)) > 0) {
-                    if (chunks == views.length) {
-                        views = Arrays.copyOf(views, views.length * 2);
-                    }
-                    views[chunks++] = new StringView(base, previousIndex, index - previousIndex);
-                    previousIndex = index + 1;
-                }
-                break;
-            }
-        }
-        this.target = chunks;
-        this.views = views;
-    }
-
-    public int target() {
-        return this.target;
     }
 
     public StringView chunk(int index) {
-        return views[index];
+        return null;
     }
 
     public int indexCompare(int index, String against) {
-        return views[index].indexCompare(against);
+        return -1;
     }
 
 }
