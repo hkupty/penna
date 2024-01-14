@@ -30,6 +30,46 @@ public class LoggerStorageTests {
 
 
     @Test
+    public void storingAHierarchicalPathCreatesTheNodesCorrectly() {
+        var cache = new LoggerStorage();
+        var logger1 = cache.getOrCreate("com.for.testing");
+        var logger2 = cache.getOrCreate("com.for.testing.other");
+        var logger3 = cache.getOrCreate("com.for.something.else");
+
+        //           com
+        //            |
+        //           for
+        //            |
+        //         testing
+        //        /   |
+        // something  |
+        //     |    other
+        //   else
+
+        var comNode = cache.root.children[2];
+        assertEquals("com", comNode.component);
+
+        var forNode = comNode.children[1];
+        assertEquals("for", forNode.component);
+
+        var testingNode = forNode.children[1];
+        assertEquals("testing", testingNode.component);
+        assertEquals(logger1, testingNode.loggerRef);
+
+        var otherNode = testingNode.children[1];
+        assertEquals("other", otherNode.component);
+        assertEquals(logger2, otherNode.loggerRef);
+
+        var somethingNode = forNode.children[1].children[0];
+        assertEquals("something", somethingNode.component);
+
+        var elseNode = somethingNode.children[1];
+        assertEquals("else", elseNode.component);
+        assertEquals(logger3, elseNode.loggerRef);
+
+    }
+
+    @Test
     public void replaceTheWholeTreeAffectsLeafObjects() {
         var cache = new LoggerStorage();
         var defaults = Config.getDefault();
@@ -44,6 +84,7 @@ public class LoggerStorageTests {
         assertEquals(Level.DEBUG, cache.getOrCreate("com.for.testing").levelGuard.level());
         assertEquals(Level.DEBUG, cache.getOrCreate("com.for.testing.other").levelGuard.level());
     }
+
 
     @Test
     public void replacePrefixAffectsOnlyDescendants() {

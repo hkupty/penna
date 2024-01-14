@@ -8,16 +8,28 @@ class StringNavigatorTest {
     @Test
     void canFindSameString() {
         StringNavigator sn = new StringNavigator(StringNavigatorTest.class.getName());
-        Assertions.assertEquals(4, sn.target);
-        Assertions.assertEquals("penna", sn.chunk(0).toString());
-        Assertions.assertEquals(1, sn.chunk(0).indexCompare("penna"));
-        Assertions.assertEquals("core", sn.chunk(1).toString());
-        Assertions.assertEquals(1, sn.chunk(1).indexCompare("core"));
-        Assertions.assertEquals("internals", sn.chunk(2).toString());
-        Assertions.assertEquals(1, sn.chunk(2).indexCompare("internals"));
-        Assertions.assertEquals("StringNavigatorTest", sn.chunk(3).toString());
-        Assertions.assertEquals(1, sn.chunk(3).indexCompare("StringNavigatorTest"));
 
+        Assertions.assertTrue(sn.hasNext);
+        StringNavigator.StringView view = sn.next();
+        Assertions.assertEquals("penna", view.toString());
+        Assertions.assertEquals(1, view.indexCompare("penna"));
+
+        Assertions.assertTrue(sn.hasNext);
+        view = sn.next();
+        Assertions.assertEquals("core", view.toString());
+        Assertions.assertEquals(1, view.indexCompare("core"));
+
+        Assertions.assertTrue(sn.hasNext);
+        view = sn.next();
+        Assertions.assertEquals("internals", view.toString());
+        Assertions.assertEquals(1, view.indexCompare("internals"));
+
+        Assertions.assertTrue(sn.hasNext);
+        view = sn.next();
+        Assertions.assertEquals("StringNavigatorTest", view.toString());
+        Assertions.assertEquals(1, view.indexCompare("StringNavigatorTest"));
+
+        Assertions.assertFalse(sn.hasNext);
     }
 
 }
