@@ -37,7 +37,6 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class LoggerStorage {
 
-
     /**
      * Stores a section (component) of the full-qualified name for the logger class, so
      * for a `com.company.myapp.controller.SalesController`, five nodes will be stored, one for each section
@@ -107,6 +106,13 @@ public class LoggerStorage {
     @VisibleForTesting
     final Node root = Node.create("", Config.getDefault());
 
+    /**
+     * Recursively creates nodes in the tree until it reaches the leaf as presented by the supplied key.
+     * Creates a logger if missing and returns it.
+     *
+     * @param key a string containing a fully qualified class name.
+     * @return a {@link PennaLogger}
+     */
     public PennaLogger getOrCreate(@NotNull String key) {
         StringNavigator path = new StringNavigator(key);
         Node cursor = root;
