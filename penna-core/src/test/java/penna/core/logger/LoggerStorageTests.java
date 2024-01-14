@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 public class LoggerStorageTests {
 
     @Test
-    public void getOrCreate_creates_a_logger() {
+    public void getOrCreateCreatesALogger() {
         var cache = new LoggerStorage();
         var logger = cache.getOrCreate("com.for.testing");
         assertEquals(logger.name, "com.for.testing");
@@ -20,7 +20,7 @@ public class LoggerStorageTests {
 
 
     @Test
-    public void calling_getOrCreate_twice_does_not_create_duplicates() {
+    public void callingGetOrCreateTwiceDoesNotCreateDuplicates() {
         var cache = new LoggerStorage();
         var logger1 = cache.getOrCreate("com.for.testing");
         var logger2 = cache.getOrCreate("com.for.testing");
@@ -30,7 +30,47 @@ public class LoggerStorageTests {
 
 
     @Test
-    public void update_the_whole_tree_affects_leaf_objects() {
+    public void storingAHierarchicalPathCreatesTheNodesCorrectly() {
+        var cache = new LoggerStorage();
+        var logger1 = cache.getOrCreate("com.for.testing");
+        var logger2 = cache.getOrCreate("com.for.testing.other");
+        var logger3 = cache.getOrCreate("com.for.something.else");
+
+        //           com
+        //            |
+        //           for
+        //            |
+        //         testing
+        //        /   |
+        // something  |
+        //     |    other
+        //   else
+
+        var comNode = cache.root.children[2];
+        assertEquals("com", comNode.component);
+
+        var forNode = comNode.children[1];
+        assertEquals("for", forNode.component);
+
+        var testingNode = forNode.children[1];
+        assertEquals("testing", testingNode.component);
+        assertEquals(logger1, testingNode.loggerRef);
+
+        var otherNode = testingNode.children[1];
+        assertEquals("other", otherNode.component);
+        assertEquals(logger2, otherNode.loggerRef);
+
+        var somethingNode = forNode.children[1].children[0];
+        assertEquals("something", somethingNode.component);
+
+        var elseNode = somethingNode.children[1];
+        assertEquals("else", elseNode.component);
+        assertEquals(logger3, elseNode.loggerRef);
+
+    }
+
+    @Test
+    public void replaceTheWholeTreeAffectsLeafObjects() {
         var cache = new LoggerStorage();
         var defaults = Config.getDefault();
         var logger1 = cache.getOrCreate("com.for.testing");
@@ -45,8 +85,9 @@ public class LoggerStorageTests {
         assertEquals(Level.DEBUG, cache.getOrCreate("com.for.testing.other").levelGuard.level());
     }
 
+
     @Test
-    public void update_prefix_doesnt_change_all_only_descendants() {
+    public void replacePrefixAffectsOnlyDescendants() {
         var cache = new LoggerStorage();
         var defaults = Config.getDefault();
         var logger1 = cache.getOrCreate("com.for.testing");
@@ -69,16 +110,63 @@ public class LoggerStorageTests {
         assertEquals(Level.WARN, logger3.levelGuard.level());
     }
 
+    @Test
+    public void updatePrefixAffectsOnlyDescendants() {
+        var cache = new LoggerStorage();
+        var defaults = Config.getDefault();
+        var logger1 = cache.getOrCreate("com.for.testing");
+        var logger2 = cache.getOrCreate("com.for.testing.other");
+        var logger3 = cache.getOrCreate("com.for.unrelated");
+        var logger4 = cache.getOrCreate("com.more.unrelated");
+        var logger5 = cache.getOrCreate("io.completely.unrelated");
+
+        assertEquals(defaults.level(), logger1.levelGuard.level());
+        assertEquals(defaults.level(), logger2.levelGuard.level());
+        assertEquals(defaults.level(), logger3.levelGuard.level());
+        assertEquals(defaults.level(), logger4.levelGuard.level());
+        assertEquals(defaults.level(), logger5.levelGuard.level());
+
+        cache.updateConfig("com.for.testing", config -> config.replaceLevel(Level.DEBUG));
+
+        assertEquals(Level.DEBUG, logger2.levelGuard.level());
+        assertEquals(Level.DEBUG, logger1.levelGuard.level());
+        assertEquals(defaults.level(), logger3.levelGuard.level());
+        assertEquals(defaults.level(), logger4.levelGuard.level());
+        assertEquals(defaults.level(), logger5.levelGuard.level());
+
+        cache.updateConfig("com.for.unrelated", config -> config.replaceLevel(Level.WARN));
+
+        assertEquals(Level.DEBUG, logger2.levelGuard.level());
+        assertEquals(Level.DEBUG, logger1.levelGuard.level());
+        assertEquals(Level.WARN, logger3.levelGuard.level());
+        assertEquals(defaults.level(), logger4.levelGuard.level());
+        assertEquals(defaults.level(), logger5.levelGuard.level());
+        cache.updateConfig("com.for", config -> config.replaceLevel(Level.TRACE));
+
+        assertEquals(Level.TRACE, logger2.levelGuard.level());
+        assertEquals(Level.TRACE, logger1.levelGuard.level());
+        assertEquals(Level.TRACE, logger3.levelGuard.level());
+        assertEquals(defaults.level(), logger4.levelGuard.level());
+        assertEquals(defaults.level(), logger5.levelGuard.level());
+
+        cache.updateConfig("io", config -> config.replaceLevel(Level.ERROR));
+
+        assertEquals(Level.TRACE, logger2.levelGuard.level());
+        assertEquals(Level.TRACE, logger1.levelGuard.level());
+        assertEquals(Level.TRACE, logger3.levelGuard.level());
+        assertEquals(defaults.level(), logger4.levelGuard.level());
+        assertEquals(Level.ERROR, logger5.levelGuard.level());
+    }
 
     @Test
-    public void we_always_get_the_right_logger() {
+    public void weAlwaysGetTheRightLogger() {
         var cache = new LoggerStorage();
         var loggers = List.of(
-                "com.AAA.AAA", "com.AAA.AAA", "com.AAA.AAA", "io.aaa.zzz.AAA", "io.aaa.zzz"
+                "com.AAA.AAA", "com.AAA.AAA", "io.aaa.zzz.AAA", "io.aaa.zzz"
         );
 
         for (var logger : loggers) {
-            assertEquals(cache.getOrCreate(logger).name, logger);
+            assertEquals(logger, cache.getOrCreate(logger).name);
         }
     }
 }

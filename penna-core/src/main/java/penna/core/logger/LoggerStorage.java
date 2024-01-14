@@ -1,13 +1,12 @@
 package penna.core.logger;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.VisibleForTesting;
 import penna.api.config.Config;
 import penna.api.config.ConfigManager;
+import penna.core.internals.StringNavigator;
 
-import java.util.ArrayDeque;
-import java.util.Arrays;
-import java.util.Deque;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -33,313 +32,164 @@ import java.util.concurrent.locks.ReentrantLock;
  * {@link LoggerStorage#getOrCreate(String)}: For retrieving an existing logger or creating a new one if none existent
  * for the key;
  * <br/>
- * {@link LoggerStorage#updateConfig(String, ConfigManager.ConfigurationChange)} for updating existing config with
- * a lambda for all update points and loggers below a certain prefix;
- * <br/>
  * {@link LoggerStorage#replaceConfig(String, Config)} for replacing the config reference for all update points and
  * loggers below a certain prefix;
  */
 public class LoggerStorage {
 
-    private static class Cursor {
-        public ComponentNode node;
-        public Config config;
-        public int index;
-        public int nextIndex;
-        public boolean isMatch;
-        public boolean earlyFinish;
-        public char[][] path;
-        private final int target;
-
-        @SuppressWarnings("PMD.ArrayIsStoredDirectly")
-        public Cursor(ComponentNode node, char[]... path) {
-            this.path = path;
-            this.index = 0;
-            this.target = path.length;
-            this.isMatch = false;
-            this.earlyFinish = false;
-            setNode(node);
-        }
-
-        private void setNode(ComponentNode node) {
-            if (node == null) {
-                this.earlyFinish = true;
-                return;
-            }
-
-            Config cfg;
-            if ((cfg = node.configRef.get()) != null) {
-                this.config = cfg;
-            }
-            this.node = node;
-
-        }
-
-        /**
-         * Ensures the values are within the range of [-1, 1], then makes them an array-accessor by incrementing
-         *
-         * @param offset Diff between two characters
-         * @return a number in the range of [0, 2]
-         */
-        private int normalize(int offset) {
-            return ((-offset >>> 31) - (offset >>> 31)) + 1;
-        }
-
-        public boolean next() {
-            var key = path[index];
-            nextIndex = normalize(Arrays.compare(key, node.component));
-            index += (nextIndex & 0x1);
-            isMatch = nextIndex == 1;
-            if (index < target) setNode(node.children[nextIndex]);
-            return index < target && !earlyFinish;
-        }
-
-        public boolean exactMatch() {
-            return index >= target && isMatch && !earlyFinish;
-        }
-
-        public void createRemaining() {
-            for (; index < target; index++) {
-                node.lock.lock();
-                try {
-                    if (node.children[nextIndex] == null) {
-                        node.children[nextIndex] = node.createChild(path[index]);
-                    }
-                } finally {
-                    node.lock.unlock();
-                    setNode(node.children[nextIndex]);
-                    this.nextIndex = 1;
-                }
-            }
-        }
-    }
-
     /**
      * Stores a section (component) of the full-qualified name for the logger class, so
      * for a `com.company.myapp.controller.SalesController`, five nodes will be stored, one for each section
-     * of the name, storing the values as a char[].
+     * of the name.
      * <br/>
      * This node can also serve as a config point in the hierarchy. If that's the case, all children loggers will
      * inherit the config of the nearest config point.
-     *
-     * @param component The char[] representing the component/section of the name.
-     * @param children  The three subordinate nodes: Left, Bottom and Right.
-     * @param loggerRef A potential reference to the {@link PennaLogger}
-     * @param configRef A potential reference to a {@link Config}
-     * @param lock      A lock for manipulating the children and/or the references.
      */
-    private record ComponentNode(
-            char[] component,
-            ComponentNode[] children,
-            AtomicReference<PennaLogger> loggerRef,
-            AtomicReference<Config> configRef,
-            Lock lock
+    @VisibleForTesting
+    static class Node {
+        private Node(String component) {this.component = component;}
 
-    ) {
-
-        /**
-         * Static factory for creating a node with the correct values.
-         *
-         * @param component the char-array representing that node
-         * @param config    the configuration for that segment
-         * @return a new {@link ComponentNode} instance
-         */
-        static ComponentNode create(char[] component, Config config) {
-            return new ComponentNode(
-                    component,
-                    new ComponentNode[3],
-                    new AtomicReference<>(),
-                    new AtomicReference<>(config),
-                    new ReentrantLock(true)
-            );
+        public static Node create(String component, Config config) {
+            var node = new Node(component);
+            node.configRef = config;
+            return node;
         }
 
-        /**
-         * This is a convenience factory method for creating a child node.
-         *
-         * @param component The char-array representing that node.
-         * @return a new {@link ComponentNode} instance.
-         */
-        ComponentNode createChild(char... component) {
-            return new ComponentNode(
-                    component,
-                    new ComponentNode[3],
-                    new AtomicReference<>(),
-                    new AtomicReference<>(),
-                    new ReentrantLock(true)
-            );
-        }
+        public final String component;
+        public final Node[] children = new Node[3];
+        public PennaLogger loggerRef;
+        public Config configRef;
+        public final Lock lock = new ReentrantLock();
 
-        /**
-         * Updates a configuration value that is stored in a {@link ComponentNode#configRef}.
-         *
-         * @param configurationChange a {@link ConfigManager.ConfigurationChange} lambda.
-         * @return the updated configuration value.
-         */
-        Config updateConfigReference(ConfigManager.ConfigurationChange configurationChange) {
-            var cfg = configRef.getAcquire();
-            var updated = configurationChange.apply(cfg);
-            configRef.setRelease(cfg);
-            return updated;
-        }
 
-        /**
-         * If this node contains a logger reference, updates its config.
-         *
-         * @param config the new configuration to be applied to that logger reference.
-         */
-        void updateLoggerConfig(Config config) {
-            PennaLogger logger;
-            if ((logger = loggerRef.get()) != null) {
-                logger.updateConfig(config);
+        void setConfigAndUpdateRecursively(Config baseConfig, @Nullable ConfigManager.ConfigurationChange updateFn) {
+            lock.lock();
+            try {
+                configRef = baseConfig;
+
+                if (loggerRef != null && baseConfig != null) {
+                    loggerRef.updateConfig(baseConfig);
+                }
+            } finally {
+                lock.unlock();
             }
+            if (children[1] != null) {children[1].updateRecursively(baseConfig, updateFn);}
         }
 
-        /**
-         * Set (or replace if existing) the configuration reference for this node.
-         *
-         * @param config the new configuration to be held by this node.
-         */
-        void replaceConfigReference(Config config) {
-            configRef.set(config);
-        }
+        void updateRecursively(Config baseConfig, @Nullable ConfigManager.ConfigurationChange updateFn) {
+            Config newConfig = baseConfig;
+            lock.lock();
+            try {
+                if (configRef != null) {
+                    if (updateFn != null) {
+                        newConfig = updateFn.apply(configRef);
+                    }
+                    configRef = newConfig;
+                }
 
-        /**
-         * Removes any configuration reference associated with this node.
-         */
-        void unsetConfig() {
-            configRef.set(null);
+                if (loggerRef != null && newConfig != null) {
+                    loggerRef.updateConfig(newConfig);
+                }
+            } finally {
+                lock.unlock();
+            }
+            if (children[0] != null) {children[0].updateRecursively(newConfig, updateFn);}
+            if (children[1] != null) {children[1].updateRecursively(newConfig, updateFn);}
+            if (children[2] != null) {children[2].updateRecursively(newConfig, updateFn);}
         }
-
     }
 
     /**
      * The root of the TST. This is a special node that doesn't have any component, therefore all children of this node will
      * live on the left children.
      */
-    private final ComponentNode root = ComponentNode.create(new char[]{}, Config.getDefault());
+    @VisibleForTesting
+    final Node root = Node.create("", Config.getDefault());
 
     /**
-     * Transforms a FQ string into an array of components, being each component an array of chars.
-     * For example, the string `io.app.controller.MyController` becomes
-     * `[[i,o],[a,p,p],[c,o,n,t,r,o,l,l,e,r],[M,y,C,o,n,t,r,o,l,l,e,r]]`.
+     * Recursively creates nodes in the tree until it reaches the leaf as presented by the supplied key.
+     * Creates a logger if missing and returns it.
      *
-     * @param key a FQ string, like the logger name.
-     * @return an array of char arrays containing the components of the name.
+     * @param key a string containing a fully qualified class name.
+     * @return a {@link PennaLogger}
      */
-    private char[][] componentsForLoggerName(String key) {
-        char[] keyChars = key.toCharArray();
-        char[][] components = new char[16][];
-        int base = 0;
-        int componentIndex = 0;
-        for (int i = 0; i < keyChars.length; i++) {
-            if (keyChars[i] == '.') {
-                if (componentIndex >= components.length) {
-                    components = Arrays.copyOf(components, components.length * 2);
-                }
-                components[componentIndex++] = Arrays.copyOfRange(keyChars, base, i);
-                base = i + 1;
-            }
-        }
-        components[componentIndex++] = Arrays.copyOfRange(keyChars, base, keyChars.length);
-
-        return Arrays.copyOfRange(components, 0, componentIndex);
-
-    }
-
-    private Cursor find(char[]... key) {
-        Cursor cursor = new Cursor(root, key);
-        while (cursor.next()) {}
-        return cursor;
-    }
-
-
     public PennaLogger getOrCreate(@NotNull String key) {
-        var ret = find(componentsForLoggerName(key));
+        StringNavigator path = new StringNavigator(key);
+        Node cursor = root;
+        Config config = root.configRef;
+        int nodeIndex = 2; // Anything will be greater than ""
 
-        if (!ret.exactMatch()) {
-            ret.createRemaining();
-        }
-
-        PennaLogger logger = ret.node.loggerRef.getAcquire();
-        if (logger == null) {
-            logger = new PennaLogger(key, ret.config);
-        }
-        ret.node.loggerRef.setRelease(logger);
-
-        return logger;
-    }
-
-    private void traverse(LoggerStorage.ComponentNode node, Config config) {
-        Deque<ComponentNode> nodes = new ArrayDeque<>();
-        ComponentNode next;
-        for (ComponentNode child : node.children) {
-            if (child != null) {
-                nodes.push(child);
-            }
-        }
-
-        while ((next = nodes.poll()) != null) {
-            if (next.configRef.get() != null) {
-                continue;
-            }
-            next.updateLoggerConfig(config);
-            for (ComponentNode child : next.children) {
-                if (child != null) {
-                    nodes.push(child);
+        while (path.hasNext()) {
+            StringNavigator.StringView view = path.next();
+            do {
+                var next = cursor.children[nodeIndex];
+                if (next == null) {
+                    cursor.lock.lock();
+                    try {
+                        cursor.children[nodeIndex] = new Node(view.toString());
+                        next = cursor.children[nodeIndex];
+                    } finally {
+                        cursor.lock.unlock();
+                    }
                 }
+                cursor = next;
+            } while ((nodeIndex = view.indexCompare(cursor.component)) != 1);
+            if (cursor.configRef != null) {
+                config = cursor.configRef;
             }
         }
-    }
 
-
-    public void updateConfig(
-            @NotNull String prefix,
-            @NotNull ConfigManager.ConfigurationChange configurationChange) {
-        Cursor updatePoint = find(componentsForLoggerName(prefix));
-
-        if (!updatePoint.exactMatch()) {
-            // TODO handle correctly
-            return;
+        if (cursor.loggerRef == null) {
+            cursor.loggerRef = new PennaLogger(key, config);
         }
 
-        Config newConfig = updatePoint.node.updateConfigReference(configurationChange);
-        updatePoint.node.updateLoggerConfig(newConfig);
-        var child = updatePoint.node.children[1]; // Only the middle child of the matched prefix should be traversed
-        if (child != null) {
-            child.updateLoggerConfig(newConfig);
-            traverse(child, newConfig);
-        }
+        return cursor.loggerRef;
     }
 
     public void replaceConfig(@NotNull String prefix,
                               @NotNull Config newConfig) {
-        Cursor cursor = find(componentsForLoggerName(prefix));
-
-        if (!cursor.exactMatch()) {
-            // TODO handle correctly
-            return;
+        StringNavigator path = new StringNavigator(prefix);
+        Node cursor = root;
+        int nodeIndex = 2; // Anything will be greater than ""
+        while (cursor != null && path.hasNext()) {
+            StringNavigator.StringView view = path.next();
+            do {
+                cursor = cursor.children[nodeIndex];
+            } while (cursor != null && (nodeIndex = view.indexCompare(cursor.component)) != 1);
         }
+        if (cursor != null) {
+            cursor.setConfigAndUpdateRecursively(newConfig, null);
+        }
+    }
 
-        ComponentNode updatePoint = cursor.node;
-
-        updatePoint.replaceConfigReference(newConfig);
-        updatePoint.updateLoggerConfig(newConfig);
-        var child = updatePoint.children[1]; // Only the middle child of the matched prefix should be traversed
-        if (child != null) {
-            child.updateLoggerConfig(newConfig);
-            traverse(child, newConfig);
+    public void updateConfig(@NotNull String prefix,
+                             @NotNull ConfigManager.ConfigurationChange configUpdateFn) {
+        var path = new StringNavigator(prefix);
+        var cursor = root;
+        Config config = root.configRef;
+        int nodeIndex = 2; // Anything will be greater than ""
+        while (cursor != null && path.hasNext()) {
+            StringNavigator.StringView view = path.next();
+            do {
+                cursor = cursor.children[nodeIndex];
+            } while (cursor != null && (nodeIndex = view.indexCompare(cursor.component)) != 1);
+            if (cursor != null && cursor.configRef != null) {
+                config = cursor.configRef;
+            }
+        }
+        if (cursor != null) {
+            cursor.setConfigAndUpdateRecursively(configUpdateFn.apply(config), configUpdateFn);
         }
     }
 
     public void replaceConfig(@NotNull Config newConfig) {
-        root.replaceConfigReference(newConfig);
-        traverse(root, newConfig);
+        root.lock.lock();
+        try {
+            root.configRef = newConfig;
+        } finally {
+            root.lock.unlock();
+        }
+        root.updateRecursively(newConfig, null);
     }
 
-
-    public void unsetConfigPoint(@NotNull String prefix) {
-        ComponentNode updatePoint = find(componentsForLoggerName(prefix)).node;
-        updatePoint.unsetConfig();
-    }
 }

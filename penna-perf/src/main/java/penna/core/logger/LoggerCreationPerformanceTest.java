@@ -1,18 +1,16 @@
 package penna.core.logger;
 
+import com.google.common.collect.Streams;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.infra.Blackhole;
 import org.openjdk.jmh.runner.Runner;
-import org.openjdk.jmh.runner.options.Options;
-import org.openjdk.jmh.runner.options.OptionsBuilder;
-import org.openjdk.jmh.runner.options.TimeValue;
 import org.slf4j.Logger;
 import penna.core.logger.utils.PerfTestLoggerFactory;
+import penna.core.logger.utils.RunnerOptions;
 
 import java.io.IOException;
 import java.util.Random;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Stream;
 
 public class LoggerCreationPerformanceTest {
 
@@ -21,12 +19,43 @@ public class LoggerCreationPerformanceTest {
     public static class TestState {
 
         public Random random = new Random();
-        public String[] randomWithCollisions;
         public String[] randomDistinct;
-        int size = 1024;
 
-        //        @Param
-        PerfTestLoggerFactory.Implementation implementation = PerfTestLoggerFactory.Implementation.Penna;
+        public static final int SIZE = 1024;
+        public static final int UNIQUE = 640;
+        public static final String[] topLevel = new String[]{
+                "com",
+                "org",
+                "io",
+        };
+
+        public static final String[] midlevel = new String[]{
+                "app",
+                "test",
+                "jmh",
+                "other",
+                "dummy",
+                "special",
+                "last"
+        };
+
+        public static final String[] botLevel = new String[]{
+                "controller",
+                "model",
+                "service",
+                "adapter",
+                "util",
+                "port",
+                "view",
+                "presenter"
+        };
+
+        @Param({
+                "Penna",
+                "Logback",
+//                "Log4j"
+        })
+        PerfTestLoggerFactory.Implementation implementation;
         PerfTestLoggerFactory factory;
 
         @Setup
@@ -34,15 +63,17 @@ public class LoggerCreationPerformanceTest {
             factory = PerfTestLoggerFactory.Factory.get(implementation);
             factory.setup(bh);
 
-            var collisions = random.ints(size / 2, 0, size / 4)
-                    .boxed();
+            var tops = random.ints(0, topLevel.length).mapToObj(ix -> topLevel[ix]);
+            var mids = random.ints(0, midlevel.length).mapToObj(ix -> midlevel[ix]);
+            var bots = random.ints(0, botLevel.length).mapToObj(ix -> botLevel[ix]);
 
-            var unique = random.ints(size * 2L, size / 2, size * 16)
-                    .boxed()
-                    .distinct();
+            var nss = Streams.zip(
+                    Streams.zip(tops, mids, (t, m) -> t + "." + m),
+                    bots, (p, b) -> p + "." + b);
 
-            randomWithCollisions = Stream.concat(collisions, unique).map(ix -> "jmh.task.nr-" + ix).limit(size).toArray(String[]::new);
-            randomDistinct = random.ints().distinct().limit(size).boxed().map(ix -> "jmh.task.nr-" + ix).toArray(String[]::new);
+
+            randomDistinct = nss.map(x -> RandomStringUtils.randomAlphabetic(2, 16)).distinct().limit(SIZE).toArray(String[]::new);
+
         }
 
         Logger getLogger(String name) {
@@ -56,49 +87,37 @@ public class LoggerCreationPerformanceTest {
 
     }
 
-    @Benchmark
+    //    @Benchmark
     public void alwaysNewLogger(TestState state, Blackhole bh) {
-        for (int i = 0; i < state.size; i++) {
-            bh.consume(state.getLogger(state.randomDistinct[i]));
-        }
-    }
-
-    @Benchmark
-    public void alwaysSameLogger(TestState state, Blackhole bh) {
-        for (int i = 0; i < state.size; i++) {
-            bh.consume(state.getLogger("jmh.task"));
+        var factory = PerfTestLoggerFactory.Factory.get(state.implementation);
+        factory.setup(bh);
+        for (int i = 0; i < TestState.SIZE; i++) {
+            bh.consume(factory.getLogger(state.randomDistinct[i]));
         }
     }
 
     @Benchmark
     public void aFewDifferentLoggers(TestState state, Blackhole bh) {
-        for (int i = 0; i < state.size; i++) {
-            bh.consume(state.getLogger(state.randomWithCollisions[i]));
+        var factory = PerfTestLoggerFactory.Factory.get(state.implementation);
+        factory.setup(bh);
+        for (int i = 0; i < TestState.SIZE; i++) {
+            bh.consume(factory.getLogger(state.randomDistinct[i % TestState.UNIQUE]));
         }
     }
 
 
     public static void main(String[] args) throws Exception {
-        Options options = new OptionsBuilder()
-                .include(LoggerCreationPerformanceTest.class.getName() + ".*")
-                .mode(Mode.Throughput)
-                .timeUnit(TimeUnit.SECONDS)
-                .warmupTime(TimeValue.seconds(20))
-                .warmupIterations(3)
-                .measurementTime(TimeValue.seconds(25))
-                .measurementIterations(3)
-                .forks(1)
-                .shouldFailOnError(true)
-                .shouldDoGC(true)
+        var options = RunnerOptions
+                .averageTime(LoggerCreationPerformanceTest.class.getName() + ".*")
+//                .warmupIterations(2)
+//                .warmupTime(TimeValue.seconds(20))
                 .addProfiler("gc")
                 .addProfiler("perfnorm")
-                .addProfiler("perfasm", "tooBigThreshold=2100")
-                .threads(1)
-                .jvm("/usr/lib/jvm/java-21-jetbrains/bin/java")
-                .jvmArgs("-Xmx8192m")
+                .addProfiler("perfasm")
+                .addProfiler("jfr")
                 .build();
-
         new Runner(options).run();
+
     }
 
 }
