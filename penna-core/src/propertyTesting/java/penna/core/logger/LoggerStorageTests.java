@@ -9,29 +9,22 @@ class LoggerStorageTests {
 
     @Provide
     Arbitrary<List<String>> loggerNames() {
-        return
-                Arbitraries
-                        .strings()
-                        .alpha()
-                        .ofMinLength(2)
-                        .ofMaxLength(5)
-                        .flatMap(prefix ->
-                                Arbitraries
-                                        .strings()
-                                        .alpha()
-                                        .ofMinLength(3)
-                                        .ofMaxLength(10)
-                                        .list()
-                                        .ofMinSize(2)
-                                        .ofMaxSize(4)
-                                        .map(components -> {
-                                            var builder = new StringBuilder(prefix);
-                                            components.forEach(item -> builder.append(".").append(item));
+        var builder = new StringBuilder();
+        var string = Arbitraries
+                .strings()
+                .alpha()
+                .ofMinLength(3)
+                .ofMaxLength(32)
+                .list()
+                .ofMinSize(2)
+                .ofMaxSize(6)
+                .map(components -> {
+                    builder.delete(0, builder.length());
+                    components.forEach(item -> builder.append(".").append(item));
+                    return builder.toString();
+                });
 
-                                            return builder.toString();
-                                        }))
-                        .list();
-
+        return string.list();
     }
 
     @Property
