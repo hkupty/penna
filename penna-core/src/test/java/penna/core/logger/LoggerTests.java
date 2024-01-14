@@ -8,7 +8,6 @@ import org.slf4j.MDC;
 import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
 import org.slf4j.event.Level;
-import penna.api.config.Config;
 import penna.core.logger.guard.*;
 import penna.core.sink.CoreSink;
 import penna.core.sink.Sink;
@@ -48,9 +47,9 @@ class LoggerTests {
 
     @Test
     void log_levels_are_respected() {
-        var cache = new TreeCache(Config.getDefault());
-        PennaLogger pennaLogger = cache.getLoggerAt("test");
-        String[] ref = new String[]{"test"};
+        var cache = new LoggerStorage();
+        PennaLogger pennaLogger = cache.getOrCreate("test");
+        String ref = "test";
 
 
         // Trace
@@ -76,13 +75,13 @@ class LoggerTests {
 
     @Test
     void can_write_log_messages() {
-        var cache = new TreeCache(Config.getDefault());
+        var cache = new LoggerStorage();
         AtomicInteger counter = new AtomicInteger(0);
         Sink checker = new TestSink(mle -> counter.getAndIncrement());
 
         SinkManager.Instance.replace(() -> checker);
 
-        PennaLogger pennaLogger = cache.getLoggerAt("test");
+        PennaLogger pennaLogger = cache.getOrCreate("test");
 
 
         Assertions.assertEquals(InfoLevelGuard.singleton(), pennaLogger.levelGuard);
@@ -106,7 +105,7 @@ class LoggerTests {
 
     @Test
     void markers_are_kept() {
-        var cache = new TreeCache(Config.getDefault());
+        var cache = new LoggerStorage();
 
         AtomicReference<Marker> usedMarker = new AtomicReference<>(null);
         Sink checker = new TestSink(mle -> {
@@ -117,7 +116,7 @@ class LoggerTests {
 
         SinkManager.Instance.replace(() -> checker);
 
-        PennaLogger pennaLogger = cache.getLoggerAt("test");
+        PennaLogger pennaLogger = cache.getOrCreate("test");
         Assertions.assertEquals(InfoLevelGuard.singleton(), pennaLogger.levelGuard);
 
         Marker ref = MarkerFactory.getMarker("ref");
@@ -134,9 +133,8 @@ class LoggerTests {
 
     @Test
     void everything_added_to_the_log_is_present_in_the_message() throws IOException {
-        Config config = Config.getDefault();
-        TreeCache cache = new TreeCache(config);
-        PennaLogger logger = cache.getLoggerAt("c", "est", "moi");
+        var cache = new LoggerStorage();
+        PennaLogger logger = cache.getOrCreate("c.est.moi");
 
         File testFile = File.createTempFile("valid-message", ".json");
         FileOutputStream fos = new FileOutputStream(testFile);
