@@ -157,8 +157,9 @@ class CoreSinkTests {
         SinkManager.Instance.replace(() -> new CoreSink(fos));
 
         Config config = Config.getDefault().replaceFields(fields);
-        TreeCache cache = new TreeCache(config);
-        PennaLogger logger = cache.getLoggerAt("c", "est", "moi");
+        LoggerStorage cache = new LoggerStorage();
+        cache.replaceConfig(config);
+        PennaLogger logger = cache.getOrCreate("c.est.moi");
 
 
         Marker marker = MarkerFactory.getMarker("something");
@@ -186,8 +187,9 @@ class CoreSinkTests {
         SinkManager.Instance.replace(() -> new CoreSink(fos));
 
         Config config = Config.getDefault().replaceFields(fields);
-        TreeCache cache = new TreeCache(config);
-        PennaLogger logger = cache.getLoggerAt("c", "est", "moi");
+        LoggerStorage cache = new LoggerStorage();
+        cache.replaceConfig(config);
+        PennaLogger logger = cache.getOrCreate("c.est.moi");
 
         event.config = LogConfig.fromConfig(Config.withFields(fields));
         event.logger = logger.nameAsChars;
