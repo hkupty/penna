@@ -17,6 +17,18 @@ jobs:
       - run:
           name: "Run tests"
           command: "./gradlew check"
+      - store_artifacts:
+          path: penna-api/build/reports/pmd/main.html
+      - store_artifacts:
+          path: penna-core/build/reports/pmd/main.html
+      - store_artifacts:
+          path: penna-dev/build/reports/pmd/main.html
+      - store_artifacts:
+          path: penna-yaml-config/build/reports/pmd/main.html
+      - store_test_results:
+          path: penna-core/build/test-results/
+      - store_test_results:
+          path: penna-dev/build/test-results/
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
