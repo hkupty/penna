@@ -6,6 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) with an addendum:
 the PATCH component is omitted when its value is `0`.
 
+## 0.7.2
+
+### `penna-core`
+
+#### Changed
+
+- Performance improvements in internal mechanisms ([#72](https://github.com/hkupty/penna/pull/72))
+- Replace logger storage([#72](https://github.com/hkupty/penna/pull/72), [#74](https://github.com/hkupty/penna/pull/74), [#75](https://github.com/hkupty/penna/pull/75) & [#76](https://github.com/hkupty/penna/pull/76))
+
+
 ## 0.7.1
 
 ### `penna-core`
