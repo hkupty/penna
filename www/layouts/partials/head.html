@@ -19,6 +19,8 @@
 <meta name="keywords" content="{{ if .Params.keywords -}}
     {{- range $i, $e := .Params.keywords }}{{ if $i }}, {{ end }}{{ $e }}{{ end }} {{- else }}
     {{- range $i, $e := .Params.tags }}{{ if $i }}, {{ end }}{{ $e }}{{ end }} {{- end -}}">
+{{ template "_internal/opengraph.html" . }}
+{{ template "_internal/twitter_cards.html" . }}
 {{- end }}
 <meta name="description" content="{{- with .Description }}{{ . }}{{- else }}{{- if or .IsPage .IsSection}}
     {{- .Summary | default (printf "%s - %s" .Title  site.Title) }}{{- else }}
