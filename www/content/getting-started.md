@@ -12,7 +12,7 @@ Penna is specially useful for when you run you applications on [docker](https://
 
 ## Adding Penna to your project
 
-1. Add [the latest version](https://central.sonatype.com/artifact/com.hkupty.penna/penna-core/overview) of `penna-dev` to your dependency manager.
+1. Add [the latest version](https://central.sonatype.com/artifact/com.hkupty.penna/penna-core/overview) of `penna-core` to your dependency manager.
 
 2. Enjoy! Penna comes with sane defaults so no initial configuration is needed
 
