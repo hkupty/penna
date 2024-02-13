@@ -26,6 +26,8 @@ Penna is specially useful for when you run you applications on [docker](https://
 
 2. Enjoy! Penna comes with sane defaults so no initial configuration is needed
 
+<!-- more -->
+
 ## What if I want to change the configuration?
 
 Then you need to add [`penna-yaml-config`](https://central.sonatype.com/artifact/com.hkupty.penna/penna-yaml-config/0.7.0) to your project, alongside jackson-dataformat-yaml:
@@ -48,7 +50,6 @@ penna:
     com.vendor.noisylib:
         level: warn
 ```
-<!--more-->
 
 ## Can I change more parameters in the configuration?
 
