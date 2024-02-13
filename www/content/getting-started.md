@@ -3,9 +3,10 @@ title: "Getting Started"
 date: 2023-11-08T04:30:58+01:00
 icon: sparkles-outline
 ---
+
 ## What is Penna?
-Penna is a fast and lightweight [slf4j](https://www.slf4j.org/) implementation that writes structured json
-log messages to stdout.
+Penna is a fast and lightweight [slf4j](https://www.slf4j.org/) implementation that writes structured JSON log messages to stdout.
+You can [read more here]({{< ref "/blog/json-logging-for-the-jvm.md" >}}).
 
 ## When should I use Penna?
 Penna is specially useful for when you run you applications on [docker](https://www.docker.com/) containers or [kubernetes](https://kubernetes.io/) pods and your log is captured from stdout to a log aggregator like [loki](https://grafana.com/oss/loki/) or [the elastic stack](https://www.elastic.co/elastic-stack/).
@@ -14,18 +15,29 @@ Penna is specially useful for when you run you applications on [docker](https://
 
 1. Add [the latest version](https://central.sonatype.com/artifact/com.hkupty.penna/penna-core/overview) of `penna-core` to your dependency manager.
 
+{{< highlight gradle "lineNos=false" >}}
+// gradle
+{{< penna-core-gradle >}}
+{{< / highlight >}}
+{{< highlight xml "lineNos=false" >}}
+<!-- maven -->
+{{< penna-core-maven >}}
+{{< / highlight >}}
+
 2. Enjoy! Penna comes with sane defaults so no initial configuration is needed
 
 ## What if I want to change the configuration?
 
 Then you need to add [`penna-yaml-config`](https://central.sonatype.com/artifact/com.hkupty.penna/penna-yaml-config/0.7.0) to your project, alongside jackson-dataformat-yaml:
 
-```gradle
-runtimeOnly 'com.hkupty.penna:penna-yaml-config:<latestPennaVersion>'
-runtimeOnly 'com.fasterxml.jackson.core:jackson-core:<latestJacksonVersion>'
-runtimeOnly 'com.fasterxml.jackson.core:jackson-databind:<latestJacksonVersion>'
-runtimeOnly 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:<latestJacksonVersion>'
-```
+{{< highlight gradle "lineNos=false" >}}
+// gradle
+{{< penna-yaml-config-gradle >}}
+{{< / highlight >}}
+{{< highlight xml "lineNos=false" >}}
+<!-- maven -->
+{{< penna-yaml-config-maven >}}
+{{< / highlight >}}
 
 And then you can configure a `resources/penna.yaml` file like this:
 ```yaml
