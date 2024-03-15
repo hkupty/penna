@@ -5,47 +5,51 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.infra.Blackhole;
 import org.openjdk.jmh.runner.Runner;
-import org.openjdk.jmh.runner.options.Options;
-import org.openjdk.jmh.runner.options.OptionsBuilder;
 import org.openjdk.jmh.runner.options.TimeValue;
 import org.slf4j.spi.MDCAdapter;
+import penna.core.logger.utils.RunnerOptions;
 import penna.core.slf4j.PennaMDCAdapter;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
-import java.util.concurrent.TimeUnit;
 
 public class MdcAdapterPerformanceTest {
+
+    public enum Target {
+        Penna,
+        Logback
+    }
 
     @State(Scope.Thread)
     public static class MDCProxy {
         private final PennaMDCAdapter pennaMDCAdapter = new PennaMDCAdapter();
         private final LogbackMDCAdapter logbackMDCAdapter = new LogbackMDCAdapter();
 
-        @Param({
-                "penna",
-                "logback"
-        })
-        String target;
+        @Param({"Penna"})
+        Target target;
 
         MDCAdapter adapter;
 
         @Setup
         public void setup() {
             adapter = switch (target) {
-                case "penna" -> pennaMDCAdapter;
-                case "logback" -> logbackMDCAdapter;
-                default -> throw new IllegalStateException("Unexpected value: " + target);
+                case Penna -> pennaMDCAdapter;
+                case Logback -> logbackMDCAdapter;
             };
+        }
+
+        @TearDown(Level.Invocation)
+        public void teardown() {
+            adapter.clear();
         }
     }
 
     @State(Scope.Benchmark)
     public static class MDCData {
         @Param({
-//                "8",
+                "8",
 //                "64",
                 "256"
         })
@@ -110,58 +114,18 @@ public class MdcAdapterPerformanceTest {
                 );
             }
         }
-    }
 
-
-    //    @Benchmark
-//    @OutputTimeUnit(TimeUnit.NANOSECONDS)
-    public void mdcThreadsTest(MDCProxy adapter) throws IOException {
-        MDCAdapter mdc = adapter.adapter;
-        mdc.put("simple", "value");
-        Thread thread = new Thread(() -> {
-            mdc.put("simple", "replace");
-            mdc.put("other", "value");
-        });
-        thread.start();
-
-        var context = mdc.getCopyOfContextMap();
-        Thread second = new Thread(() -> {
-            mdc.clear();
-            mdc.put("simple", "thing");
-        });
-        second.start();
-        mdc.setContextMap(context);
-    }
-
-    //    @Benchmark
-//    @OutputTimeUnit(TimeUnit.NANOSECONDS)
-    public void sizedComplete(Blackhole bh, MDCProxy adapter, MDCData data) throws IOException {
-        MDCAdapter mdc = adapter.adapter;
-        mdc.clear();
-        int kv;
-
-        for (int i = 0; i < (data.size / 8); i++) {
-            for (int j = 0; j < 8; j++) {
-                kv = data.nextKv();
-                mdc.put(data.keys[kv], data.values[kv]);
-            }
-            bh.consume(mdc.get(data.get[data.nextGet()]));
-            bh.consume(mdc.get(data.get[data.nextGet()]));
-
-            mdc.remove(data.remove[data.nextRem()]);
+        @TearDown(Level.Invocation)
+        public void teardown() {
+            ixRem = 0;
+            ixKv = 0;
+            ixGet = 0;
         }
-        bh.consume(mdc.getCopyOfContextMap());
-        mdc.setContextMap(data.replacement);
-        data.ixRem = 0;
-        data.ixKv = 0;
-        data.ixGet = 0;
     }
 
     @Benchmark
-    @OutputTimeUnit(TimeUnit.NANOSECONDS)
     public void recreateMdc(Blackhole bh, MDCProxy adapter, MDCData data) throws IOException {
         MDCAdapter mdc = adapter.adapter;
-        mdc.clear();
         int kv;
         var ctx = mdc.getCopyOfContextMap();
 
@@ -174,27 +138,18 @@ public class MdcAdapterPerformanceTest {
             ctx = mdc.getCopyOfContextMap();
             mdc.setContextMap(prev);
         }
-        data.ixRem = 0;
-        data.ixKv = 0;
-        data.ixGet = 0;
     }
 
-
     public static void main(String[] args) throws Exception {
-        Options options = new OptionsBuilder()
-                .include(MdcAdapterPerformanceTest.class.getName() + ".*")
-                .mode(Mode.AverageTime)
+        var options = RunnerOptions
+                .averageTime(MdcAdapterPerformanceTest.class.getName() + ".*")
+                .warmupIterations(2)
                 .warmupTime(TimeValue.seconds(20))
-                .warmupIterations(3)
-                .threads(1)
-                .measurementIterations(3)
-                .forks(1)
-                .shouldFailOnError(true)
-                .shouldDoGC(true)
                 .addProfiler("gc")
-                .jvm("/usr/lib/jvm/java-21-jetbrains/bin/java")
+                .addProfiler("perfnorm")
+                .addProfiler("perfasm")
+                .addProfiler("jfr")
                 .build();
-
         new Runner(options).run();
     }
 
@@ -202,31 +157,59 @@ public class MdcAdapterPerformanceTest {
 
 
 /*
-// 1st run
-Benchmark                                                 (size)  (target)  Mode  Cnt       Score        Error   Units
-MdcAdapterPerformanceTest.recreateMdc                        256     penna  avgt    3   49929.215 ±  89803.104   ns/op
-MdcAdapterPerformanceTest.recreateMdc:gc.alloc.rate          256     penna  avgt    3    1941.892 ±   3610.730  MB/sec
-MdcAdapterPerformanceTest.recreateMdc:gc.alloc.rate.norm     256     penna  avgt    3  100992.035 ±      0.064    B/op
-MdcAdapterPerformanceTest.recreateMdc:gc.count               256     penna  avgt    3     400.000               counts
-MdcAdapterPerformanceTest.recreateMdc:gc.time                256     penna  avgt    3     256.000                   ms
-MdcAdapterPerformanceTest.recreateMdc                        256   logback  avgt    3  210140.260 ± 283560.778   ns/op
-MdcAdapterPerformanceTest.recreateMdc:gc.alloc.rate          256   logback  avgt    3    1423.210 ±   1937.524  MB/sec
-MdcAdapterPerformanceTest.recreateMdc:gc.alloc.rate.norm     256   logback  avgt    3  312464.146 ±      0.191    B/op
-MdcAdapterPerformanceTest.recreateMdc:gc.count               256   logback  avgt    3     294.000               counts
-MdcAdapterPerformanceTest.recreateMdc:gc.time                256   logback  avgt    3     177.000                   ms
-
-
-// 2nd run, Map.copyOf(x) + set with new HashMap(ctx)
-Benchmark                                                 (size)  (target)  Mode  Cnt       Score         Error   Units
-MdcAdapterPerformanceTest.recreateMdc                        256     penna  avgt    3  113175.908 ±   23078.567   ns/op
-MdcAdapterPerformanceTest.recreateMdc:gc.alloc.rate          256     penna  avgt    3    1342.356 ±     272.373  MB/sec
-MdcAdapterPerformanceTest.recreateMdc:gc.alloc.rate.norm     256     penna  avgt    3  159296.079 ±       0.016    B/op
-MdcAdapterPerformanceTest.recreateMdc:gc.count               256     penna  avgt    3     280.000                counts
-MdcAdapterPerformanceTest.recreateMdc:gc.time                256     penna  avgt    3     155.000                    ms
-MdcAdapterPerformanceTest.recreateMdc                        256   logback  avgt    3  326954.749 ± 1190715.666   ns/op
-MdcAdapterPerformanceTest.recreateMdc:gc.alloc.rate          256   logback  avgt    3     933.593 ±    3048.751  MB/sec
-MdcAdapterPerformanceTest.recreateMdc:gc.alloc.rate.norm     256   logback  avgt    3  312464.227 ±       0.827    B/op
-MdcAdapterPerformanceTest.recreateMdc:gc.count               256   logback  avgt    3     199.000                counts
-MdcAdapterPerformanceTest.recreateMdc:gc.time                256   logback  avgt    3     166.000                    ms
+// With TreeMap
+Benchmark                                                      (size)  (target)  Mode  Cnt       Score      Error      Units
+MdcAdapterPerformanceTest.recreateMdc                               8     Penna  avgt    3       0.278 ±    0.012      us/op
+MdcAdapterPerformanceTest.recreateMdc:CPI                           8     Penna  avgt            0.309             clks/insn
+MdcAdapterPerformanceTest.recreateMdc:IPC                           8     Penna  avgt            3.241             insns/clk
+MdcAdapterPerformanceTest.recreateMdc:L1-dcache-load-misses:u       8     Penna  avgt           14.115                  #/op
+MdcAdapterPerformanceTest.recreateMdc:L1-dcache-loads:u             8     Penna  avgt         1078.988                  #/op
+MdcAdapterPerformanceTest.recreateMdc:L1-dcache-stores:u            8     Penna  avgt          533.286                  #/op
+MdcAdapterPerformanceTest.recreateMdc:L1-icache-load-misses:u       8     Penna  avgt            1.513                  #/op
+MdcAdapterPerformanceTest.recreateMdc:LLC-load-misses:u             8     Penna  avgt            0.026                  #/op
+MdcAdapterPerformanceTest.recreateMdc:LLC-loads:u                   8     Penna  avgt            0.270                  #/op
+MdcAdapterPerformanceTest.recreateMdc:LLC-store-misses:u            8     Penna  avgt            0.148                  #/op
+MdcAdapterPerformanceTest.recreateMdc:LLC-stores:u                  8     Penna  avgt            0.255                  #/op
+MdcAdapterPerformanceTest.recreateMdc:asm                           8     Penna  avgt              NaN                   ---
+MdcAdapterPerformanceTest.recreateMdc:branch-misses:u               8     Penna  avgt            0.395                  #/op
+MdcAdapterPerformanceTest.recreateMdc:branches:u                    8     Penna  avgt          695.286                  #/op
+MdcAdapterPerformanceTest.recreateMdc:cycles:u                      8     Penna  avgt         1222.893                  #/op
+MdcAdapterPerformanceTest.recreateMdc:dTLB-load-misses:u            8     Penna  avgt            0.055                  #/op
+MdcAdapterPerformanceTest.recreateMdc:dTLB-loads:u                  8     Penna  avgt         1085.475                  #/op
+MdcAdapterPerformanceTest.recreateMdc:dTLB-store-misses:u           8     Penna  avgt            0.096                  #/op
+MdcAdapterPerformanceTest.recreateMdc:dTLB-stores:u                 8     Penna  avgt          536.295                  #/op
+MdcAdapterPerformanceTest.recreateMdc:gc.alloc.rate                 8     Penna  avgt    3    2316.134 ± 1610.439     MB/sec
+MdcAdapterPerformanceTest.recreateMdc:gc.alloc.rate.norm            8     Penna  avgt    3     816.084 ±    2.356       B/op
+MdcAdapterPerformanceTest.recreateMdc:gc.count                      8     Penna  avgt    3    1330.000                counts
+MdcAdapterPerformanceTest.recreateMdc:gc.time                       8     Penna  avgt    3     534.000                    ms
+MdcAdapterPerformanceTest.recreateMdc:iTLB-load-misses:u            8     Penna  avgt            0.032                  #/op
+MdcAdapterPerformanceTest.recreateMdc:instructions:u                8     Penna  avgt         3962.827                  #/op
+MdcAdapterPerformanceTest.recreateMdc:jfr                           8     Penna  avgt              NaN                   ---
+MdcAdapterPerformanceTest.recreateMdc                             256     Penna  avgt    3      29.351 ±    5.543      us/op
+MdcAdapterPerformanceTest.recreateMdc:CPI                         256     Penna  avgt            0.245             clks/insn
+MdcAdapterPerformanceTest.recreateMdc:IPC                         256     Penna  avgt            4.085             insns/clk
+MdcAdapterPerformanceTest.recreateMdc:L1-dcache-load-misses:u     256     Penna  avgt         2620.078                  #/op
+MdcAdapterPerformanceTest.recreateMdc:L1-dcache-loads:u           256     Penna  avgt       113747.530                  #/op
+MdcAdapterPerformanceTest.recreateMdc:L1-dcache-stores:u          256     Penna  avgt        62283.020                  #/op
+MdcAdapterPerformanceTest.recreateMdc:L1-icache-load-misses:u     256     Penna  avgt          138.940                  #/op
+MdcAdapterPerformanceTest.recreateMdc:LLC-load-misses:u           256     Penna  avgt            2.658                  #/op
+MdcAdapterPerformanceTest.recreateMdc:LLC-loads:u                 256     Penna  avgt           29.724                  #/op
+MdcAdapterPerformanceTest.recreateMdc:LLC-store-misses:u          256     Penna  avgt           74.369                  #/op
+MdcAdapterPerformanceTest.recreateMdc:LLC-stores:u                256     Penna  avgt           84.087                  #/op
+MdcAdapterPerformanceTest.recreateMdc:asm                         256     Penna  avgt              NaN                   ---
+MdcAdapterPerformanceTest.recreateMdc:branch-misses:u             256     Penna  avgt           55.235                  #/op
+MdcAdapterPerformanceTest.recreateMdc:branches:u                  256     Penna  avgt        76694.591                  #/op
+MdcAdapterPerformanceTest.recreateMdc:cycles:u                    256     Penna  avgt       107139.814                  #/op
+MdcAdapterPerformanceTest.recreateMdc:dTLB-load-misses:u          256     Penna  avgt            4.118                  #/op
+MdcAdapterPerformanceTest.recreateMdc:dTLB-loads:u                256     Penna  avgt       113875.370                  #/op
+MdcAdapterPerformanceTest.recreateMdc:dTLB-store-misses:u         256     Penna  avgt            0.617                  #/op
+MdcAdapterPerformanceTest.recreateMdc:dTLB-stores:u               256     Penna  avgt        62479.368                  #/op
+MdcAdapterPerformanceTest.recreateMdc:gc.alloc.rate               256     Penna  avgt    3    3132.054 ± 4338.725     MB/sec
+MdcAdapterPerformanceTest.recreateMdc:gc.alloc.rate.norm          256     Penna  avgt    3  100999.667 ±  215.457       B/op
+MdcAdapterPerformanceTest.recreateMdc:gc.count                    256     Penna  avgt    3    1215.000                counts
+MdcAdapterPerformanceTest.recreateMdc:gc.time                     256     Penna  avgt    3     527.000                    ms
+MdcAdapterPerformanceTest.recreateMdc:iTLB-load-misses:u          256     Penna  avgt            2.542                  #/op
+MdcAdapterPerformanceTest.recreateMdc:instructions:u              256     Penna  avgt       437681.585                  #/op
+MdcAdapterPerformanceTest.recreateMdc:jfr                         256     Penna  avgt              NaN                   ---
 
  */
