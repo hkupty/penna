@@ -4,7 +4,6 @@ import penna.core.internals.store.StringMap;
 import penna.core.internals.store.StringTreeMap;
 
 import java.util.Map;
-import java.util.function.BiConsumer;
 
 /**
  * This is the MDC Proxy between the adapter and the actual storage.
@@ -21,11 +20,7 @@ public sealed interface Mdc extends Map<String, String> permits EmptyMdc, MdcSto
 
     boolean isNotEmpty();
 
-    int size();
-
     void remove(String key);
-
-    void forEach(BiConsumer<? super String, ? super String> action);
 
     String get(String key);
 
