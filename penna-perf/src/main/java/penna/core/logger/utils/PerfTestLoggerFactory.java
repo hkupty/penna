@@ -8,7 +8,6 @@ import org.slf4j.ILoggerFactory;
 import org.slf4j.Logger;
 import penna.api.config.Config;
 import penna.core.logger.LoggerStorage;
-import penna.core.logger.TreeCache;
 import penna.core.sink.CoreSink;
 import penna.core.sink.SinkManager;
 import penna.perf.misc.IfBasedLogger;
@@ -46,7 +45,6 @@ public sealed interface PerfTestLoggerFactory extends Closeable {
 
     final class PennaFactory implements PerfTestLoggerFactory {
         public LoggerStorage storage = new LoggerStorage();
-        public TreeCache cache = new TreeCache(Config.getDefault());
 
         @Override
         public void setup(Blackhole bh) {
