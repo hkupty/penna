@@ -2,7 +2,7 @@
 slf4j = "2.0.9"
 jackson = "2.15.3"
 jqwik = "1.7.2"
-junit = "5.8.1"
+junit = "5.10.2"
 jmh = "1.37"
 jbrAnn = "24.0.1"
 
