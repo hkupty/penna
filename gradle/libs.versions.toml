@@ -1,10 +1,10 @@
 [versions]
 slf4j = "2.0.9"
-jackson = "2.15.3"
+jackson = "2.17.0"
 jqwik = "1.8.4"
 junit = "5.8.1"
 jmh = "1.37"
-jbrAnn = "24.0.1"
+jbrAnn = "24.1.0"
 
 [libraries]
 slf4j = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
