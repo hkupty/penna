@@ -1,0 +1,4 @@
+---
+config:
+  penna: { level: trace }
+  org.example: { level: debug }
