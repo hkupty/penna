@@ -8,7 +8,7 @@ import java.util.function.UnaryOperator;
  * so than at least the initial set up of the logger factory has the adequate levels and fields to log.
  * <br />
  * Also, {@link ConfigManager#bind(Configurable)} is required so then penna.core's implementation of
- * {@link org.slf4j.spi.SLF4JServiceProvider} can bind the ConfigManager instance to the LoggerFactory.
+ * {@link org.slf4j.spi.SLF4JServiceProvider} can bind the ManagerImpl instance to the LoggerFactory.
  * <br />
  * Finally, event though a convenience method, it is nice that {@link ConfigManager#updateConfigs(ConfigItem...)}
  * is implemented, because that would allow for runtime reconfiguration of a logger. It uses {@link ConfigItem} instead

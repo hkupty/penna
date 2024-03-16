@@ -2,20 +2,22 @@ package penna.api.config;
 
 /**
  * This record holds configuration on how Penna should handle logging exception fields.
- * @param maxDepth How far the stacktrace can go before cutting short
- * @param traverseDepth The amount of levels one can traverse down the exception
+ *
+ * @param maxDepth      How far the stacktrace can go before cutting short
+ * @param traverseDepth The amount of nested exceptions the logger can traverse before aborting
  * @param deduplication When enabled, penna will not print repeated stack frames
  */
 public record ExceptionHandling(
-    int maxDepth,
-    int traverseDepth,
-    boolean deduplication
+        int maxDepth,
+        int traverseDepth,
+        boolean deduplication
 ) {
 
     private static final ExceptionHandling singleton = new ExceptionHandling(64, 2, false);
 
     /**
      * Gets the default instance.
+     *
      * @return The static default instance.
      */
     public static ExceptionHandling getDefault() {
@@ -24,6 +26,7 @@ public record ExceptionHandling(
 
     /**
      * Returns a copy of the original object swapping the value for {@link ExceptionHandling#deduplication}
+     *
      * @param deduplication Whether Penna should short-circuit out of writing stacktraces if identifies duplicates or not.
      * @return A copy of the original object with the values replaced
      */
@@ -33,16 +36,28 @@ public record ExceptionHandling(
 
     /**
      * Returns a copy of the original object swapping the value for {@link ExceptionHandling#maxDepth}
+     *
      * @param maxDepth The maximum number of stacktrace lines that should be shown before short-circuiting out
      * @return A copy of the original object with the values replaced
      */
     public ExceptionHandling replaceMaxDepth(int maxDepth) {
-        return new ExceptionHandling(maxDepth, this.traverseDepth,  this.deduplication);
+        return new ExceptionHandling(maxDepth, this.traverseDepth, this.deduplication);
+    }
+
+    /**
+     * Returns a copy of the original object swapping the value for {@link ExceptionHandling#traverseDepth}
+     *
+     * @param traverseDepth the amount of nested exceptions the logger will traverse
+     * @return A copy of the original object with the values replaced
+     */
+    public ExceptionHandling replaceTraverseDepth(int traverseDepth) {
+        return new ExceptionHandling(this.maxDepth, traverseDepth, this.deduplication);
     }
 
     /**
      * This is a convenience method that returns a copy of the default object with the value for {@link ExceptionHandling#deduplication}
      * replaced by the parameter provided.
+     *
      * @param deduplication Whether Penna should short-circuit out of writing stacktraces if identifies duplicates or not.
      * @return An instance of {@link ExceptionHandling}
      */
@@ -53,6 +68,7 @@ public record ExceptionHandling(
     /**
      * This is a convenience method that returns a copy of the default object with the value for {@link ExceptionHandling#maxDepth}
      * replaced by the parameter provided.
+     *
      * @param maxDepth The maximum number of stacktrace lines that should be shown before short-circuiting out
      * @return An instance of {@link ExceptionHandling}
      */
