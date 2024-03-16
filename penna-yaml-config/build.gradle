@@ -30,6 +30,10 @@ dependencies {
     testRuntimeOnly libs.jackson.core
     testRuntimeOnly libs.jackson.databind
     testRuntimeOnly libs.jackson.yaml
+
+    testImplementation libs.jackson.core
+    testImplementation libs.jackson.databind
+    testImplementation libs.jackson.yaml
 }
 
 test {

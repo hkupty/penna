@@ -16,9 +16,11 @@ public class YamlConfigManager implements ConfigManager {
         return new JacksonConfigManager(configFile);
     }
 
-    public YamlConfigManager(){
+    public YamlConfigManager() {
         try {
-            var url = Objects.requireNonNull(Thread.currentThread().getContextClassLoader().getResource("penna.yaml"));
+            var url = Objects.requireNonNull(Thread.currentThread()
+                    .getContextClassLoader()
+                    .getResource("penna.yaml"));
             impl = tryJackson(url);
         } catch (ClassNotFoundException ignored) {
             impl = new ConfigManager() {
@@ -30,10 +32,10 @@ public class YamlConfigManager implements ConfigManager {
                 }
 
                 @Override
-                public void configure() { }
+                public void configure() {}
 
                 @Override
-                public void updateConfigs(ConfigItem... configItems) { configurable.configure(configItems); }
+                public void updateConfigs(ConfigItem... configItems) {configurable.configure(configItems);}
             };
         }
     }

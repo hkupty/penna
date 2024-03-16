@@ -1,3 +1,4 @@
+import penna.config.yaml.JacksonYamlConfigProvider;
 import penna.config.yaml.YamlConfigManager;
 
 module penna.config.yaml {
@@ -9,6 +10,7 @@ module penna.config.yaml {
     requires penna.core;
 
     provides penna.api.config.ConfigManager with YamlConfigManager;
+    provides penna.api.configv2.Provider with JacksonYamlConfigProvider;
 
     exports penna.config.yaml;
 }
