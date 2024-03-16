@@ -151,6 +151,31 @@ public class LoggerStorage {
         StringNavigator path = new StringNavigator(prefix);
         Node cursor = root;
         int nodeIndex = 2; // Anything will be greater than ""
+
+        while (path.hasNext()) {
+            StringNavigator.StringView view = path.next();
+            do {
+                var next = cursor.children[nodeIndex];
+                if (next == null) {
+                    cursor.lock.lock();
+                    try {
+                        cursor.children[nodeIndex] = new Node(view.toString());
+                        next = cursor.children[nodeIndex];
+                    } finally {
+                        cursor.lock.unlock();
+                    }
+                }
+                cursor = next;
+            } while ((nodeIndex = view.indexCompare(cursor.component)) != 1);
+        }
+
+        cursor.setConfigAndUpdateRecursively(newConfig, null);
+    }
+
+    public Config getConfig(@NotNull String prefix) {
+        StringNavigator path = new StringNavigator(prefix);
+        Node cursor = root;
+        int nodeIndex = 2; // Anything will be greater than ""
         while (cursor != null && path.hasNext()) {
             StringNavigator.StringView view = path.next();
             do {
@@ -158,8 +183,10 @@ public class LoggerStorage {
             } while (cursor != null && (nodeIndex = view.indexCompare(cursor.component)) != 1);
         }
         if (cursor != null) {
-            cursor.setConfigAndUpdateRecursively(newConfig, null);
+            return cursor.configRef;
         }
+
+        return null;
     }
 
     public void updateConfig(@NotNull String prefix,
