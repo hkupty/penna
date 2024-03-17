@@ -1,30 +1,24 @@
 package penna.config.yaml;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
-import org.jetbrains.annotations.VisibleForTesting;
 import penna.api.configv2.Manager;
 import penna.api.configv2.Provider;
-import penna.config.yaml.jackson.NodeReader;
-import penna.config.yaml.models.ConfigMap;
-import penna.config.yaml.models.ConfigNode;
+import penna.config.yaml.parser.Parser;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 
-public class JacksonYamlConfigProvider implements Provider {
-    @VisibleForTesting
-    transient final ObjectMapper mapper;
+/**
+ * Implementation of the {@link Provider} interface that extends the {@link Manager}
+ * by adding configuration from a yaml file source.
+ */
+public class YamlConfigProvider implements Provider {
     private transient Path configPath;
     private transient Manager manager;
+    private transient final Parser parser;
 
-    public JacksonYamlConfigProvider() {
-        this.mapper = new YAMLMapper();
+    public YamlConfigProvider() {
+        this.parser = Parser.Factory.getParser();
     }
 
     /**
@@ -56,32 +50,14 @@ public class JacksonYamlConfigProvider implements Provider {
         }
     }
 
-    @VisibleForTesting
-    ConfigMap readConfig(JsonNode root) {
-        var configNodes = new HashMap<String, ConfigNode>();
-        var cfg = root.get("config");
-        var iterator = cfg.fields();
-        while (iterator.hasNext()) {
-            try {
-                var entry = iterator.next();
-                configNodes.put(entry.getKey(), NodeReader.deserialize(entry.getValue()));
-            } catch (IOException e) {
-                // TODO Handle malformed configuration
-                continue;
-            }
-        }
-        return new ConfigMap(Map.copyOf(configNodes));
-    }
-
     /**
      * This functions reads the configuration from the yaml file and supplies it to the manager.
-     * It should only be called <b>after</b> the manager has been installed through {@link JacksonYamlConfigProvider#register(Manager)}
+     * It should only be called <b>after</b> the manager has been installed through {@link YamlConfigProvider#register(Manager)}
      *
      * @throws IOException Due to yaml file reading, an exception can be thrown.
      */
     private void refresh() throws IOException {
-        var tree = mapper.readTree(Files.newBufferedReader(this.configPath));
-        var configMap = readConfig(tree);
+        var configMap = parser.readAndParse(this.configPath);
 
         for (var entry : configMap.config().entrySet()) {
             var next = entry.getValue();

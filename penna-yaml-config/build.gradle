@@ -19,10 +19,16 @@ dependencies {
     implementation project(":penna-api")
     implementation project(":penna-core")
     implementation libs.slf4j
+
+    // (optional) Jackson support
     compileOnly libs.jackson.core
     compileOnly libs.jackson.databind
     compileOnly libs.jackson.yaml
     compileOnly libs.jetbrains.annotations
+
+    // (optional) SnakeYaml support
+    compileOnly libs.snakeyaml.plain
+    compileOnly libs.snakeyaml.engine
 
     // Tests
     testImplementation libs.junit.api
@@ -30,6 +36,7 @@ dependencies {
     testRuntimeOnly libs.jackson.core
     testRuntimeOnly libs.jackson.databind
     testRuntimeOnly libs.jackson.yaml
+    testRuntimeOnly libs.snakeyaml.engine
 
     testImplementation libs.jackson.core
     testImplementation libs.jackson.databind

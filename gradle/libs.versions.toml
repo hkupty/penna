@@ -5,18 +5,28 @@ jqwik = "1.8.4"
 junit = "5.10.2"
 jmh = "1.37"
 jbrAnn = "24.1.0"
+snakeyaml = "2.2"
+snakeyaml-engine = "2.7"
 
 [libraries]
 slf4j = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
+
+# Jackson support
 jackson-core = { module = "com.fasterxml.jackson.core:jackson-core", version.ref = "jackson" }
 jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson" }
 jackson-yaml = { module = "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml", version.ref = "jackson" }
-jqwik = { module = "net.jqwik:jqwik", version.ref = "jqwik" }
-junit-api = { module ="org.junit.jupiter:junit-jupiter-api", version.ref = "junit" }
-junit-engine = { module ="org.junit.jupiter:junit-jupiter-engine", version.ref = "junit" }
 
-commons-math = { module = "org.apache.commons:commons-math3", version.prefer = "3.6.1"}
-commons-lang = { module = "org.apache.commons:commons-lang3", version.prefer = "3.13.0"}
+# snakeyaml
+snakeyaml-plain = { module = "org.yaml:snakeyaml", version.ref = "snakeyaml" }
+snakeyaml-engine = { module = "org.snakeyaml:snakeyaml-engine", version.ref = "snakeyaml-engine" }
+
+# testing
+jqwik = { module = "net.jqwik:jqwik", version.ref = "jqwik" }
+junit-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit" }
+junit-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit" }
+
+commons-math = { module = "org.apache.commons:commons-math3", version.prefer = "3.6.1" }
+commons-lang = { module = "org.apache.commons:commons-lang3", version.prefer = "3.13.0" }
 
 jmh-core = { module = "org.openjdk.jmh:jmh-core", version.ref = "jmh" }
 jmh-annotations = { module = "org.openjdk.jmh:jmh-generator-annprocess", version.ref = "jmh" }
