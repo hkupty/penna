@@ -6,6 +6,7 @@ import penna.config.yaml.parser.Parser;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -16,6 +17,13 @@ public class YamlConfigProvider implements Provider {
     private transient Path configPath;
     private transient Manager manager;
     private transient final Parser parser;
+
+    private static final List<String> TARGET_FILES = List.of(
+            "penna-test.yaml",
+            "penna-test.yml",
+            "penna.yaml",
+            "penna.yml"
+    );
 
     public YamlConfigProvider() {
         this.parser = Parser.Factory.getParser();
@@ -31,13 +39,15 @@ public class YamlConfigProvider implements Provider {
     @Override
     public boolean register(Manager manager) {
         try {
-            var file = Objects.requireNonNull(Thread
-                            .currentThread()
-                            .getContextClassLoader()
-                            .getResource("penna.yaml"))
-                    .toURI();
+            var classLoader = Thread.currentThread().getContextClassLoader();
 
-            this.configPath = Path.of(file);
+            var maybeFile = TARGET_FILES.stream().map(classLoader::getResource).dropWhile(Objects::isNull).findFirst();
+
+            if (maybeFile.isEmpty()) {
+                return false;
+            }
+
+            this.configPath = Path.of(maybeFile.get().toURI());
             this.manager = manager;
 
             refresh();
