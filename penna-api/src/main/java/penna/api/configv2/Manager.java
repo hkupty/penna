@@ -43,6 +43,8 @@ public sealed interface Manager {
 
             instance.attachProviders(providers);
 
+            providers.forEach(Provider::init);
+
             return instance;
         }
     }
