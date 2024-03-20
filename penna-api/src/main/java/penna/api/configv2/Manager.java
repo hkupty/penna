@@ -16,15 +16,32 @@ import java.util.function.Supplier;
  * from outside third-parties.
  */
 public sealed interface Manager {
+    /**
+     * This is where the concrete implementation of a {@link Manager} will be created and stored
+     */
     class Factory {
+        private Factory() {}
+
         private static final ServiceLoader<Provider> loader = ServiceLoader.load(Provider.class);
         private static ManagerImpl instance;
 
+        /**
+         * Returns a concrete implementation of {@link Manager} once and if it's created, otherwise fails with an
+         * exception.
+         *
+         * @return a concrete implementation of {@link Manager}.
+         */
         public static ManagerImpl getInstance() {
             if (instance == null) throw new RuntimeException("ManagerImpl instance has not been initialized yet!");
             return instance;
         }
 
+        /**
+         * Used to initialize the {@link Manager} for a given {@link Storage} implementation.
+         *
+         * @param storage The concrete {@link Storage} implementation that will effectively store the configuration.
+         * @return the initialized concrete {@link Manager} instance.
+         */
         public static ManagerImpl initialize(Storage storage) {
             if (instance != null) throw new RuntimeException("ManagerImpl instance has already been initialized!");
             loader.reload();
@@ -49,10 +66,28 @@ public sealed interface Manager {
         }
     }
 
+    /**
+     * Sets a number of configurations to the {@link Storage}
+     *
+     * @param configs a number of configuration items to update
+     */
     void set(ConfigToLogger... configs);
 
+    /**
+     * Sets a single configuration item to a particular logger path, wrapping in a {@link ConfigToLogger} concrete
+     * instance.
+     *
+     * @param logger The path of a logger. Use "" for the root.
+     * @param action A function that produces a {@link Config} element to be applied to the supplied logger.
+     */
     void set(String logger, Supplier<Config> action);
 
+    /**
+     * For a given logger path, it will produce a new configuration based on the previous one.
+     *
+     * @param logger The path of a logger. Use "" for the root.
+     * @param action A function that transforms a {@link Config} element into a new one to be applied for the supplied logger.
+     */
     void update(String logger, Function<Config, Config> action);
 
     /**
@@ -79,20 +114,26 @@ public sealed interface Manager {
 
         @Override
         public void set(String logger, Supplier<Config> action) {
-            storage.apply(new ConfigToLogger.NamedLoggerConfigItem(
-                    logger,
-                    action.get()
-            ));
+            Config config = action.get();
+            ConfigToLogger item = switch (logger) {
+                case String path when path.isEmpty() -> new ConfigToLogger.RootLoggerConfigItem(config);
+                case String path -> new ConfigToLogger.NamedLoggerConfigItem(path, config);
+            };
+
+            storage.apply(item);
         }
 
         @Override
         public void update(String logger, Function<Config, Config> action) {
             var current = storage.get(logger);
             if (current != null) {
-                storage.apply(new ConfigToLogger.NamedLoggerConfigItem(
-                        logger,
-                        action.apply(current)
-                ));
+                Config config = action.apply(current);
+                ConfigToLogger item = switch (logger) {
+                    case String path when path.isEmpty() -> new ConfigToLogger.RootLoggerConfigItem(config);
+                    case String path -> new ConfigToLogger.NamedLoggerConfigItem(path, config);
+                };
+
+                storage.apply(item);
             }
         }
 

@@ -7,10 +7,6 @@ import penna.api.config.Config;
  */
 public sealed interface ConfigToLogger {
 
-    String logger();
-
-    Config config();
-
     /**
      * Applies the configuration to a specific logger or to a partial name for all the descendant
      * loggers in that hierarchy.
@@ -25,10 +21,5 @@ public sealed interface ConfigToLogger {
      *
      * @param config The configuration object to be applied
      */
-    record RootLoggerConfigItem(Config config) implements ConfigToLogger {
-        @Override
-        public String logger() {
-            return "";
-        }
-    }
+    record RootLoggerConfigItem(Config config) implements ConfigToLogger {}
 }

@@ -18,6 +18,11 @@ public final class PennaLoggerFactory implements ILoggerFactory, Configurable, S
         return singleton;
     }
 
+    private PennaLoggerFactory() {
+        cache = new LoggerStorage();
+    }
+
+    // Config Interface
     @Override
     public void configure(ConfigManager.ConfigItem... configItems) {
         for (ConfigManager.ConfigItem configItem : configItems) {
@@ -25,19 +30,20 @@ public final class PennaLoggerFactory implements ILoggerFactory, Configurable, S
         }
     }
 
-    private PennaLoggerFactory() {
-        cache = new LoggerStorage();
-    }
-
     @Override
     public Logger getLogger(String name) {
         return cache.getOrCreate(name);
     }
 
+    // Config V2 interface
     @Override
     public void apply(ConfigToLogger... configs) {
         for (var config : configs) {
-            cache.replaceConfig(config.logger(), config.config());
+            switch (config) {
+                case ConfigToLogger.RootLoggerConfigItem root -> cache.replaceConfig(root.config());
+                case ConfigToLogger.NamedLoggerConfigItem named -> cache.replaceConfig(named.logger(), named.config());
+            }
+
         }
     }
 

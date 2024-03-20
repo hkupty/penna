@@ -42,6 +42,8 @@ public interface ConfigManager {
          * The string that represents the path/prefix for a configuration to be applied. Can point to a full logger name
          * or just a portion of the name for the configuration to be hierarchically applied to all loggers matching the
          * prefix.
+         *
+         * @return Should return the path of a logger
          */
         String loggerPath();
 
