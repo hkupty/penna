@@ -8,11 +8,25 @@ the PATCH component is omitted when its value is `0`.
 
 ## Unreleased
 
+### `penna-api`
+
+#### Changed
+
+- Replace configuration interfaces([#89](https://github.com/hkupty/penna/pull/89))
+
+
 ### `penna-core`
 
 #### Changed
 
 - Replace internal MDC storage implementation([#83](https://github.com/hkupty/penna/pull/83))
+- Remove ad-hoc configuration mechanism([#89](https://github.com/hkupty/penna/pull/89))
+
+### `penna-yaml-config`
+
+#### Changed
+
+- Restructure configuration; implement new interface([#89](https://github.com/hkupty/penna/pull/89))
 
 ## 0.7.2
 
