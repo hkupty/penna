@@ -179,7 +179,7 @@ public final class CoreSink implements Sink, Closeable {
         }
     }
 
-    private void writeMap(LogConfig config, final Map map) throws IOException {
+    private void writeMap(LogConfig config, final Map<?,?> map) throws IOException {
         jsonGenerator.checkSpace(4);
         jsonGenerator.openObject();
         for (var key : map.keySet()) {
@@ -194,7 +194,7 @@ public final class CoreSink implements Sink, Closeable {
         jsonGenerator.writeSep();
     }
 
-    private void writeArray(LogConfig config, final List lst) throws IOException {
+    private void writeArray(LogConfig config, final List<?> lst) throws IOException {
         jsonGenerator.openArray();
         for (Object o : lst) {
             writeObject(config, o);
@@ -214,35 +214,44 @@ public final class CoreSink implements Sink, Closeable {
     }
 
     private void writeObject(LogConfig config, final Object object) throws IOException {
-        if (object instanceof Throwable throwable) {
-            config.filter.reset();
-            writeThrowable(throwable, config, 0);
-        } else if (object instanceof Map map) {
-            writeMap(config, map);
-        } else if (object instanceof List lst) {
-            writeArray(config, lst);
-        } else if (object instanceof Object[] lst) {
-            writeArray(config, lst);
-        } else if (object instanceof String str) {
-            jsonGenerator.checkSpace(str.length());
-            jsonGenerator.writeString(str);
-        } else if (object instanceof Long num) {
-            // Long.MIN_SIZE will yield 20 chars
-            jsonGenerator.checkSpace(20);
-            jsonGenerator.writeNumber(num);
-        } else if (object instanceof Integer num) {
-            jsonGenerator.checkSpace(11);
-            jsonGenerator.writeNumber(num);
-        } else if (object instanceof Float num) {
-            jsonGenerator.checkSpace(32);
-            jsonGenerator.writeNumber(num);
-        } else if (object instanceof Double num) {
-            jsonGenerator.checkSpace(64);
-            jsonGenerator.writeNumber(num);
-        } else {
-            var str = object.toString();
-            jsonGenerator.checkSpace(str.length());
-            jsonGenerator.writeString(str);
+
+        switch (object) {
+            case Throwable throwable -> {
+                config.filter.reset();
+                writeThrowable(throwable, config, 0);
+            }
+            case Map<?, ?> map -> writeMap(config, map);
+            case List<?> lst -> writeArray(config, lst);
+            case Object[] lst -> writeArray(config, lst);
+            case String str -> {
+                jsonGenerator.checkSpace(str.length());
+                jsonGenerator.writeString(str);
+            }
+            case Long num -> {
+                // Long.MIN_SIZE will yield 20 chars
+                jsonGenerator.checkSpace(20);
+                jsonGenerator.writeNumber(num);
+            }
+            case Integer num -> {
+                jsonGenerator.checkSpace(11);
+                jsonGenerator.writeNumber(num);
+            }
+            case Float num -> {
+                jsonGenerator.checkSpace(32);
+                jsonGenerator.writeNumber(num);
+            }
+            case Double num -> {
+                jsonGenerator.checkSpace(64);
+                jsonGenerator.writeNumber(num);
+            }
+            case null -> {
+                jsonGenerator.writeNull();
+            }
+            default -> {
+                var str = object.toString();
+                jsonGenerator.checkSpace(str.length());
+                jsonGenerator.writeString(str);
+            }
         }
     }
 

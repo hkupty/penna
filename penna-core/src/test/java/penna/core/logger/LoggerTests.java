@@ -7,10 +7,10 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.MDC;
 import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
+import penna.core.internals.TestContextPoolManager;
 import penna.core.logger.guard.InfoLevelGuard;
 import penna.core.sink.CoreSink;
 import penna.core.sink.Sink;
-import penna.core.sink.SinkManager;
 import penna.core.sink.TestSink;
 
 import java.io.File;
@@ -50,7 +50,7 @@ class LoggerTests {
         AtomicInteger counter = new AtomicInteger(0);
         Sink checker = new TestSink(mle -> counter.getAndIncrement());
 
-        SinkManager.Instance.replace(() -> checker);
+        TestContextPoolManager.replace(() -> checker);
 
         PennaLogger pennaLogger = cache.getOrCreate("test");
 
@@ -85,7 +85,7 @@ class LoggerTests {
             }
         });
 
-        SinkManager.Instance.replace(() -> checker);
+        TestContextPoolManager.replace(() -> checker);
 
         PennaLogger pennaLogger = cache.getOrCreate("test");
         Assertions.assertEquals(InfoLevelGuard.singleton(), pennaLogger.levelGuard);
@@ -110,7 +110,7 @@ class LoggerTests {
         File testFile = File.createTempFile("valid-message", ".json");
         FileOutputStream fos = new FileOutputStream(testFile);
 
-        SinkManager.Instance.replace(() -> new CoreSink(fos));
+        TestContextPoolManager.replace(() -> new CoreSink(fos));
 
         MDC.put("key", "value");
         logger.atInfo()

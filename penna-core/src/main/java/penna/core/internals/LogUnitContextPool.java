@@ -1,11 +1,14 @@
 package penna.core.internals;
 
+import org.jetbrains.annotations.VisibleForTesting;
 import penna.core.logger.LogUnitContext;
 import penna.core.models.PennaLogEvent;
-import penna.core.sink.SinkManager;
+import penna.core.sink.CoreSink;
+import penna.core.sink.Sink;
 
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Supplier;
 
 /**
  * This Object Pool ensures each thread will have access to a single pooled {@link LogUnitContext},
@@ -26,7 +29,7 @@ public final class LogUnitContextPool {
     private final LogUnitContext[] objectGroup;
 
     private LogUnitContext leafObject(int index) {
-        return new LogUnitContext(this, index, SinkManager.Instance.get(), new PennaLogEvent());
+        return new LogUnitContext(this, index, CoreSink.getSink(), new PennaLogEvent());
     }
 
     public LogUnitContextPool() {
@@ -36,6 +39,13 @@ public final class LogUnitContextPool {
         for (int i = 0; i < size; i++) {
             objectGroup[i] = leafObject(i);
             locks[i] = new ReentrantLock();
+        }
+    }
+
+    @VisibleForTesting
+    void refillThePool(Supplier<Sink> sinkSupplier) {
+        for (int i = 0; i < objectGroup.length; i++) {
+            objectGroup[i] = new LogUnitContext(this, i, sinkSupplier.get(), objectGroup[i].logEvent());
         }
     }
 

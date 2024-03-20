@@ -8,11 +8,11 @@ import org.slf4j.MarkerFactory;
 import org.slf4j.event.Level;
 import penna.api.config.Config;
 import penna.api.models.LogField;
+import penna.core.internals.TestContextPoolManager;
 import penna.core.models.KeyValuePair;
 import penna.core.models.LogConfig;
 import penna.core.models.PennaLogEvent;
 import penna.core.sink.CoreSink;
-import penna.core.sink.SinkManager;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -154,7 +154,7 @@ class CoreSinkTests {
         File testFile = File.createTempFile("valid-message", ".json");
         FileOutputStream fos = new FileOutputStream(testFile);
 
-        SinkManager.Instance.replace(() -> new CoreSink(fos));
+        TestContextPoolManager.replace(() -> new CoreSink(fos));
 
         Config config = Config.getDefault().replaceFields(fields);
         LoggerStorage cache = new LoggerStorage();
@@ -184,7 +184,7 @@ class CoreSinkTests {
         File testFile = File.createTempFile("valid-message", ".json");
         FileOutputStream fos = new FileOutputStream(testFile);
 
-        SinkManager.Instance.replace(() -> new CoreSink(fos));
+        TestContextPoolManager.replace(() -> new CoreSink(fos));
 
         Config config = Config.getDefault().replaceFields(fields);
         LoggerStorage cache = new LoggerStorage();
