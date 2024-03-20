@@ -1,4 +1,4 @@
-import penna.api.configv2.Provider;
+import penna.api.config.Provider;
 
 /**
  * Penna API is a thin set of classes and records that are common-ground between the {@code penna.core} project
@@ -13,5 +13,4 @@ module penna.api {
 
     exports penna.api.models;
     exports penna.api.config;
-    exports penna.api.configv2;
 }

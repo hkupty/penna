@@ -1,6 +1,4 @@
-package penna.api.configv2;
-
-import penna.api.config.Config;
+package penna.api.config;
 
 /**
  * A Config Storage defines a class that stores the configurations for all logs in the hierarchy.

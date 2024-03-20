@@ -1,4 +1,4 @@
-package penna.api.configv2;
+package penna.api.config;
 
 /**
  * This interface allows for additional configuration providers to interact with the logger setup.
