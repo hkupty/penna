@@ -3,6 +3,7 @@ slf4j = "2.0.12"
 jackson = "2.17.0"
 jqwik = "1.8.4"
 junit = "5.10.2"
+junit-pioneer = "2.2.0"
 jmh = "1.37"
 jbrAnn = "24.1.0"
 snakeyaml = "2.2"
@@ -24,6 +25,7 @@ snakeyaml-engine = { module = "org.snakeyaml:snakeyaml-engine", version.ref = "s
 jqwik = { module = "net.jqwik:jqwik", version.ref = "jqwik" }
 junit-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit" }
 junit-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit" }
+junit-pioneer = { module = "org.junit-pioneer:junit-pioneer", version.ref = "junit-pioneer" }
 
 commons-math = { module = "org.apache.commons:commons-math3", version.prefer = "3.6.1" }
 commons-lang = { module = "org.apache.commons:commons-lang3", version.prefer = "3.13.0" }

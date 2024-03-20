@@ -53,6 +53,7 @@ dependencies {
 
     // Tests
     testImplementation libs.junit.api
+    testImplementation libs.junit.pioneer
     testRuntimeOnly libs.junit.engine
     testRuntimeOnly libs.jackson.core
     testRuntimeOnly libs.jackson.databind
