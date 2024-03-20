@@ -1,5 +1,6 @@
 package penna.core.internals.store;
 
+import java.io.Serial;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -12,6 +13,9 @@ import java.util.TreeMap;
  * which is our goal.
  */
 public final class StringTreeMap extends TreeMap<String, String> implements StringMap {
+
+    @Serial
+    private static final long serialVersionUID = 23827L;
 
     public StringTreeMap() {
         super();
