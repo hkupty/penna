@@ -59,7 +59,7 @@ testing {
                 implementation libs.jackson.databind
                 implementation libs.commons.lang
                 implementation libs.jmh.core
-                implementation 'ch.qos.logback:logback-core:1.4.11'
+                implementation 'ch.qos.logback:logback-core:1.5.3'
                 implementation 'ch.qos.logback:logback-classic:1.5.3'
                 implementation 'ch.qos.logback.contrib:logback-jackson:0.1.5'
                 implementation 'ch.qos.logback.contrib:logback-json-core:0.1.5'
