@@ -2,7 +2,7 @@ plugins {
     id 'penna.base-java'
     id 'penna.publishing'
     id 'pmd'
-    id("org.gradlex.extra-java-module-info") version "1.4.2"
+    id("org.gradlex.extra-java-module-info") version "1.8"
 }
 
 group 'com.hkupty.penna'
