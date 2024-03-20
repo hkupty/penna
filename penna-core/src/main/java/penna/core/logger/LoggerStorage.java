@@ -60,12 +60,12 @@ public class LoggerStorage {
         public final Lock lock = new ReentrantLock();
 
 
-        void setConfigAndUpdateRecursively(Config baseConfig) {
+        void setConfigAndUpdateRecursively(@NotNull Config baseConfig) {
             lock.lock();
             try {
                 configRef = baseConfig;
 
-                if (loggerRef != null && baseConfig != null) {
+                if (loggerRef != null) {
                     loggerRef.updateConfig(baseConfig);
                 }
             } finally {
@@ -74,14 +74,18 @@ public class LoggerStorage {
             if (children[1] != null) {children[1].updateRecursively(baseConfig);}
         }
 
-        void updateRecursively(Config baseConfig) {
+        void updateRecursively(@NotNull Config baseConfig) {
             lock.lock();
             try {
                 if (configRef != null) {
+                    // TODO: This might be a little problematic. Needs to be investigated further
+                    //  A Configuration object might need a stamp so we can differentiate
+                    //  a valid replacement (i.e. a newer version is updating old data) from an
+                    //  invalid one.
                     configRef = baseConfig;
                 }
 
-                if (loggerRef != null && baseConfig != null) {
+                if (loggerRef != null) {
                     loggerRef.updateConfig(baseConfig);
                 }
             } finally {
@@ -184,12 +188,6 @@ public class LoggerStorage {
     }
 
     public void replaceConfig(@NotNull Config newConfig) {
-        root.lock.lock();
-        try {
-            root.configRef = newConfig;
-        } finally {
-            root.lock.unlock();
-        }
         root.updateRecursively(newConfig);
     }
 }
