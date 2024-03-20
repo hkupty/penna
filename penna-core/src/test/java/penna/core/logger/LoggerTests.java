@@ -7,8 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.MDC;
 import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
-import org.slf4j.event.Level;
-import penna.core.logger.guard.*;
+import penna.core.logger.guard.InfoLevelGuard;
 import penna.core.sink.CoreSink;
 import penna.core.sink.Sink;
 import penna.core.sink.SinkManager;
@@ -44,34 +43,6 @@ class LoggerTests {
     }
 
     private static final ObjectMapper om = new ObjectMapper();
-
-    @Test
-    void log_levels_are_respected() {
-        var cache = new LoggerStorage();
-        PennaLogger pennaLogger = cache.getOrCreate("test");
-        String ref = "test";
-
-
-        // Trace
-        cache.updateConfig(ref, config -> config.replaceLevel(Level.TRACE));
-        Assertions.assertEquals(TraceLevelGuard.singleton(), pennaLogger.levelGuard);
-
-        // Debug
-        cache.updateConfig(ref, config -> config.replaceLevel(Level.DEBUG));
-        Assertions.assertEquals(DebugLevelGuard.singleton(), pennaLogger.levelGuard);
-
-        // Info
-        cache.updateConfig(ref, config -> config.replaceLevel(Level.INFO));
-        Assertions.assertEquals(InfoLevelGuard.singleton(), pennaLogger.levelGuard);
-
-        // Warn
-        cache.updateConfig(ref, config -> config.replaceLevel(Level.WARN));
-        Assertions.assertEquals(WarnLevelGuard.singleton(), pennaLogger.levelGuard);
-
-        // Error
-        cache.updateConfig(ref, config -> config.replaceLevel(Level.ERROR));
-        Assertions.assertEquals(ErrorLevelGuard.singleton(), pennaLogger.levelGuard);
-    }
 
     @Test
     void can_write_log_messages() {
@@ -165,7 +136,7 @@ class LoggerTests {
         Assertions.assertEquals("kvp", logMessage.data().get("key"));
         Assertions.assertEquals("value", logMessage.mdc().get("key"));
         Assertions.assertEquals(1, logMessage.tags().size());
-        Assertions.assertEquals("marker", logMessage.tags().get(0));
+        Assertions.assertEquals("marker", logMessage.tags().getFirst());
         Assertions.assertEquals("java.lang.RuntimeException", logMessage.throwable().throwable());
         Assertions.assertEquals("exception", logMessage.throwable().message());
 

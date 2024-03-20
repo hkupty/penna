@@ -126,7 +126,7 @@ public class LoggerStorageTests {
         assertEquals(defaults.level(), logger4.levelGuard.level());
         assertEquals(defaults.level(), logger5.levelGuard.level());
 
-        cache.updateConfig("com.for.testing", config -> config.replaceLevel(Level.DEBUG));
+        cache.replaceConfig("com.for.testing", defaults.replaceLevel(Level.DEBUG));
 
         assertEquals(Level.DEBUG, logger2.levelGuard.level());
         assertEquals(Level.DEBUG, logger1.levelGuard.level());
@@ -134,14 +134,14 @@ public class LoggerStorageTests {
         assertEquals(defaults.level(), logger4.levelGuard.level());
         assertEquals(defaults.level(), logger5.levelGuard.level());
 
-        cache.updateConfig("com.for.unrelated", config -> config.replaceLevel(Level.WARN));
+        cache.replaceConfig("com.for.unrelated", defaults.replaceLevel(Level.WARN));
 
         assertEquals(Level.DEBUG, logger2.levelGuard.level());
         assertEquals(Level.DEBUG, logger1.levelGuard.level());
         assertEquals(Level.WARN, logger3.levelGuard.level());
         assertEquals(defaults.level(), logger4.levelGuard.level());
         assertEquals(defaults.level(), logger5.levelGuard.level());
-        cache.updateConfig("com.for", config -> config.replaceLevel(Level.TRACE));
+        cache.replaceConfig("com.for", defaults.replaceLevel(Level.TRACE));
 
         assertEquals(Level.TRACE, logger2.levelGuard.level());
         assertEquals(Level.TRACE, logger1.levelGuard.level());
@@ -149,7 +149,7 @@ public class LoggerStorageTests {
         assertEquals(defaults.level(), logger4.levelGuard.level());
         assertEquals(defaults.level(), logger5.levelGuard.level());
 
-        cache.updateConfig("io", config -> config.replaceLevel(Level.ERROR));
+        cache.replaceConfig("io", defaults.replaceLevel(Level.ERROR));
 
         assertEquals(Level.TRACE, logger2.levelGuard.level());
         assertEquals(Level.TRACE, logger1.levelGuard.level());

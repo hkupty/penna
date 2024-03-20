@@ -52,7 +52,7 @@ testing {
 
             dependencies {
                 implementation project(":penna-api")
-                implementation project(":penna-core")
+                implementation project()
                 implementation libs.slf4j
                 implementation libs.jqwik
                 implementation libs.commons.math
@@ -65,37 +65,6 @@ testing {
                 all {
                     testTask.configure {
                         shouldRunAfter(test)
-                    }
-                }
-            }
-        }
-
-        jmh(JvmTestSuite) {
-            testType = TestSuiteType.PERFORMANCE_TEST
-            dependencies {
-                implementation project(":penna-api")
-                implementation project(":penna-core")
-                implementation libs.slf4j
-
-                implementation libs.jackson.core
-                implementation libs.jackson.databind
-                implementation libs.commons.lang
-                implementation libs.jmh.core
-                implementation 'ch.qos.logback:logback-core:1.5.3'
-                implementation 'ch.qos.logback:logback-classic:1.5.3'
-                implementation 'ch.qos.logback.contrib:logback-jackson:0.1.5'
-                implementation 'ch.qos.logback.contrib:logback-json-core:0.1.5'
-                implementation 'ch.qos.logback.contrib:logback-json-classic:0.1.5'
-                implementation 'net.logstash.logback:logstash-logback-encoder:7.4'
-
-                annotationProcessor libs.jmh.annotations
-            }
-
-            targets {
-                all {
-                    testTask.configure {
-                        shouldRunAfter(test)
-                        shouldRunAfter(propertyTesting)
                     }
                 }
             }

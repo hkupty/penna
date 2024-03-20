@@ -2,9 +2,6 @@ package penna.api.configv2;
 
 import penna.api.config.Config;
 
-import java.io.Closeable;
-import java.io.IOException;
-import java.util.List;
 import java.util.Objects;
 import java.util.ServiceLoader;
 import java.util.function.Function;
@@ -26,13 +23,11 @@ public sealed interface Manager {
         private static ManagerImpl instance;
 
         /**
-         * Returns a concrete implementation of {@link Manager} once and if it's created, otherwise fails with an
-         * exception.
+         * Returns a singleton instance of {@link Manager} once and if it's created, returning null otherwise.
          *
-         * @return a concrete implementation of {@link Manager}.
+         * @return a concrete implementation of {@link Manager} or null.
          */
         public static ManagerImpl getInstance() {
-            if (instance == null) throw new RuntimeException("ManagerImpl instance has not been initialized yet!");
             return instance;
         }
 
@@ -40,10 +35,11 @@ public sealed interface Manager {
          * Used to initialize the {@link Manager} for a given {@link Storage} implementation.
          *
          * @param storage The concrete {@link Storage} implementation that will effectively store the configuration.
-         * @return the initialized concrete {@link Manager} instance.
          */
-        public static ManagerImpl initialize(Storage storage) {
-            if (instance != null) throw new RuntimeException("ManagerImpl instance has already been initialized!");
+        public static void initialize(Storage storage) {
+            // Doesn't re-initializes;
+            if (instance != null) return;
+
             loader.reload();
             instance = new ManagerImpl(storage);
             var providers = loader.stream()
@@ -58,11 +54,7 @@ public sealed interface Manager {
                     .filter(provider -> provider.register(instance))
                     .toList();
 
-            instance.attachProviders(providers);
-
             providers.forEach(Provider::init);
-
-            return instance;
         }
     }
 
@@ -95,16 +87,11 @@ public sealed interface Manager {
      * It should not be created manually, but instead through {@link Factory#initialize(Storage)} and subsequent
      * instance requests fetched through {@link Factory#getInstance()}.
      */
-    final class ManagerImpl implements Manager, Closeable {
+    final class ManagerImpl implements Manager {
         private final Storage storage;
-        private List<Provider> providers;
 
         ManagerImpl(Storage storage) {
             this.storage = storage;
-        }
-
-        void attachProviders(List<Provider> providers) {
-            this.providers = providers;
         }
 
         @Override
@@ -135,11 +122,6 @@ public sealed interface Manager {
 
                 storage.apply(item);
             }
-        }
-
-        @Override
-        public void close() throws IOException {
-            providers.forEach(Provider::deregister);
         }
     }
 }

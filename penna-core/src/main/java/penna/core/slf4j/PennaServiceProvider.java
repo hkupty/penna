@@ -54,11 +54,8 @@ public final class PennaServiceProvider implements SLF4JServiceProvider {
     @Override
     public void initialize() {
         getOverridingSink().ifPresent(nonStandardSinkProvider -> SinkManager.Instance.replace(nonStandardSinkProvider::get));
-//        ConfigManager manager = ConfigManagerFactory.getConfigManager();
         PennaLoggerFactory pennaLoggerFactory = PennaLoggerFactory.getInstance();
-        var configManager = Manager.Factory.initialize(pennaLoggerFactory);
-//        manager.bind(pennaLoggerFactory);
-//        manager.configure();
+        Manager.Factory.initialize(pennaLoggerFactory);
 
         this.loggerFactory = pennaLoggerFactory;
         markerFactory = new BasicMarkerFactory();

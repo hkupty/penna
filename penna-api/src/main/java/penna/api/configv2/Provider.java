@@ -21,16 +21,6 @@ public interface Provider {
     boolean register(Manager manager);
 
     /**
-     * This method should be called when and if the {@link Manager} is closed,
-     * allowing the provider to perform any clean-up activity.
-     * <br />
-     * As the instance was likely initiated by {@link Manager.Factory} upon creation,
-     * this is a chance to close any threads created at register/startup or release any
-     * pending resources.
-     */
-    void deregister();
-
-    /**
      * After all the providers are registered, the {@link Manager} will then call init for each Provider,
      * so they can load their initial configuration to the Manager.
      */

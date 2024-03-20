@@ -1,10 +1,8 @@
 package penna.core.logger;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
 import penna.api.config.Config;
-import penna.api.config.ConfigManager;
 import penna.core.internals.StringNavigator;
 
 import java.util.concurrent.locks.Lock;
@@ -62,7 +60,7 @@ public class LoggerStorage {
         public final Lock lock = new ReentrantLock();
 
 
-        void setConfigAndUpdateRecursively(Config baseConfig, @Nullable ConfigManager.ConfigurationChange updateFn) {
+        void setConfigAndUpdateRecursively(Config baseConfig) {
             lock.lock();
             try {
                 configRef = baseConfig;
@@ -73,29 +71,25 @@ public class LoggerStorage {
             } finally {
                 lock.unlock();
             }
-            if (children[1] != null) {children[1].updateRecursively(baseConfig, updateFn);}
+            if (children[1] != null) {children[1].updateRecursively(baseConfig);}
         }
 
-        void updateRecursively(Config baseConfig, @Nullable ConfigManager.ConfigurationChange updateFn) {
-            Config newConfig = baseConfig;
+        void updateRecursively(Config baseConfig) {
             lock.lock();
             try {
                 if (configRef != null) {
-                    if (updateFn != null) {
-                        newConfig = updateFn.apply(configRef);
-                    }
-                    configRef = newConfig;
+                    configRef = baseConfig;
                 }
 
-                if (loggerRef != null && newConfig != null) {
-                    loggerRef.updateConfig(newConfig);
+                if (loggerRef != null && baseConfig != null) {
+                    loggerRef.updateConfig(baseConfig);
                 }
             } finally {
                 lock.unlock();
             }
-            if (children[0] != null) {children[0].updateRecursively(newConfig, updateFn);}
-            if (children[1] != null) {children[1].updateRecursively(newConfig, updateFn);}
-            if (children[2] != null) {children[2].updateRecursively(newConfig, updateFn);}
+            if (children[0] != null) {children[0].updateRecursively(baseConfig);}
+            if (children[1] != null) {children[1].updateRecursively(baseConfig);}
+            if (children[2] != null) {children[2].updateRecursively(baseConfig);}
         }
     }
 
@@ -169,7 +163,7 @@ public class LoggerStorage {
             } while ((nodeIndex = view.indexCompare(cursor.component)) != 1);
         }
 
-        cursor.setConfigAndUpdateRecursively(newConfig, null);
+        cursor.setConfigAndUpdateRecursively(newConfig);
     }
 
     public Config getConfig(@NotNull String prefix) {
@@ -189,26 +183,6 @@ public class LoggerStorage {
         return null;
     }
 
-    public void updateConfig(@NotNull String prefix,
-                             @NotNull ConfigManager.ConfigurationChange configUpdateFn) {
-        var path = new StringNavigator(prefix);
-        var cursor = root;
-        Config config = root.configRef;
-        int nodeIndex = 2; // Anything will be greater than ""
-        while (cursor != null && path.hasNext()) {
-            StringNavigator.StringView view = path.next();
-            do {
-                cursor = cursor.children[nodeIndex];
-            } while (cursor != null && (nodeIndex = view.indexCompare(cursor.component)) != 1);
-            if (cursor != null && cursor.configRef != null) {
-                config = cursor.configRef;
-            }
-        }
-        if (cursor != null) {
-            cursor.setConfigAndUpdateRecursively(configUpdateFn.apply(config), configUpdateFn);
-        }
-    }
-
     public void replaceConfig(@NotNull Config newConfig) {
         root.lock.lock();
         try {
@@ -216,7 +190,6 @@ public class LoggerStorage {
         } finally {
             root.lock.unlock();
         }
-        root.updateRecursively(newConfig, null);
+        root.updateRecursively(newConfig);
     }
-
 }

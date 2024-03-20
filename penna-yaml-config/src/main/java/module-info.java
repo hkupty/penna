@@ -1,4 +1,3 @@
-import penna.config.yaml.YamlConfigManager;
 import penna.config.yaml.YamlConfigProvider;
 
 module penna.config.yaml {
@@ -12,8 +11,9 @@ module penna.config.yaml {
 
     // (Optional) support for Snakeyaml
     requires static org.yaml.snakeyaml;
+
+    // (Optional) support for Snakeyaml Engine
     requires static org.snakeyaml.engine.v2;
 
-    provides penna.api.config.ConfigManager with YamlConfigManager;
     provides penna.api.configv2.Provider with YamlConfigProvider;
 }

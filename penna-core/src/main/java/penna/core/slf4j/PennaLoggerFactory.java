@@ -3,14 +3,12 @@ package penna.core.slf4j;
 import org.slf4j.ILoggerFactory;
 import org.slf4j.Logger;
 import penna.api.config.Config;
-import penna.api.config.ConfigManager;
-import penna.api.config.Configurable;
 import penna.api.configv2.ConfigToLogger;
 import penna.api.configv2.Storage;
 import penna.core.logger.LoggerStorage;
 
 
-public final class PennaLoggerFactory implements ILoggerFactory, Configurable, Storage {
+public final class PennaLoggerFactory implements ILoggerFactory, Storage {
     private static final PennaLoggerFactory singleton = new PennaLoggerFactory();
     private transient final LoggerStorage cache;
 
@@ -20,14 +18,6 @@ public final class PennaLoggerFactory implements ILoggerFactory, Configurable, S
 
     private PennaLoggerFactory() {
         cache = new LoggerStorage();
-    }
-
-    // Config Interface
-    @Override
-    public void configure(ConfigManager.ConfigItem... configItems) {
-        for (ConfigManager.ConfigItem configItem : configItems) {
-            cache.updateConfig(configItem.loggerPath(), configItem.updateFn());
-        }
     }
 
     @Override
