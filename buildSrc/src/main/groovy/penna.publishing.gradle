@@ -1,5 +1,4 @@
 plugins {
-    id 'penna.base-java'
     id 'maven-publish'
     id 'signing'
 }

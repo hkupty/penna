@@ -21,17 +21,15 @@ java {
 }
 
 // Reproducible builds
-tasks.withType(AbstractArchiveTask) {
+tasks.withType(AbstractArchiveTask).configureEach {
     preserveFileTimestamps = false
     reproducibleFileOrder = true
 }
 
-tasks.withType(JavaCompile) {
+tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
     options.compilerArgs += [
-            "-Xlint:deprecation",
-            "-Xlint:removal",
-            "-Xlint:unchecked",
+            "-Xlint:all",
             // TODO Eventually we should enable -Werror here
             //"-Werror"
     ]

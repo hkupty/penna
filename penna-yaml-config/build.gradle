@@ -31,6 +31,7 @@ tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
     options.compilerArgs += [
             "-Xlint:all",
+            // "-Xdoclint:all/public",
             "-Werror"
     ]
 }
