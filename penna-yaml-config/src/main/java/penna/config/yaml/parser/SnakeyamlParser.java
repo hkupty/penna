@@ -81,12 +81,14 @@ public final class SnakeyamlParser implements Parser {
 
 
     @Override
+    @SuppressWarnings({"unchecked"})
     public ConfigMap readAndParse(Path file) throws IOException {
         var yaml = new Yaml();
         // <logger> -> <properties>
-        Map<String, Map<String, Map<String, Object>>> data = yaml.load(Files.newBufferedReader(file));
+        Map<String, Object> data = yaml.load(Files.newBufferedReader(file));
 
-        var loggerConfigs = data.get("config");
+        Boolean watch = (Boolean) data.get("watch");
+        Map<String, Map<String, Object>> loggerConfigs = (Map<String, Map<String, Object>>) data.get("config");
         var result = new HashMap<String, ConfigNode>();
 
         loggerConfigs.forEach((logger, config) -> {
@@ -98,6 +100,6 @@ public final class SnakeyamlParser implements Parser {
             } catch (IOException ignored) {}
         });
 
-        return new ConfigMap(Map.copyOf(result));
+        return new ConfigMap(Map.copyOf(result), watch);
     }
 }

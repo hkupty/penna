@@ -5,9 +5,10 @@ import penna.api.configv2.Provider;
 import penna.config.yaml.parser.Parser;
 
 import java.io.IOException;
-import java.nio.file.Path;
+import java.nio.file.*;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Implementation of the {@link Provider} interface that extends the {@link Manager}
@@ -17,6 +18,8 @@ public class YamlConfigProvider implements Provider {
     private transient Path configPath;
     private transient Manager manager;
     private transient final Parser parser;
+    private transient final AtomicBoolean keepRunning = new AtomicBoolean(true);
+
 
     private static final List<String> TARGET_FILES = List.of(
             "penna-test.yaml",
@@ -50,14 +53,36 @@ public class YamlConfigProvider implements Provider {
             this.configPath = Path.of(maybeFile.get().toURI());
             this.manager = manager;
 
-            refresh();
-
-            // TODO add file watcher
+            var configMap = parser.readAndParse(this.configPath);
+            if (configMap.watch()) {
+                startWorker();
+            }
 
             return true;
         } catch (Exception ex) {
             return false;
         }
+    }
+
+    private void startWorker() {
+        var worker = new Thread(() -> {
+            try (WatchService watchService = FileSystems.getDefault().newWatchService()) {
+                var target = configPath.getFileName();
+                configPath.getParent().register(watchService, StandardWatchEventKinds.ENTRY_MODIFY);
+
+                WatchKey key;
+                while (keepRunning.get() && (key = watchService.take()) != null) {
+                    for (WatchEvent<?> event : key.pollEvents()) {
+                        if (event.context().equals(target)) {
+                            refresh();
+                        }
+                    }
+                    key.reset();
+                }
+            } catch (Exception ignored) {}
+        });
+        worker.setDaemon(true);
+        worker.start();
     }
 
     /**
@@ -77,5 +102,15 @@ public class YamlConfigProvider implements Provider {
 
     @Override
     public void deregister() {
+        keepRunning.set(false);
+    }
+
+    @Override
+    public void init() {
+        try {
+            refresh();
+        } catch (Exception ignored) {
+            // TODO log
+        }
     }
 }

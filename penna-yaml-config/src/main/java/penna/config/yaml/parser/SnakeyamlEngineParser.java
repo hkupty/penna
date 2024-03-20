@@ -85,9 +85,10 @@ public class SnakeyamlEngineParser implements Parser {
     @SuppressWarnings({"unchecked"})
     public ConfigMap readAndParse(Path file) throws IOException {
         var loader = new Load(LoadSettings.builder().build());
-        Map<String, Map<String, Map<String, Object>>> data = (Map<String, Map<String, Map<String, Object>>>) loader.loadFromReader(Files.newBufferedReader(file));
+        Map<String, Object> data = (Map<String, Object>) loader.loadFromReader(Files.newBufferedReader(file));
 
-        var loggerConfigs = data.get("config");
+        Boolean watch = (Boolean) data.get("watch");
+        Map<String, Map<String, Object>> loggerConfigs = (Map<String, Map<String, Object>>) data.get("config");
         var result = new HashMap<String, ConfigNode>();
 
         loggerConfigs.forEach((logger, config) -> {
@@ -99,6 +100,6 @@ public class SnakeyamlEngineParser implements Parser {
             } catch (IOException ignored) {}
         });
 
-        return new ConfigMap(Map.copyOf(result));
+        return new ConfigMap(Map.copyOf(result), watch);
     }
 }

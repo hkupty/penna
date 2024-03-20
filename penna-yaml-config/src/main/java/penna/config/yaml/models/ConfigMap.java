@@ -2,4 +2,4 @@ package penna.config.yaml.models;
 
 import java.util.Map;
 
-public record ConfigMap(Map<String, ConfigNode> config) {}
+public record ConfigMap(Map<String, ConfigNode> config, Boolean watch) {}

@@ -81,6 +81,7 @@ public final class JacksonParser implements Parser {
     @VisibleForTesting
     ConfigMap readConfig(JsonNode root) {
         var configNodes = new HashMap<String, ConfigNode>();
+        var watch = root.get("watch").asBoolean();
         var cfg = root.get("config");
         var iterator = cfg.fields();
         while (iterator.hasNext()) {
@@ -92,7 +93,7 @@ public final class JacksonParser implements Parser {
                 continue;
             }
         }
-        return new ConfigMap(Map.copyOf(configNodes));
+        return new ConfigMap(Map.copyOf(configNodes), watch);
     }
 
     @Override
