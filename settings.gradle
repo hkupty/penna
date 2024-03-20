@@ -14,7 +14,6 @@ rootProject.name = 'penna'
 include "penna-api"
 include "penna-core"
 // include "penna-perf"
-include "penna-dev"
 include "penna-yaml-config"
-
+include 'sample'
 

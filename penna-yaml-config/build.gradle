@@ -1,5 +1,5 @@
 plugins {
-    id 'penna.base-java'
+    id 'java-library'
     id 'penna.publishing'
     id 'pmd'
 }
@@ -15,21 +15,54 @@ repositories {
     mavenCentral()
 }
 
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+// Reproducible builds
+tasks.withType(AbstractArchiveTask) {
+    preserveFileTimestamps = false
+    reproducibleFileOrder = true
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+    options.compilerArgs += [
+            "-Xlint:all",
+            // "-Xdoclint:all/public",
+            "-Werror"
+    ]
+}
+
 dependencies {
     implementation project(":penna-api")
     implementation project(":penna-core")
     implementation libs.slf4j
+
+    // (optional) Jackson support
     compileOnly libs.jackson.core
     compileOnly libs.jackson.databind
     compileOnly libs.jackson.yaml
     compileOnly libs.jetbrains.annotations
 
+    // (optional) SnakeYaml support
+    compileOnly libs.snakeyaml.plain
+    compileOnly libs.snakeyaml.engine
+
     // Tests
     testImplementation libs.junit.api
+    testImplementation libs.junit.pioneer
     testRuntimeOnly libs.junit.engine
     testRuntimeOnly libs.jackson.core
     testRuntimeOnly libs.jackson.databind
     testRuntimeOnly libs.jackson.yaml
+    testRuntimeOnly libs.snakeyaml.engine
+
+    testImplementation libs.jackson.core
+    testImplementation libs.jackson.databind
+    testImplementation libs.jackson.yaml
 }
 
 test {

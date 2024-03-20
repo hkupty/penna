@@ -1,0 +1,8 @@
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+---
+version: "3"
+
+tasks:
+  check:
+    desc: "Runs all the checks in the source code, running tests and static analysis"
+    cmd: ./gradlew check

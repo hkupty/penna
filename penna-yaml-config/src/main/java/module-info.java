@@ -1,14 +1,19 @@
-import penna.config.yaml.YamlConfigManager;
+import penna.config.yaml.YamlConfigProvider;
 
 module penna.config.yaml {
     requires org.slf4j;
     requires transitive penna.api;
-
-    requires static com.fasterxml.jackson.databind;
-    requires static com.fasterxml.jackson.dataformat.yaml;
     requires penna.core;
 
-    provides penna.api.config.ConfigManager with YamlConfigManager;
+    // (Optional) support for Jackson
+    requires static com.fasterxml.jackson.databind;
+    requires static com.fasterxml.jackson.dataformat.yaml;
 
-    exports penna.config.yaml;
+    // (Optional) support for Snakeyaml
+    requires static org.yaml.snakeyaml;
+
+    // (Optional) support for Snakeyaml Engine
+    requires static org.snakeyaml.engine.v2;
+
+    provides penna.api.configv2.Provider with YamlConfigProvider;
 }

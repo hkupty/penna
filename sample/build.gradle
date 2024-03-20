@@ -1,0 +1,48 @@
+plugins {
+    id 'java'
+}
+
+group = 'org.example'
+version = '0.7.2'
+
+repositories {
+    mavenCentral()
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+// Reproducible builds
+tasks.withType(AbstractArchiveTask).configureEach {
+    preserveFileTimestamps = false
+    reproducibleFileOrder = true
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.compilerArgs += [
+            "-Xlint:deprecation",
+            "-Xlint:removal",
+            "-Xlint:unchecked",
+            // TODO Eventually we should enable -Werror here
+            //"-Werror"
+    ]
+}
+
+dependencies {
+    implementation libs.slf4j
+    runtimeOnly project(":penna-core")
+    runtimeOnly project(":penna-yaml-config")
+    runtimeOnly libs.jackson.core
+    runtimeOnly libs.jackson.databind
+    runtimeOnly libs.jackson.yaml
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+}
+
+test {
+    useJUnitPlatform()
+}

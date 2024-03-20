@@ -1,8 +1,5 @@
 # penna-yaml-config
 
-This is a very simple wrapper implementation of `penna.api.config.ConfigManager` that looks up for a `penna.yaml` file
-in your resources and applies the configuration from that file into penna.
-
 Given `penna` is designed for apps running in [kubernetes](https://kubernetes.io), we believe that yaml is a more
 natural configuration format than xml, so it should be convenient to set yaml files in k8s.
 
