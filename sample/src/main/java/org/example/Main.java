@@ -25,9 +25,7 @@ public class Main {
                     keepRunning.set(false);
                 }
             });
-            Thread.sleep(Duration.ofSeconds(2));
+            Thread.sleep(Duration.ofMillis(250));
         }
-
-
     }
 }
