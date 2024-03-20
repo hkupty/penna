@@ -1,4 +1,5 @@
 plugins {
+    id 'java-library'
     id 'penna.publishing'
     id 'pmd'
 }
@@ -29,11 +30,8 @@ tasks.withType(AbstractArchiveTask) {
 tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
     options.compilerArgs += [
-            "-Xlint:deprecation",
-            "-Xlint:removal",
-            "-Xlint:unchecked",
-            // TODO Eventually we should enable -Werror here
-            //"-Werror"
+            "-Xlint:all",
+            "-Werror"
     ]
 }
 

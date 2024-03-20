@@ -1,6 +1,7 @@
 import org.gradle.api.plugins.jvm.JvmTestSuite
 
 plugins {
+    id 'java-library'
     id 'penna.publishing'
     id 'signing'
     id 'pmd'

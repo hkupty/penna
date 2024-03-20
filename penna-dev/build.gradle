@@ -1,5 +1,5 @@
 plugins {
-    id 'penna.base-java'
+    id 'java-library'
     id 'penna.publishing'
     id 'pmd'
     id("org.gradlex.extra-java-module-info") version "1.8"
