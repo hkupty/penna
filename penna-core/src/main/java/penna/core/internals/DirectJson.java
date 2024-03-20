@@ -16,7 +16,7 @@ import java.nio.charset.StandardCharsets;
 public final class DirectJson implements Closeable {
     private static final int INITIAL_BUFFER_SIZE = 2 * 1024;
     private int highWatermark = (int) Math.ceil(INITIAL_BUFFER_SIZE * 0.8);
-    private static final byte[] LINE_BREAK = System.getProperty("line.separator").getBytes(StandardCharsets.UTF_8);
+    private static final byte[] LINE_BREAK = System.lineSeparator().getBytes(StandardCharsets.UTF_8);
     private static final byte QUOTE = '"';
     private static final byte ENTRY_SEP = ':';
     private static final byte KV_SEP = ',';
