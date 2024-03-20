@@ -1,4 +1,4 @@
-package penna.config.yaml.parser;
+package penna.config.yaml.parsers;
 
 import org.yaml.snakeyaml.Yaml;
 import penna.api.config.ExceptionHandling;

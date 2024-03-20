@@ -1,4 +1,4 @@
-package penna.config.yaml.parser;
+package penna.config.yaml.parsers;
 
 import penna.config.yaml.models.ConfigMap;
 

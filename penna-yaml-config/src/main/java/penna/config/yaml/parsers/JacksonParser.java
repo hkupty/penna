@@ -1,4 +1,4 @@
-package penna.config.yaml.parser;
+package penna.config.yaml.parsers;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;

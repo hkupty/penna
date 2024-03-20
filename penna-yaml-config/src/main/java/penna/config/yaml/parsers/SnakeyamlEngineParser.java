@@ -1,4 +1,4 @@
-package penna.config.yaml.parser;
+package penna.config.yaml.parsers;
 
 
 import org.snakeyaml.engine.v2.api.Load;

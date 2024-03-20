@@ -2,7 +2,7 @@ package penna.config.yaml;
 
 import penna.api.configv2.Manager;
 import penna.api.configv2.Provider;
-import penna.config.yaml.parser.Parser;
+import penna.config.yaml.parsers.Parser;
 
 import java.io.IOException;
 import java.nio.file.*;
@@ -94,15 +94,13 @@ public class YamlConfigProvider implements Provider {
     private void refresh() throws IOException {
         var configMap = parser.readAndParse(this.configPath);
 
+        // Setting to false effectively shuts down the watcher if it was running.
+        keepRunning.set(configMap.watch());
+
         for (var entry : configMap.loggers().entrySet()) {
             var next = entry.getValue();
             manager.set(entry.getKey(), next::toConfig);
         }
-    }
-
-    @Override
-    public void deregister() {
-        keepRunning.set(false);
     }
 
     @Override
