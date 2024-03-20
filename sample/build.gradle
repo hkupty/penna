@@ -9,6 +9,29 @@ repositories {
     mavenCentral()
 }
 
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+// Reproducible builds
+tasks.withType(AbstractArchiveTask) {
+    preserveFileTimestamps = false
+    reproducibleFileOrder = true
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+    options.compilerArgs += [
+            "-Xlint:deprecation",
+            "-Xlint:removal",
+            "-Xlint:unchecked",
+            // TODO Eventually we should enable -Werror here
+            //"-Werror"
+    ]
+}
+
 dependencies {
     implementation libs.slf4j
     runtimeOnly project(":penna-core")

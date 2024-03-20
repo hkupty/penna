@@ -1,5 +1,4 @@
 plugins {
-    id 'penna.base-java'
     id 'penna.publishing'
     id 'pmd'
 }
@@ -8,6 +7,30 @@ group 'com.hkupty.penna'
 
 repositories {
     mavenCentral()
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+// Reproducible builds
+tasks.withType(AbstractArchiveTask).configureEach {
+    preserveFileTimestamps = false
+    reproducibleFileOrder = true
+}
+
+// The API is an optional client-facing library and therefore it should not have gaps
+// in the documentation, nor fail on linting, so it is easier for consumers to understand
+// what it is doing under the hood.
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.compilerArgs += [
+            "-Xlint:all",
+            "-Xdoclint:all/public",
+            "-Werror"
+    ]
 }
 
 dependencies {
