@@ -94,7 +94,7 @@ public class YamlConfigProvider implements Provider {
     private void refresh() throws IOException {
         var configMap = parser.readAndParse(this.configPath);
 
-        for (var entry : configMap.config().entrySet()) {
+        for (var entry : configMap.loggers().entrySet()) {
             var next = entry.getValue();
             manager.set(entry.getKey(), next::toConfig);
         }

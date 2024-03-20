@@ -6,14 +6,14 @@ class NodeTest {
 //    void CanReadSimpleYaml() throws JsonProcessingException {
 //        var provider = new YamlConfigProvider();
 //
-//        var config = """
+//        var loggers = """
 //                ---
-//                config:
+//                loggers:
 //                    penna:
 //                        level: debug
 //                """;
 //
-//        var tree = provider.mapper.readTree(config);
+//        var tree = provider.mapper.readTree(loggers);
 //        var result = provider.readConfig(tree);
 //
 //        var reference = new ConfigMap(Map.of("penna", new ConfigNode.OnlyLevel("debug")));
@@ -24,9 +24,9 @@ class NodeTest {
 //    void CanReadMultipleFields() throws JsonProcessingException {
 //        var provider = new YamlConfigProvider();
 //
-//        var config = """
+//        var loggers = """
 //                ---
-//                config:
+//                loggers:
 //                    penna:
 //                        level: debug
 //                        fields:
@@ -35,7 +35,7 @@ class NodeTest {
 //                            - thread
 //                """;
 //
-//        var tree = provider.mapper.readTree(config);
+//        var tree = provider.mapper.readTree(loggers);
 //        var result = provider.readConfig(tree);
 //
 //        var reference = new ConfigMap(Map.of("penna", new ConfigNode.LevelAndFields("debug", List.of(
@@ -50,22 +50,22 @@ class NodeTest {
 //    @Test
 //    void CanReadMultipleFields2() throws JsonProcessingException {
 //        var provider = new YamlConfigProvider();
-//        var config = """
+//        var loggers = """
 //                ---
-//                config:
+//                loggers:
 //                    "": { level: error }
 //                    penna: { level: debug }
-//                    penna.config.yaml: { level: trace, fields: [message] }
+//                    penna.loggers.yaml: { level: trace, fields: [message] }
 //                    com.other: { level: warn }
 //                """;
 //
-//        var tree = provider.mapper.readTree(config);
+//        var tree = provider.mapper.readTree(loggers);
 //        var result = provider.readConfig(tree);
 //
 //        var reference = new ConfigMap(
 //                Map.of("", new ConfigNode.OnlyLevel("error"),
 //                        "penna", new ConfigNode.OnlyLevel("debug"),
-//                        "penna.config.yaml", new ConfigNode.LevelAndFields("trace", List.of("message")),
+//                        "penna.loggers.yaml", new ConfigNode.LevelAndFields("trace", List.of("message")),
 //                        "com.other", new ConfigNode.OnlyLevel("warn")
 //                ));
 //
@@ -75,9 +75,9 @@ class NodeTest {
 //    @Test
 //    void CanReadExceptionConfigs() throws JsonProcessingException {
 //        var provider = new YamlConfigProvider();
-//        var config = """
+//        var loggers = """
 //                ---
-//                config:
+//                loggers:
 //                    penna:
 //                        level: debug
 //                        exception:
@@ -86,7 +86,7 @@ class NodeTest {
 //                            traverseDepth: 3
 //                """;
 //
-//        var tree = provider.mapper.readTree(config);
+//        var tree = provider.mapper.readTree(loggers);
 //        var result = provider.readConfig(tree);
 //
 //        var reference = new ConfigMap(
@@ -105,11 +105,11 @@ class NodeTest {
 //
 //        @Override
 //        public void apply(ConfigToLogger... configs) {
-//            for (var config : configs) {
-//                if (config instanceof ConfigToLogger.RootLoggerConfigItem rootLoggerConfigItem) {
-//                    simpleStorage.put("", rootLoggerConfigItem.config());
-//                } else if (config instanceof ConfigToLogger.NamedLoggerConfigItem namedLoggerConfigItem) {
-//                    simpleStorage.put(namedLoggerConfigItem.logger(), namedLoggerConfigItem.config());
+//            for (var loggers : configs) {
+//                if (loggers instanceof ConfigToLogger.RootLoggerConfigItem rootLoggerConfigItem) {
+//                    simpleStorage.put("", rootLoggerConfigItem.loggers());
+//                } else if (loggers instanceof ConfigToLogger.NamedLoggerConfigItem namedLoggerConfigItem) {
+//                    simpleStorage.put(namedLoggerConfigItem.logger(), namedLoggerConfigItem.loggers());
 //                }
 //            }
 //        }

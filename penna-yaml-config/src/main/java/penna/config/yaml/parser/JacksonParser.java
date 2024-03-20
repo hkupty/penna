@@ -82,7 +82,7 @@ public final class JacksonParser implements Parser {
     ConfigMap readConfig(JsonNode root) {
         var configNodes = new HashMap<String, ConfigNode>();
         var watch = root.get("watch").asBoolean();
-        var cfg = root.get("config");
+        var cfg = root.get("loggers");
         var iterator = cfg.fields();
         while (iterator.hasNext()) {
             try {

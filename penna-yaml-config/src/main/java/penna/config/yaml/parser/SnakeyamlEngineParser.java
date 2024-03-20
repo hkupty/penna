@@ -88,7 +88,7 @@ public class SnakeyamlEngineParser implements Parser {
         Map<String, Object> data = (Map<String, Object>) loader.loadFromReader(Files.newBufferedReader(file));
 
         Boolean watch = (Boolean) data.get("watch");
-        Map<String, Map<String, Object>> loggerConfigs = (Map<String, Map<String, Object>>) data.get("config");
+        Map<String, Map<String, Object>> loggerConfigs = (Map<String, Map<String, Object>>) data.get("loggers");
         var result = new HashMap<String, ConfigNode>();
 
         loggerConfigs.forEach((logger, config) -> {

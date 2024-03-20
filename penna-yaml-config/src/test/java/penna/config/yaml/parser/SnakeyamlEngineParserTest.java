@@ -18,6 +18,7 @@ class SnakeyamlEngineParserTest {
         var parser = new SnakeyamlEngineParser();
         var config = """
                 ---
+                watch: false
                 config:
                     penna:
                         level: debug
@@ -38,7 +39,7 @@ class SnakeyamlEngineParserTest {
                                 "debug",
                                 new ExceptionHandling(128, 3, true)
                         )
-                ));
+                ), false);
 
         Assertions.assertEquals(reference, result);
     }
