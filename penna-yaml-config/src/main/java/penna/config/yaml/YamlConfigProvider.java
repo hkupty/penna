@@ -1,7 +1,7 @@
 package penna.config.yaml;
 
-import penna.api.configv2.Manager;
-import penna.api.configv2.Provider;
+import penna.api.config.Manager;
+import penna.api.config.Provider;
 import penna.config.yaml.parsers.Parser;
 
 import java.io.IOException;

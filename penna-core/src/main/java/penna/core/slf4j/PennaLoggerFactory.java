@@ -3,8 +3,8 @@ package penna.core.slf4j;
 import org.slf4j.ILoggerFactory;
 import org.slf4j.Logger;
 import penna.api.config.Config;
-import penna.api.configv2.ConfigToLogger;
-import penna.api.configv2.Storage;
+import penna.api.config.ConfigToLogger;
+import penna.api.config.Storage;
 import penna.core.logger.LoggerStorage;
 
 

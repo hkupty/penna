@@ -39,13 +39,13 @@ In order to use it, add it to the [build manager of your preference](https://mvn
 
 ```groovy
 // gradle
-runtimeOnly 'com.hkupty.penna:penna-core:0.7.0'
+runtimeOnly 'com.hkupty.penna:penna-core:0.8.0'
 
 // Penna doesn't have any strict dependencies aside from slf4j.
-implementation 'org.slf4j:slf4j-api:2.0.9'
+implementation 'org.slf4j:slf4j-api:2.0.12'
 ```
 
-:warning: Note that Penna is built targeting JVM 17+.
+:warning: Note that Penna is built targeting JVM 21+.
 
 By default, you will get log level `INFO` enabled as well as the following fields:
 - `timestamp`
@@ -58,68 +58,37 @@ By default, you will get log level `INFO` enabled as well as the following field
 - `data` (slf4j's 2.0 `.addKeyValue()`)
 - `throwable`
 
-Penna has support for logging also a `Counter` to each message, individually marking each message with a monotonically increasing
-`long` counting from process startup, but that is disabled by default.
-
 If you want to configure it, Penna provides a separate convenience library for configuring your log levels in yaml files:
 ```yaml
 # resources/penna.yaml
-
-# This is for configuring the root level
-penna:
-  # We don't need to set level because by default it is set to INFO
-  fields:
-    # Not that it matter for json, but the key-value pairs below will be rendered in this order.
-    # So, for human readability in the console, one can tweak the position of the fields:
-    - level
-    - logger
-    - thread
-    - data
-    - mdc
-    - markers
-    - message
-    - throwable
-  loggers:
-    # This map will match the logger with the same literal name and all its children loggers, so
-    # com.mycompany.myapp as well as com.mycompany.myapp.controllers.MyGreatController and so on..
-    com.mycompany.myapp:
-      level: debug
-      # There's no need to set fields here since it will inherit from the root logger
-    com.vendor.noisylib:
-      level: warn
-      fields:
-        # USE WITH CAUTION! You can opt to remove/add fields to the message in different loggers
-        # In this example, we're removing `thread`, `data`, `mdc` and `markers` and adding the `counter` field.
-        # This means the log messages from `com.vendor.noisylib` will be rendered differently.
-        - level
-        - logger
-        - message
-        - throwable
+---
+# Since version 0.8, penna-yaml-config supports setting up a file watcher
+# so any updates to this file will be reflected immediately
+watch: true
+loggers:
+    # All the loggers under `com.yourapp` will be configured to debug level.
+    com.yourapp: { level: debug }
+    org.noisylibrary: { level: warn }
 ```
 
 If you want to use [penna-yaml-config](penna-yaml-config/README.md), you have to add it as a dependency:
 
 ```groovy
-runtimeOnly 'com.hkupty.penna:penna-yaml-config:0.7.0'
+runtimeOnly 'com.hkupty.penna:penna-yaml-config:0.8.0'
 
-// We have to add a yaml parser to the classpath for `penna-yaml-config` to work properly.
-// Currently we only support `jackson-dataformat-yaml`, but we plan on adding support for other libraries.
-runtimeOnly 'com.fasterxml.jackson.core:jackson-core:2.14.2'
-runtimeOnly 'com.fasterxml.jackson.core:jackson-databind:2.14.2'
-runtimeOnly 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.14.2'
-```
+// penna-yaml-config is a thin layer and uses a yaml parsing libray under the hood.
+// You can chose among jackson, snakeyaml (yaml 1.1) or snakeyaml engine (yaml 1.2)
 
-## Test logs
+// Jackson
+runtimeOnly 'com.fasterxml.jackson.core:jackson-core:2.17.0'
+runtimeOnly 'com.fasterxml.jackson.core:jackson-databind:2.17.0'
+runtimeOnly 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.17.0'
 
-Starting from Penna 0.7, Penna offers a `penna-dev` module which reformats the log to standard formatted strings instead of json.
-By adding `penna-dev` to your test runtime it will automatically bind the new logger on top of `penna-core`
+// Snakeyaml
+runtimeOnly 'org.yaml:snakeyaml:2.2'
 
-```groovy
-// penna-core is still needed as a runtime dependency
-runtimeOnly 'com.hkupty.penna:penna-core:0.7.0'
-
-// penna-dev should only be added to the test runtime
-testRuntimeOnly 'com.hkupty.penna:penna-dev:0.7.0'
+// Snakeyaml engine
+runtimeOnly 'org.snakeyaml:snakeyaml-engine:2.7'
 ```
 
 ## Principles

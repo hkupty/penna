@@ -52,7 +52,7 @@ public final class Clock {
      * increment the clock every X nanoseconds as defined by {@link Clock#REFRESH_RATE} and after every
      * Y iterations, as defined by {@link Clock#PRECISION}, we sync back with the system clock.
      */
-    private static final Thread clockThread = ThreadCreator.newThread("penna-clock-ticker", () -> {
+    private static final Thread clockThread = Thread.ofVirtual().name("penna-clock-ticker").start(() -> {
         while(!Thread.currentThread().isInterrupted()) {
             var ts = timestamp.incrementAndGet();
 

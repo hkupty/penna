@@ -5,12 +5,7 @@ import org.slf4j.IMarkerFactory;
 import org.slf4j.helpers.BasicMarkerFactory;
 import org.slf4j.spi.MDCAdapter;
 import org.slf4j.spi.SLF4JServiceProvider;
-import penna.api.configv2.Manager;
-import penna.core.sink.NonStandardSink;
-import penna.core.sink.SinkManager;
-
-import java.util.Optional;
-import java.util.ServiceLoader;
+import penna.api.config.Manager;
 
 public final class PennaServiceProvider implements SLF4JServiceProvider {
 
@@ -46,14 +41,8 @@ public final class PennaServiceProvider implements SLF4JServiceProvider {
         return REQUESTED_API_VERSION;
     }
 
-    private Optional<ServiceLoader.Provider<NonStandardSink>> getOverridingSink() {
-        ServiceLoader<NonStandardSink> sinkProvider = ServiceLoader.load(NonStandardSink.class);
-        return sinkProvider.stream().findFirst();
-    }
-
     @Override
     public void initialize() {
-        getOverridingSink().ifPresent(nonStandardSinkProvider -> SinkManager.Instance.replace(nonStandardSinkProvider::get));
         PennaLoggerFactory pennaLoggerFactory = PennaLoggerFactory.getInstance();
         Manager.Factory.initialize(pennaLoggerFactory);
 

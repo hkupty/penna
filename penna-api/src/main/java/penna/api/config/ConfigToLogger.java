@@ -1,6 +1,4 @@
-package penna.api.configv2;
-
-import penna.api.config.Config;
+package penna.api.config;
 
 /**
  * Class exists to contextually bind a configuration object to a logger by its name.

@@ -1,6 +1,4 @@
-package penna.api.configv2;
-
-import penna.api.config.Config;
+package penna.api.config;
 
 import java.util.Objects;
 import java.util.ServiceLoader;

@@ -5,7 +5,7 @@ import penna.core.models.PennaLogEvent;
 import java.io.IOException;
 import java.util.function.Consumer;
 
-public final class TestSink implements NonStandardSink {
+public final class TestSink implements InternalSink {
 
     final Consumer<PennaLogEvent> consumer;
 
