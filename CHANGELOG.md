@@ -14,13 +14,14 @@ the PATCH component is omitted when its value is `0`.
 
 - Replace configuration interfaces([#89](https://github.com/hkupty/penna/pull/89))
 
-
 ### `penna-core`
 
 #### Changed
 
 - Replace internal MDC storage implementation([#83](https://github.com/hkupty/penna/pull/83))
 - Remove ad-hoc configuration mechanism([#89](https://github.com/hkupty/penna/pull/89))
+- Remove sink proxy([#94](https://github.com/hkupty/penna/pull/94))
+- Minor cleanups and adjusts for JDK21 ([#94](https://github.com/hkupty/penna/pull/94))
 
 ### `penna-yaml-config`
 
