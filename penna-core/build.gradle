@@ -81,6 +81,8 @@ dependencies {
     implementation libs.slf4j
     compileOnly libs.jetbrains.annotations
 
+    testImplementation libs.junit.pioneer
+
     testImplementation libs.junit.api
     testRuntimeOnly libs.junit.engine
     testImplementation libs.jackson.core

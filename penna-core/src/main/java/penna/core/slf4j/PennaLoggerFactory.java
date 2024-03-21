@@ -1,5 +1,6 @@
 package penna.core.slf4j;
 
+import org.jetbrains.annotations.VisibleForTesting;
 import org.slf4j.ILoggerFactory;
 import org.slf4j.Logger;
 import penna.api.config.Config;
@@ -16,7 +17,8 @@ public final class PennaLoggerFactory implements ILoggerFactory, Storage {
         return singleton;
     }
 
-    private PennaLoggerFactory() {
+    @VisibleForTesting
+    PennaLoggerFactory() {
         cache = new LoggerStorage();
     }
 
