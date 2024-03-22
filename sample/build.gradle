@@ -34,7 +34,8 @@ tasks.withType(JavaCompile).configureEach {
 
 dependencies {
     implementation libs.slf4j
-    runtimeOnly project(":penna-core")
+    implementation project(":penna-api")
+    implementation project(":penna-core")
     runtimeOnly project(":penna-yaml-config")
     runtimeOnly libs.jackson.core
     runtimeOnly libs.jackson.databind

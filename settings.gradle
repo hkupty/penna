@@ -16,4 +16,3 @@ include "penna-core"
 // include "penna-perf"
 include "penna-yaml-config"
 include 'sample'
-
