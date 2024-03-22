@@ -6,6 +6,7 @@ import org.slf4j.helpers.BasicMarkerFactory;
 import org.slf4j.spi.MDCAdapter;
 import org.slf4j.spi.SLF4JServiceProvider;
 import penna.api.config.Manager;
+import penna.core.internals.ManagerHolder;
 
 public final class PennaServiceProvider implements SLF4JServiceProvider {
 
@@ -44,7 +45,7 @@ public final class PennaServiceProvider implements SLF4JServiceProvider {
     @Override
     public void initialize() {
         PennaLoggerFactory pennaLoggerFactory = PennaLoggerFactory.getInstance();
-        Manager.Factory.initialize(pennaLoggerFactory);
+        ManagerHolder.setManager(Manager.create(pennaLoggerFactory));
 
         this.loggerFactory = pennaLoggerFactory;
         markerFactory = new BasicMarkerFactory();

@@ -170,21 +170,30 @@ public class LoggerStorage {
         cursor.setConfigAndUpdateRecursively(newConfig);
     }
 
-    public Config getConfig(@NotNull String prefix) {
+    /**
+     * Returns the configuration that is applied to the requested prefix, if not directly associated, the one
+     * applied to the nearest ancestor.
+     * @param prefix the path to the logger
+     * @return The configuration instance that is applied to it
+     */
+    public @NotNull Config getConfig(@NotNull String prefix) {
         StringNavigator path = new StringNavigator(prefix);
         Node cursor = root;
-        int nodeIndex = 2; // Anything will be greater than ""
+        Config configRef = root.configRef;
+        int nodeIndex = 2; // given root is "", any child is located at index 2, so first hop is "free"
         while (cursor != null && path.hasNext()) {
             StringNavigator.StringView view = path.next();
             do {
                 cursor = cursor.children[nodeIndex];
             } while (cursor != null && (nodeIndex = view.indexCompare(cursor.component)) != 1);
-        }
-        if (cursor != null) {
-            return cursor.configRef;
-        }
 
-        return null;
+            configRef = switch (cursor) {
+                case null -> configRef;
+                case Node c when c.configRef == null -> configRef;
+                default -> cursor.configRef;
+            };
+        }
+        return configRef;
     }
 
     public void replaceConfig(@NotNull Config newConfig) {
