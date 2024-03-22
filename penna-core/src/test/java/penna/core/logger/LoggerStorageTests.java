@@ -2,7 +2,7 @@ package penna.core.logger;
 
 import org.junit.jupiter.api.Test;
 import org.slf4j.event.Level;
-import penna.api.config.Config;
+import penna.api.models.Config;
 
 import java.util.List;
 

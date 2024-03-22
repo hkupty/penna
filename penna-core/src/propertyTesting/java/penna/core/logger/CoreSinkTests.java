@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Assertions;
 import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
 import org.slf4j.event.Level;
-import penna.api.config.Config;
+import penna.api.models.Config;
 import penna.api.models.LogField;
 import penna.core.internals.TestContextPoolManager;
 import penna.core.models.KeyValuePair;

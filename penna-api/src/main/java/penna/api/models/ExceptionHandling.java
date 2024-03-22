@@ -1,4 +1,4 @@
-package penna.api.config;
+package penna.api.models;
 
 /**
  * This record holds configuration on how Penna should handle logging exception fields.

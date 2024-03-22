@@ -2,7 +2,7 @@ package penna.core.logger;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.VisibleForTesting;
-import penna.api.config.Config;
+import penna.api.models.Config;
 import penna.core.internals.StringNavigator;
 
 import java.util.concurrent.locks.Lock;

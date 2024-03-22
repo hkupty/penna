@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import org.jetbrains.annotations.VisibleForTesting;
-import penna.api.config.ExceptionHandling;
+import penna.api.models.ExceptionHandling;
 import penna.config.yaml.models.ConfigMap;
 import penna.config.yaml.models.ConfigNode;
 

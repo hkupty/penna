@@ -1,6 +1,6 @@
 package penna.core.models;
 
-import penna.api.config.Config;
+import penna.api.models.Config;
 import penna.api.models.LogField;
 import penna.core.internals.StackTraceFilter;
 

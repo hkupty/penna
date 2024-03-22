@@ -1,8 +1,7 @@
-package penna.api.config;
+package penna.api.models;
 
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.event.Level;
-import penna.api.models.LogField;
 
 import java.util.Arrays;
 
