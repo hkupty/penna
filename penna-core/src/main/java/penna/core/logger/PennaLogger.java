@@ -3,7 +3,7 @@ package penna.core.logger;
 import org.slf4j.Marker;
 import org.slf4j.event.LoggingEvent;
 import org.slf4j.spi.LoggingEventBuilder;
-import penna.api.config.Config;
+import penna.api.models.Config;
 import penna.core.logger.guard.LevelGuard;
 import penna.core.models.LogConfig;
 

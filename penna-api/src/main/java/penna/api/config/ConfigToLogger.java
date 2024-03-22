@@ -1,5 +1,7 @@
 package penna.api.config;
 
+import penna.api.models.Config;
+
 /**
  * Class exists to contextually bind a configuration object to a logger by its name.
  */

@@ -7,4 +7,6 @@ module penna.core {
 
     // Exposes a service provider for SLF4j
     provides org.slf4j.spi.SLF4JServiceProvider with PennaServiceProvider;
+
+    exports penna.core.api;
 }

@@ -1,10 +1,14 @@
 package penna.api.config;
 
+import org.jetbrains.annotations.NotNull;
+import penna.api.config.internal.ManagerImpl;
+import penna.api.models.Config;
+
 /**
  * A Config Storage defines a class that stores the configurations for all logs in the hierarchy.
  * <br/>
  * Such class is never expected to be called directly by its interface, but through the
- * {@link Manager.ManagerImpl} that will receive it.
+ * {@link ManagerImpl} that will receive it.
  */
 public interface Storage {
 
@@ -23,5 +27,6 @@ public interface Storage {
      * @param logger The path/name of the logger
      * @return The configuration for the logger
      */
-    Config get(String logger);
+    @NotNull
+    Config get(@NotNull String logger);
 }

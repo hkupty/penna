@@ -1,8 +1,8 @@
 package penna.config.yaml.models;
 
 import org.slf4j.event.Level;
-import penna.api.config.Config;
-import penna.api.config.ExceptionHandling;
+import penna.api.models.Config;
+import penna.api.models.ExceptionHandling;
 import penna.api.models.LogField;
 
 import java.util.List;

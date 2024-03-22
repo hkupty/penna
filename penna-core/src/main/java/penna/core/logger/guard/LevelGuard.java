@@ -5,7 +5,7 @@ import org.jetbrains.annotations.VisibleForTesting;
 import org.slf4j.event.Level;
 import org.slf4j.spi.LoggingEventBuilder;
 import org.slf4j.spi.NOPLoggingEventBuilder;
-import penna.api.config.Config;
+import penna.api.models.Config;
 import penna.core.internals.LogUnitContextPool;
 import penna.core.logger.LogUnitContext;
 import penna.core.logger.PennaLogger;

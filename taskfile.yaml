@@ -6,3 +6,9 @@ tasks:
   check:
     desc: "Runs all the checks in the source code, running tests and static analysis"
     cmd: ./gradlew check
+  publish-local:
+    desc: "Publishes the jars to maven local"
+    cmd: ./gradlew :penna-{core,api,yaml-config}:publishToManvenLocal
+  publish:
+    desc: "Publishes the jars to maven local"
+    cmd: ./gradlew :penna-{core,api,yaml-config}:publish

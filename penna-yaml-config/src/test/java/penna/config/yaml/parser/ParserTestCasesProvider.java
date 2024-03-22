@@ -2,7 +2,7 @@ package penna.config.yaml.parser;
 
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junitpioneer.jupiter.cartesian.CartesianParameterArgumentsProvider;
-import penna.api.config.ExceptionHandling;
+import penna.api.models.ExceptionHandling;
 import penna.config.yaml.models.ConfigMap;
 import penna.config.yaml.models.ConfigNode;
 

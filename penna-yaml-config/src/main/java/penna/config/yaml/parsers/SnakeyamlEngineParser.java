@@ -3,7 +3,7 @@ package penna.config.yaml.parsers;
 
 import org.snakeyaml.engine.v2.api.Load;
 import org.snakeyaml.engine.v2.api.LoadSettings;
-import penna.api.config.ExceptionHandling;
+import penna.api.models.ExceptionHandling;
 import penna.config.yaml.models.ConfigMap;
 import penna.config.yaml.models.ConfigNode;
 

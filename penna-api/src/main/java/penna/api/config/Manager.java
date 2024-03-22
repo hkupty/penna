@@ -1,7 +1,9 @@
 package penna.api.config;
 
+import penna.api.config.internal.ManagerImpl;
+import penna.api.models.Config;
+
 import java.util.Objects;
-import java.util.ServiceLoader;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -10,50 +12,33 @@ import java.util.function.Supplier;
  * This allows the ManagerImpl to evolve its internal configuration while still encapsulating its behavior
  * from outside third-parties.
  */
-public sealed interface Manager {
+public sealed interface Manager permits ManagerImpl {
+
+
     /**
-     * This is where the concrete implementation of a {@link Manager} will be created and stored
+     * This method initializes and creates a manager, but does not replace the existing one.
+     * @param storage The implementation of the logger storage that holds the configurations
+     * @return a new initialized instance of the manager that initialized {@link Provider}s
+     * and registered itself with them
      */
-    class Factory {
-        private Factory() {}
+    static Manager create(Storage storage) {
+        ManagerImpl.loader.reload();
+        var instance = new ManagerImpl(storage);
+        var providers = ManagerImpl.loader.stream()
+                .map(provider -> {
+                    try {
+                        return provider.get();
+                    } catch (Throwable ex) {
+                        return null;
+                    }
+                })
+                .filter(Objects::nonNull)
+                .filter(provider -> provider.register(instance))
+                .toList();
 
-        private static final ServiceLoader<Provider> loader = ServiceLoader.load(Provider.class);
-        private static ManagerImpl instance;
+        providers.forEach(Provider::init);
 
-        /**
-         * Returns a singleton instance of {@link Manager} once and if it's created, returning null otherwise.
-         *
-         * @return a concrete implementation of {@link Manager} or null.
-         */
-        public static ManagerImpl getInstance() {
-            return instance;
-        }
-
-        /**
-         * Used to initialize the {@link Manager} for a given {@link Storage} implementation.
-         *
-         * @param storage The concrete {@link Storage} implementation that will effectively store the configuration.
-         */
-        public static void initialize(Storage storage) {
-            // Doesn't re-initializes;
-            if (instance != null) return;
-
-            loader.reload();
-            instance = new ManagerImpl(storage);
-            var providers = loader.stream()
-                    .map(provider -> {
-                        try {
-                            return provider.get();
-                        } catch (Throwable ex) {
-                            return null;
-                        }
-                    })
-                    .filter(Objects::nonNull)
-                    .filter(provider -> provider.register(instance))
-                    .toList();
-
-            providers.forEach(Provider::init);
-        }
+        return instance;
     }
 
     /**
@@ -80,46 +65,4 @@ public sealed interface Manager {
      */
     void update(String logger, Function<Config, Config> action);
 
-    /**
-     * This is the central piece of the configuration management.
-     * It should not be created manually, but instead through {@link Factory#initialize(Storage)} and subsequent
-     * instance requests fetched through {@link Factory#getInstance()}.
-     */
-    final class ManagerImpl implements Manager {
-        private final Storage storage;
-
-        ManagerImpl(Storage storage) {
-            this.storage = storage;
-        }
-
-        @Override
-        public void set(ConfigToLogger... configs) {
-            storage.apply(configs);
-        }
-
-        @Override
-        public void set(String logger, Supplier<Config> action) {
-            Config config = action.get();
-            ConfigToLogger item = switch (logger) {
-                case String path when path.isEmpty() -> new ConfigToLogger.RootLoggerConfigItem(config);
-                case String path -> new ConfigToLogger.NamedLoggerConfigItem(path, config);
-            };
-
-            storage.apply(item);
-        }
-
-        @Override
-        public void update(String logger, Function<Config, Config> action) {
-            var current = storage.get(logger);
-            if (current != null) {
-                Config config = action.apply(current);
-                ConfigToLogger item = switch (logger) {
-                    case String path when path.isEmpty() -> new ConfigToLogger.RootLoggerConfigItem(config);
-                    case String path -> new ConfigToLogger.NamedLoggerConfigItem(path, config);
-                };
-
-                storage.apply(item);
-            }
-        }
-    }
 }
