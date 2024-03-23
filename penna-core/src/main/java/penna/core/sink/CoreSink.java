@@ -4,7 +4,6 @@ import org.slf4j.MDC;
 import penna.api.models.LogField;
 import penna.core.internals.DirectJson;
 import penna.core.internals.StackTraceBloomFilter;
-import penna.core.minilog.MiniLogger;
 import penna.core.models.LogConfig;
 import penna.core.models.PennaLogEvent;
 import penna.core.slf4j.PennaMDCAdapter;
@@ -18,6 +17,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiConsumer;
+
+import static penna.api.audit.Logger.report;
 
 public final class CoreSink implements Sink, Closeable {
     private static final byte[] SUPPRESSED = "suppressed".getBytes();
@@ -65,7 +66,7 @@ public final class CoreSink implements Sink, Closeable {
         if (MDC.getMDCAdapter() instanceof PennaMDCAdapter adapter) {
             mdcAdapter = adapter;
         } else {
-            MiniLogger.error("Not using PennaMDCAdapter for some reason! MDC will be off");
+            report("ERROR", "Not using PennaMDCAdapter for some reason! MDC will be off");
             mdcAdapter = null;
         }
         jsonGenerator = new DirectJson(channel);

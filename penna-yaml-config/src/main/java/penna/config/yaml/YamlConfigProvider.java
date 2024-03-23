@@ -10,6 +10,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static penna.api.audit.Logger.report;
+import static penna.api.audit.Logger.reportError;
+
 /**
  * Implementation of the {@link Provider} interface that extends the {@link Manager}
  * by adding configuration from a yaml file source.
@@ -57,9 +60,9 @@ public class YamlConfigProvider implements Provider {
             if (configMap.watch()) {
                 startWorker();
             }
-
             return true;
-        } catch (Exception ex) {
+        } catch (Exception ignored) {
+            report("INFO", "yaml config not registered");
             return false;
         }
     }
@@ -79,7 +82,9 @@ public class YamlConfigProvider implements Provider {
                     }
                     key.reset();
                 }
-            } catch (Exception ignored) {}
+            } catch (Exception exception) {
+                reportError("WARN", "yaml config file watcher got error, closing", exception);
+            }
         });
     }
 
@@ -105,8 +110,8 @@ public class YamlConfigProvider implements Provider {
     public void init() {
         try {
             refresh();
-        } catch (Exception ignored) {
-            // TODO log
+        } catch (Exception exception) {
+            reportError("WARN", "yaml config init got error", exception);
         }
     }
 }
