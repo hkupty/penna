@@ -24,3 +24,7 @@ www/public
 www/resources
 
 .jqwik-database
+.classpath
+.project
+.settings/
+tags*
