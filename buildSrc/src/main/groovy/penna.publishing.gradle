@@ -8,6 +8,12 @@ java {
     withSourcesJar()
 }
 
+jar {
+    manifest {
+        attributes 'Implementation-Version': version,
+                   'Implementation-Title': project.name
+    }
+}
 
 publishing {
     publications {

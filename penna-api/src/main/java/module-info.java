@@ -13,4 +13,5 @@ module penna.api {
 
     exports penna.api.models;
     exports penna.api.config;
+    exports penna.api.audit;
 }

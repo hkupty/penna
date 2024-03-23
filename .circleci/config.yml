@@ -23,6 +23,8 @@ jobs:
       - store_artifacts:
           path: penna-core/build/reports/pmd/main.html
       - store_artifacts:
+          path: penna-core/.jqwik-database
+      - store_artifacts:
           path: penna-dev/build/reports/pmd/main.html
       - store_artifacts:
           path: penna-yaml-config/build/reports/pmd/main.html

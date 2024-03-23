@@ -8,6 +8,8 @@ import org.slf4j.spi.SLF4JServiceProvider;
 import penna.api.config.Manager;
 import penna.core.internals.ManagerHolder;
 
+import static penna.api.audit.Logger.report;
+
 public final class PennaServiceProvider implements SLF4JServiceProvider {
 
     /**
@@ -50,5 +52,6 @@ public final class PennaServiceProvider implements SLF4JServiceProvider {
         this.loggerFactory = pennaLoggerFactory;
         markerFactory = new BasicMarkerFactory();
         mdcAdapter = new PennaMDCAdapter();
+        report("INFO", "Penna initialized successfully");
     }
 }
