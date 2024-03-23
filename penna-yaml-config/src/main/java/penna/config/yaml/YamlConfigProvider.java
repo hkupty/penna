@@ -65,7 +65,7 @@ public class YamlConfigProvider implements Provider {
     }
 
     private void startWorker() {
-        var worker = new Thread(() -> {
+        Thread.ofVirtual().name("penna-yaml-config-file-watcher").start(() -> {
             try (WatchService watchService = FileSystems.getDefault().newWatchService()) {
                 var target = configPath.getFileName();
                 configPath.getParent().register(watchService, StandardWatchEventKinds.ENTRY_MODIFY);
@@ -81,8 +81,6 @@ public class YamlConfigProvider implements Provider {
                 }
             } catch (Exception ignored) {}
         });
-        worker.setDaemon(true);
-        worker.start();
     }
 
     /**
