@@ -14,6 +14,7 @@ the PATCH component is omitted when its value is `0`.
 
 - Replace configuration interfaces([#89](https://github.com/hkupty/penna/pull/89))
 - Restructure namespaces([#95](https://github.com/hkupty/penna/pull/95))
+- Add audit logger([#97](https://github.com/hkupty/penna/pull/97))
 
 ### `penna-core`
 
@@ -24,6 +25,7 @@ the PATCH component is omitted when its value is `0`.
 - Remove sink proxy([#94](https://github.com/hkupty/penna/pull/94))
 - Minor cleanups and adjusts for JDK21 ([#94](https://github.com/hkupty/penna/pull/94))
 - Provide optional runtime controls([#95](https://github.com/hkupty/penna/pull/95))
+- Remove Minilogger([#97](https://github.com/hkupty/penna/pull/97))
 
 ### `penna-yaml-config`
 
