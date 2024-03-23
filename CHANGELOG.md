@@ -30,6 +30,7 @@ the PATCH component is omitted when its value is `0`.
 #### Changed
 
 - Restructure configuration; implement new interface([#89](https://github.com/hkupty/penna/pull/89))
+- Use Virtual Thread for the File watcher([#96](https://github.com/hkupty/penna/pull/96))
 
 ## 0.7.2
 
