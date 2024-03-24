@@ -50,11 +50,7 @@ public class LoggerCreationPerformanceTest {
                 "presenter"
         };
 
-        @Param({
-                "Penna",
-                "Logback",
-//                "Log4j"
-        })
+        @Param()
         PerfTestLoggerFactory.Implementation implementation;
         PerfTestLoggerFactory factory;
 
@@ -87,7 +83,7 @@ public class LoggerCreationPerformanceTest {
 
     }
 
-    //    @Benchmark
+    @Benchmark
     public void alwaysNewLogger(TestState state, Blackhole bh) {
         var factory = PerfTestLoggerFactory.Factory.get(state.implementation);
         factory.setup(bh);
