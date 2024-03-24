@@ -6,7 +6,7 @@ import org.slf4j.event.Level;
 import org.slf4j.event.LoggingEvent;
 import org.slf4j.spi.LoggingEventAware;
 import org.slf4j.spi.LoggingEventBuilder;
-import penna.api.config.Config;
+import penna.api.models.Config;
 import penna.core.internals.LogUnitContextPool;
 import penna.core.logger.LogUnitContext;
 import penna.core.models.LogConfig;

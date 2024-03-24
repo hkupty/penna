@@ -8,6 +8,15 @@ jmh = "1.37"
 jbrAnn = "24.1.0"
 snakeyaml = "2.2"
 snakeyaml-engine = "2.7"
+logback = "1.4.14"
+shax = "2.0.6.0.1.0"
+log4j2 = "2.21.1"
+rainbowgum = "0.4.1"
+
+guava = "33.0.0-jre"
+commons-lang3 = "3.14.0"
+
+commons-math = "3.6.1"
 
 [libraries]
 slf4j = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
@@ -22,15 +31,35 @@ snakeyaml-plain = { module = "org.yaml:snakeyaml", version.ref = "snakeyaml" }
 snakeyaml-engine = { module = "org.snakeyaml:snakeyaml-engine", version.ref = "snakeyaml-engine" }
 
 # testing
+commons-math = { module = "org.apache.commons:commons-math3", version.ref = "commons-math" }
+
 jqwik = { module = "net.jqwik:jqwik", version.ref = "jqwik" }
 junit-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit" }
 junit-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit" }
 junit-pioneer = { module = "org.junit-pioneer:junit-pioneer", version.ref = "junit-pioneer" }
 
-commons-math = { module = "org.apache.commons:commons-math3", version.prefer = "3.6.1" }
-commons-lang = { module = "org.apache.commons:commons-lang3", version.prefer = "3.13.0" }
-
 jmh-core = { module = "org.openjdk.jmh:jmh-core", version.ref = "jmh" }
 jmh-annotations = { module = "org.openjdk.jmh:jmh-generator-annprocess", version.ref = "jmh" }
 
 jetbrains-annotations = { module = "org.jetbrains:annotations", version.ref = "jbrAnn" }
+
+### For Benchmarking
+# Logback
+logback-core = { module = "ch.qos.logback:logback-core", version.ref = "logback" }
+logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
+
+# Shax
+shax = { module = "io.vacco.shax:shax", version.ref = "shax" }
+
+# Rainbowgum
+rainbowgum = { module = "io.jstach.rainbowgum:rainbowgum", version.ref = "rainbowgum" }
+
+# Log4J2
+log4j-api = { module = "org.apache.logging.log4j:log4j-api", version.ref = "log4j2" }
+log4j-core = { module = "org.apache.logging.log4j:log4j-core", version.ref = "log4j2" }
+log4j-slf4j = { module = "org.apache.logging.log4j:log4j-slf4j2-impl", version.ref = "log4j2" }
+log4j-json = { module = "org.apache.logging.log4j:log4j-layout-template-json", version.ref = "log4j2" }
+
+# utils
+guava = { module = "com.google.guava:guava", version.ref = "guava" }
+commons-lang3 = { module = "org.apache.commons:commons-lang3", version.ref = "commons-lang3" }

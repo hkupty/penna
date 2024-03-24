@@ -6,10 +6,10 @@ import org.apache.logging.slf4j.Log4jMarkerFactory;
 import org.openjdk.jmh.infra.Blackhole;
 import org.slf4j.ILoggerFactory;
 import org.slf4j.Logger;
-import penna.api.config.Config;
+import penna.api.models.Config;
+import penna.core.internals.TestContextPoolManager;
 import penna.core.logger.LoggerStorage;
 import penna.core.sink.CoreSink;
-import penna.core.sink.SinkManager;
 import penna.perf.misc.IfBasedLogger;
 
 import java.io.Closeable;
@@ -24,7 +24,6 @@ public sealed interface PerfTestLoggerFactory extends Closeable {
         public static PerfTestLoggerFactory get(Implementation implementation) {
             return switch (implementation) {
                 case Penna -> new PennaFactory();
-                case IfBasedLogger -> new IfBasedLoggerFactory();
                 case Logback -> new LogbackFactory();
                 case Log4j -> new Log4JFactory();
             };
@@ -34,13 +33,12 @@ public sealed interface PerfTestLoggerFactory extends Closeable {
 
     void setup(Blackhole bh);
 
-    org.slf4j.Logger getLogger(String name);
+    Logger getLogger(String name);
 
     enum Implementation {
         Penna,
-        IfBasedLogger,
         Logback,
-        Log4j
+        Log4j,
     }
 
     final class PennaFactory implements PerfTestLoggerFactory {
@@ -48,7 +46,7 @@ public sealed interface PerfTestLoggerFactory extends Closeable {
 
         @Override
         public void setup(Blackhole bh) {
-            SinkManager.Instance.replace(() -> new CoreSink(new BlackholeChannel(bh)));
+            TestContextPoolManager.replace(() -> new CoreSink(new BlackholeChannel(bh)));
         }
 
         @Override
@@ -65,7 +63,7 @@ public sealed interface PerfTestLoggerFactory extends Closeable {
 
         @Override
         public void setup(Blackhole bh) {
-            SinkManager.Instance.replace(() -> new CoreSink(new BlackholeChannel(bh)));
+            TestContextPoolManager.replace(() -> new CoreSink(new BlackholeChannel(bh)));
         }
 
         @Override

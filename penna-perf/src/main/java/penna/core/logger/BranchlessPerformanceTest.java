@@ -16,10 +16,7 @@ public class BranchlessPerformanceTest {
 
     @State(Scope.Thread)
     public static class TestState {
-        @Param({
-                "Penna",
-                "IfBasedLogger"
-        })
+        @Param()
         PerfTestLoggerFactory.Implementation implementation;
         PerfTestLoggerFactory factory;
         Logger logger;
