@@ -7,7 +7,9 @@ For us to achieve that, measuring (instead of guessing) is fundamental.
 
 ## Previous tests
 
-[development/version 0.6](ca142e8a9d9dbdf13b89db4f2de001aaedb1c3f6.md)
+[version 0.6 - Logger Performance](0.6-Logger.md)
+[version 0.8 - Logger Performance](0.8-Logger.md)
+[version 0.8 - Logger Creation Performance](0.8-LoggerCreation.md)
 
 ## Where are the tests?
 
