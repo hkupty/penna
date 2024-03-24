@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.MDC;
 import org.slf4j.MarkerFactory;
 import penna.core.logger.utils.PerfTestLoggerFactory;
+import penna.core.logger.utils.RunnerOptions;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
@@ -20,8 +21,8 @@ public class LoggerPerformanceTest {
     public static class TestBehavior {
         @Param({
                 "simple",
-//                "modest",
-//                "moderate",
+                "modest",
+                "moderate",
                 "large"
         })
         String behavior;
@@ -62,7 +63,8 @@ public class LoggerPerformanceTest {
 
     @State(Scope.Thread)
     public static class TestState {
-        PerfTestLoggerFactory.Implementation implementation = PerfTestLoggerFactory.Implementation.Penna;
+        @Param
+        PerfTestLoggerFactory.Implementation implementation;
         PerfTestLoggerFactory factory;
         Logger logger;
 
@@ -87,23 +89,12 @@ public class LoggerPerformanceTest {
     }
 
     public static void main(String[] args) throws Exception {
-        Options options = new OptionsBuilder()
-                .include(LoggerPerformanceTest.class.getName() + ".*")
-                .mode(Mode.Throughput)
-                .timeUnit(TimeUnit.SECONDS)
-                .warmupTime(TimeValue.seconds(40))
-                .warmupIterations(3)
-                .measurementIterations(3)
-                .measurementTime(TimeValue.seconds(50))
-                .forks(1)
-                .shouldFailOnError(true)
-                .shouldDoGC(true)
+        var options = RunnerOptions
+                .averageTime(LoggerPerformanceTest.class.getName() + ".*")
                 .addProfiler("gc")
                 .addProfiler("perfnorm")
-                .addProfiler("perfasm", "tooBigThreshold=2100")
-                .threads(1)
-                .jvm("/usr/lib/jvm/java-21-jetbrains/bin/java")
-                .jvmArgs("-Xmx8192m")
+                .addProfiler("perfasm")
+                .addProfiler("jfr")
                 .build();
 
         new Runner(options).run();

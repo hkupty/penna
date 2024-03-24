@@ -1,5 +1,6 @@
 plugins {
-    id 'penna.base-java'
+    id 'java'
+    id 'application'
 }
 
 group 'com.hkupty.penna'
@@ -20,22 +21,22 @@ dependencies {
     implementation project(":penna-core")
 
     implementation libs.slf4j
-
-    implementation libs.commons.lang
     implementation libs.jmh.core
 
+    implementation libs.logback.core
+    implementation libs.logback.classic
 
-    implementation 'ch.qos.logback:logback-core:1.4.14'
-    implementation 'ch.qos.logback:logback-classic:1.4.14'
+    implementation libs.shax
 
-    implementation 'io.vacco.shax:shax:2.0.6.0.1.0'
-    implementation 'com.google.guava:guava:33.0.0-jre'
-    implementation 'org.apache.commons:commons-lang3:3.14.0'
+    implementation libs.rainbowgum
 
-    implementation 'org.apache.logging.log4j:log4j-api:2.21.1'
-    implementation 'org.apache.logging.log4j:log4j-core:2.21.1'
-    implementation 'org.apache.logging.log4j:log4j-slf4j2-impl:2.21.1'
-    implementation 'org.apache.logging.log4j:log4j-layout-template-json:2.21.1'
+    implementation libs.log4j.api
+    implementation libs.log4j.core
+    implementation libs.log4j.slf4j
+    implementation libs.log4j.json
+
+    implementation libs.guava
+    implementation libs.commons.lang3
 
     annotationProcessor libs.jmh.annotations
 }
