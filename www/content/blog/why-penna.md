@@ -2,10 +2,10 @@
 title: "Why Penna?"
 date: 2023-06-05T22:16:44+02:00
 description: "Featherweight JSON Logging for the JVM"
-# tags:
-#   - slf4j
-#   - structured-logging
-#   - java-logging
+tags:
+    - slf4j
+    - logging
+    - java
 ---
 
 ## Why?

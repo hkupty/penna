@@ -2,6 +2,9 @@
 title: "Performance insights: Guards, Time and Modern Java Features"
 date: 2023-11-29T11:11:11+01:00
 description: "Simple code can bear great performance benefits"
+tags:
+    - java
+    - performance
 ---
 
 A while ago I promised to go a little more in detail on the performance of Penna. There are quite a few interesting techniques
