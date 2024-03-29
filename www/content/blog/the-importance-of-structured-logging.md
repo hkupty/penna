@@ -2,6 +2,10 @@
 title: "The importance of structured logging"
 date: 2024-02-13T21:39:25+01:00
 description: "Why should we log JSON instead of plain text"
+tags:
+    - java
+    - json
+    - logging
 ---
 
 ## Why log in JSON?
