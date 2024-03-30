@@ -1,7 +1,7 @@
 ---
-title: "Performance insights: Specialized code should be faster"
+title: "Performance insights: Engineering for high performance"
 date: 2024-03-24T21:28:24+01:00
-description: "Generic abstractions can hold you back in terms of performance"
+description: "The performance of our projects is a byproduct of the process we adopt developing it"
 tags:
     - java
     - performance
