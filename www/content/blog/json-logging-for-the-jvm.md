@@ -2,6 +2,10 @@
 title: "JSON logs for the JVM"
 date: 2024-01-31T11:58:57+01:00
 description: "Logging JSON from SLF4J"
+tags:
+    - java
+    - json
+    - logging
 ---
 
 ## How to output JSON logs?
