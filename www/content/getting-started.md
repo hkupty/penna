@@ -30,7 +30,7 @@ Penna is specially useful for when you run you applications on [docker](https://
 
 ## What if I want to change the configuration?
 
-Then you need to add [`penna-yaml-config`](https://central.sonatype.com/artifact/com.hkupty.penna/penna-yaml-config/0.7.0) to your project, alongside jackson-dataformat-yaml:
+Then you need to add [`penna-yaml-config`](https://central.sonatype.com/artifact/com.hkupty.penna/penna-yaml-config/overview) to your project, alongside jackson-dataformat-yaml:
 
 {{< highlight gradle "lineNos=false" >}}
 // gradle
@@ -43,12 +43,17 @@ Then you need to add [`penna-yaml-config`](https://central.sonatype.com/artifact
 
 And then you can configure a `resources/penna.yaml` file like this:
 ```yaml
-penna:
-  loggers:
-    com.mycompany.myapp:
-        level: debug
-    com.vendor.noisylib:
-        level: warn
+# resources/penna.yaml
+---
+# Since version 0.8, penna-yaml-config supports setting up a file watcher
+# so any updates to this file will be reflected immediately
+watch: true
+loggers:
+    # All the loggers under `com.yourapp` will be configured to debug level.
+    com.yourapp: { level: debug }
+    # this special namespace (and everything below it) will get trace level instead
+    com.yourapp.specialNamespace: { level: trace }
+    org.noisylibrary: { level: warn }
 ```
 
 ## Can I change more parameters in the configuration?
@@ -56,8 +61,7 @@ penna:
 As mentioned before, penna comes with a set of good defaults so you don't have to worry about them, but if you
 really want to tweak some parameters, you can.
 ```yaml
-penna:
-  loggers:
+loggers:
     com.mycompany.myapp:
         level: debug
         fields:
