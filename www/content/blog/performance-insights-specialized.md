@@ -115,7 +115,7 @@ The point is, we can make use of the type system to increase the safety of the i
 
 Differently from the previous article, this has been more of a theoretical writing. Yet, I think there is a significant benefit of trying to approach perfromance from an application design point of view and I am a strong believer in "intentional" software architecture.
 
-Still, although approaching performance from distance, there are a few concrete suggestions that you can apply to your ongoing or next projects, without necessarily treating performance as a hihgh-complexity kind of problem.
+Still, although approaching performance from distance, there are a few concrete suggestions that you can apply to your ongoing or next projects, without necessarily treating performance as a high-complexity kind of problem.
 
 Depending on the outcome of this one, I might write a third article on this Performance Insights series, so let me know your thoughts. Also, don't forget to try out Penna! As I mentioned on the introduction, I have recently released the 0.8 version with many great improvements to the overall ergonomics of the library.
 As always, feedback is appreciated and welcome!
