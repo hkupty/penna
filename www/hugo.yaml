@@ -12,7 +12,6 @@ markup:
     anchorLineNos: true
     codeFences: true
     guessSyntax: false
-    hl_inline: false
     lineNoStart: 1
     lineNos: true
     lineNumbersInTable: true
@@ -20,3 +19,5 @@ markup:
     noHl: false
     style: nord
     tabWidth: 4
+taxonomies:
+  tag: tags

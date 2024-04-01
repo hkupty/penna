@@ -88,7 +88,19 @@ Having the ability to dynamically include both the `userId` and the `cartSize` i
 "message": "Processing order", "mdc": {"userId": "01HPJ5KNHE35K0B2QA3FZ18KWT"}, "data": {"cartSize": 32}}
 ```
 
-## How can Penna help?
+## How can I add structured logging to my project?
 
-Penna is a native SLF4J implementation designed to do one thing well: **Write JSON logs to stdout**. Leveraging structured logs is one of its core values.
-Check our [getting started]({{< ref "getting-started.md" >}}) guide for updated information on how to add Penna to your application.
+Penna offers you a very simple solution. Out of the box, Penna will log structured logs in JSON for `INFO`, `WARN` and `ERROR`, without any necessary configuration.
+Just add it to your project using your build tool of choice (most likely [gradle](https://docs.gradle.org/) or [maven](https://maven.apache.org/)):
+
+For gradle, it should be as simple as adding the following line:
+{{< highlight gradle "lineNos=false" >}}
+{{< penna-core-gradle >}}
+{{< / highlight >}}
+
+If you use maven instead, add the following dependency to your `pom.xml` file:
+{{< highlight xml "lineNos=false" >}}
+{{< penna-core-maven >}}
+{{< / highlight >}}
+
+For further configuration, have a look at our [Getting Started]({{< ref "getting-started.md" >}}) page.

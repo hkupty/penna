@@ -1,4 +1,15 @@
-runtimeOnly 'com.hkupty.penna:penna-yaml-config:{{ .Site.Data.version.release }}'
-runtimeOnly 'com.fasterxml.jackson.core:jackson-core:$jacksonVersion'
-runtimeOnly 'com.fasterxml.jackson.core:jackson-databind:$jacksonVersion'
-runtimeOnly 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:$jacksonVersion'
+runtimeOnly 'com.hkupty.penna:penna-yaml-config:{{ .Site.Data.links.currentVersion }}'
+
+// penna-yaml-config is a thin layer and uses a yaml parsing libray under the hood.
+// You can chose among jackson, snakeyaml (yaml 1.1) or snakeyaml engine (yaml 1.2)
+
+// Jackson
+runtimeOnly 'com.fasterxml.jackson.core:jackson-core:2.17.0'
+runtimeOnly 'com.fasterxml.jackson.core:jackson-databind:2.17.0'
+runtimeOnly 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.17.0'
+
+// Snakeyaml
+runtimeOnly 'org.yaml:snakeyaml:2.2'
+
+// Snakeyaml engine
+runtimeOnly 'org.snakeyaml:snakeyaml-engine:2.7'

@@ -55,15 +55,22 @@ Most of the configuration is done beforehand so you don't need to do anything. Y
 
 Penna is designed to be small, slim and specialized; It's meant to not get in your way, so it has no reason to be taxing your application with runtime penalty. Altough not intensively optimized, Penna can boast its high throughput and low memory footprint. In fact, it's constant memory consumption for most use-cases. As mentioned above, doing one thing and being native to SLF4J opens up great opportinities for performance improvements. If you're interested in this subject, I go deeply in the performance aspects of Penna in a series of articles [starting from this one]({{< ref "/blog/performance-insights-branchless.md" >}}).
 
-## How to use Penna?
+## How do I add JSON logs to my SLF4J project?
 
-The only line you need to add to your project is the one below if you want to get started with Penna straight away:
+Penna offers you a very simple solution. Out of the box, Penna will log structured logs in JSON for `INFO`, `WARN` and `ERROR`, without any necessary configuration.
+Just add it to your project using your build tool of choice (most likely [gradle](https://docs.gradle.org/) or [maven](https://maven.apache.org/)):
 
-```gradle
-runtimeOnly 'com.hkupty.penna:penna-core:<latestPennaVersion>'
-```
+For gradle, it should be as simple as adding the following line:
+{{< highlight gradle "lineNos=false" >}}
+{{< penna-core-gradle >}}
+{{< / highlight >}}
 
-For more details, check the [getting started guide]({{< ref "getting-started.md" >}} "Getting Started"), which explains how to set up the yaml config as well.
+If you use maven instead, add the following dependency to your `pom.xml` file:
+{{< highlight xml "lineNos=false" >}}
+{{< penna-core-maven >}}
+{{< / highlight >}}
+
+For further configuration, have a look at our [Getting Started]({{< ref "getting-started.md" >}}) page.
 
 ## Closing thoughts
 

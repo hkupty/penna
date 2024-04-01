@@ -31,9 +31,15 @@
 
           <div class="navbar-dropdown">
             {{ range .Pages }}
-            <a class="navbar-item" href="{{ .RelPermalink }}">
-              {{ .Title }}
-            </a>
+              {{ if .Params.External }}
+                <a class="navbar-item" href="{{ .Params.External }}" target="_blank">
+                  {{ .Title }}
+                </a>
+              {{ else }}
+                <a class="navbar-item" href="{{ .RelPermalink }}">
+                  {{ .Title }}
+                </a>
+              {{ end }}
             {{ end }}
           </div>
         </div>

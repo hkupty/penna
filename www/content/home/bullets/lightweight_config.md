@@ -2,6 +2,8 @@
 title: "Lightweight Configuration"
 date: 2023-04-21T16:27:07+02:00
 icon: cube
+build:
+    render: never
 ---
 
 Penna comes packed with a sane defaults configuration that allows one to plug it and start using immediately.
