@@ -45,3 +45,9 @@ dependencies {
 test {
     useJUnitPlatform()
 }
+
+jar {
+    manifest {
+        attributes('Implementation-Version': project.version)
+    }
+}
