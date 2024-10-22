@@ -35,8 +35,6 @@ tasks.withType(JavaCompile).configureEach {
             //"-Werror"
     ]
 
-    dependsOn("projectVersion")
-
 }
 
 

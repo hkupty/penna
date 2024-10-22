@@ -21,8 +21,6 @@ java {
 tasks.withType(AbstractArchiveTask).configureEach {
     preserveFileTimestamps = false
     reproducibleFileOrder = true
-
-    dependsOn("projectVersion")
 }
 
 // The API is an optional client-facing library and therefore it should not have gaps
@@ -35,12 +33,10 @@ tasks.withType(JavaCompile).configureEach {
             "-Xdoclint:all/public",
             "-Werror"
     ]
-
-    dependsOn("projectVersion")
 }
 
 
-version = "0.8.1"
+// version = "0.8.1"
 
 dependencies {
     compileOnly libs.slf4j
