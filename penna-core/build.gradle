@@ -81,12 +81,13 @@ tasks.named("check") {
 dependencies {
     implementation project(":penna-api")
     implementation libs.slf4j
+
     compileOnly libs.jetbrains.annotations
 
     testImplementation libs.junit.pioneer
 
-    testImplementation libs.junit.api
     testRuntimeOnly libs.junit.engine
+    testImplementation libs.junit.api
     testImplementation libs.jackson.core
     testImplementation libs.jackson.databind
 

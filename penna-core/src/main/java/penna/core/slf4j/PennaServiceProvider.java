@@ -50,6 +50,7 @@ public final class PennaServiceProvider implements SLF4JServiceProvider {
         ManagerHolder.setManager(Manager.create(pennaLoggerFactory));
 
         this.loggerFactory = pennaLoggerFactory;
+        // TODO Write Penna's own marker factory
         markerFactory = new BasicMarkerFactory();
         mdcAdapter = new PennaMDCAdapter();
         report("INFO", "Penna initialized successfully");
