@@ -1,6 +1,7 @@
 plugins {
     id 'java-library'
     id 'penna.publishing'
+    id 'penna.build.projectVersion'
     id 'pmd'
 }
 

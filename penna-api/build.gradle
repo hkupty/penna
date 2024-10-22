@@ -1,6 +1,7 @@
 plugins {
     id 'java-library'
     id 'penna.publishing'
+    id 'penna.build.projectVersion'
     id 'pmd'
 }
 
@@ -33,6 +34,9 @@ tasks.withType(JavaCompile).configureEach {
             "-Werror"
     ]
 }
+
+
+// version = "0.8.1"
 
 dependencies {
     compileOnly libs.slf4j
