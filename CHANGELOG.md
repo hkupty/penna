@@ -5,6 +5,11 @@ All notable changes to Penna will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.8.1
+
+### `penna-api`
+- Fix version reporting in audit message([#121](https://github.com/hkupty/penna/pull/121)) - Thanks [@marksailes](https://github.com/marksailes)!
+
 ## 0.8.0
 
 ### `penna-api`
