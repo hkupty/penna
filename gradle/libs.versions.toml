@@ -11,7 +11,6 @@ snakeyaml-engine = "2.8"
 logback = "1.5.7"
 shax = "2.0.6.0.1.0"
 log4j2 = "2.23.1"
-rainbowgum = "0.4.1"
 
 guava = "33.3.1-jre"
 commons-lang3 = "3.17.0"
@@ -50,9 +49,6 @@ logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "lo
 
 # Shax
 shax = { module = "io.vacco.shax:shax", version.ref = "shax" }
-
-# Rainbowgum
-rainbowgum = { module = "io.jstach.rainbowgum:rainbowgum", version.ref = "rainbowgum" }
 
 # Log4J2
 log4j-api = { module = "org.apache.logging.log4j:log4j-api", version.ref = "log4j2" }
