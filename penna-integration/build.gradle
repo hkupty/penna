@@ -1,0 +1,42 @@
+plugins {
+    id 'application'
+    id 'pmd'
+}
+
+group 'com.hkupty.penna'
+
+repositories {
+    mavenCentral()
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+// Reproducible builds
+tasks.withType(AbstractArchiveTask).configureEach {
+    preserveFileTimestamps = false
+    reproducibleFileOrder = true
+}
+
+
+dependencies {
+    implementation project(":penna-core")
+    implementation libs.slf4j
+    compileOnly libs.jetbrains.annotations
+    implementation libs.jackson.core
+    implementation libs.jackson.databind
+
+    testImplementation libs.junit.api
+    testRuntimeOnly libs.junit.engine
+}
+
+application {
+  mainClass = "org.integration.Application"
+}
+
+run {
+    jvmArgs '-ea'
+}

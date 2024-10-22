@@ -32,6 +32,9 @@ jobs:
           path: penna-core/build/test-results/
       - store_test_results:
           path: penna-dev/build/test-results/
+      - run:
+          name: "Run integration tests"
+          command: "./gradlew penna-integration:run"
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
