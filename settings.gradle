@@ -1,4 +1,6 @@
 pluginManagement {
+    includeBuild('build-logic')
+
     repositories {
         gradlePluginPortal()
     }
@@ -14,5 +16,6 @@ rootProject.name = 'penna'
 include "penna-api"
 include "penna-core"
 // include "penna-perf"
+include "penna-integration"
 include "penna-yaml-config"
 include 'sample'

@@ -4,6 +4,7 @@ plugins {
     id 'java-library'
     id 'penna.publishing'
     id 'signing'
+    id 'penna.build.projectVersion'
     id 'pmd'
     id 'jvm-test-suite'
 }
@@ -33,6 +34,9 @@ tasks.withType(JavaCompile).configureEach {
             // TODO Eventually we should enable -Werror here
             //"-Werror"
     ]
+
+    dependsOn("projectVersion")
+
 }
 
 
