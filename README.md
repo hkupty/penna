@@ -39,7 +39,7 @@ In order to use it, add it to the [build manager of your preference](https://mvn
 
 ```groovy
 // gradle
-runtimeOnly 'com.hkupty.penna:penna-core:0.8.0'
+runtimeOnly 'com.hkupty.penna:penna-core:0.8.1'
 
 // Penna doesn't have any strict dependencies aside from slf4j.
 implementation 'org.slf4j:slf4j-api:2.0.12'
@@ -74,7 +74,7 @@ loggers:
 If you want to use [penna-yaml-config](penna-yaml-config/README.md), you have to add it as a dependency:
 
 ```groovy
-runtimeOnly 'com.hkupty.penna:penna-yaml-config:0.8.0'
+runtimeOnly 'com.hkupty.penna:penna-yaml-config:0.8.1'
 
 // penna-yaml-config is a thin layer and uses a yaml parsing libray under the hood.
 // You can chose among jackson, snakeyaml (yaml 1.1) or snakeyaml engine (yaml 1.2)
