@@ -4,15 +4,18 @@
 
 [![version](https://img.shields.io/maven-central/v/com.hkupty.penna/penna-core?style=flat-square)](https://mvnrepository.com/artifact/com.hkupty.penna)
 [![Maintainability](https://api.codeclimate.com/v1/badges/646db2db253b2610143d/maintainability)](https://codeclimate.com/github/hkupty/penna/maintainability)
-[![CircleCI](https://dl.circleci.com/status-badge/img/gh/hkupty/penna/tree/dev/0.7.svg?style=svg)](https://dl.circleci.com/status-badge/redirect/gh/hkupty/penna/tree/dev/0.7)
+[![CircleCI](https://dl.circleci.com/status-badge/img/gh/hkupty/penna/tree/dev/0.9.svg?style=svg)](https://dl.circleci.com/status-badge/redirect/gh/hkupty/penna/tree/dev/0.9)
 
 Penna is an opinionated backend for [slf4j](https://github.com/qos-ch/slf4j/) that focuses on doing one thing right: Logging structured logs in json format to the console.
 
-## Warning!
+## A word of caution
 
-Penna is currently in alpha and, while usable, *has not been tested in production yet*.
+Penna is considered to be in beta stage.
+It has been observed to be stable, no reports of data loss (loss of log messages) or data corruption (malformed/unprocessable log messages).
+Yet, since no major system has reported using Penna under high load, it is only theoretically stable.
+Usage is advised with caution when rolling back to an alternate backend is easy.
 
-Please use with caution. Feedback, however, is very welcome.
+It would be immensely appreciated if real world usages of Penna were reported in [discussions](https://github.com/hkupty/penna/discussions) section, so we can speed up promoting Penna to 1.x and consider it completely stable.
 
 ## Why use Penna?
 
