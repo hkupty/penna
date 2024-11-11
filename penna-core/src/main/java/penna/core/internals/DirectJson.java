@@ -178,19 +178,9 @@ public final class DirectJson implements Closeable {
         buffer.put(OPEN_ARR);
     }
 
-    public void openObject(String str) {
-        writeKey(str);
-        buffer.put(OPEN_OBJ);
-    }
-
     public void openObject(final byte[] str) {
         writeKey(str);
         buffer.put(OPEN_OBJ);
-    }
-
-    public void openArray(String str) {
-        writeKey(str);
-        buffer.put(OPEN_ARR);
     }
 
     public void openArray(final byte[] str) {
@@ -233,7 +223,6 @@ public final class DirectJson implements Closeable {
         writeRaw(chars);
         buffer.put(QUOTE);
         buffer.put(KV_SEP);
-
     }
 
     public void writeKey(String str) {
@@ -334,28 +323,6 @@ public final class DirectJson implements Closeable {
         checkSpace(key.length() + value.length() + 5);
         writeKey(key);
         writeString(value);
-    }
-
-    public void writeStringValueFormatting(String key, String value, Object... args) {
-        checkSpace(key.length() + value.length() + 5);
-        writeKey(key);
-        writeStringFormatting(value, args);
-    }
-
-    public void writeNumberValue(String key, long value) {
-        checkSpace(key.length() + 3);
-        writeKey(key);
-        writeNumber(value);
-    }
-
-    public void writeNumberValue(String key, double value) {
-        writeKey(key);
-        writeNumber(value);
-    }
-
-    public void writeBoolean(boolean value) {
-        buffer.put(value ? TRUE : FALSE);
-        buffer.put(KV_SEP);
     }
 
     public void writeNull() {
