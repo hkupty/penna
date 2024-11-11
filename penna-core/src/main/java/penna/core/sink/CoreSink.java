@@ -312,9 +312,8 @@ public final class CoreSink implements Sink, Closeable {
         if (!logEvent.markers.isEmpty()) {
             jsonGenerator.openArray(LogField.MARKERS.fieldName);
             for (int i = 0; i < logEvent.markers.size(); i++) {
-                var marker = logEvent.markers.get(i).getName();
-                jsonGenerator.checkSpace(4 + marker.length());
-                jsonGenerator.writeString(marker);
+                var marker = logEvent.markers.get(i).buffer();
+                jsonGenerator.writeStringFromBuffer(marker);
             }
             jsonGenerator.closeArray();
             jsonGenerator.writeSep();
