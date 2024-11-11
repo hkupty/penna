@@ -42,19 +42,6 @@ public final class DirectJson implements Closeable {
             '\\',
             't',
     };
-    private static final byte[] TRUE = new byte[]{
-            't',
-            'r',
-            'u',
-            'e'
-    };
-    private static final byte[] FALSE = new byte[]{
-            'f',
-            'a',
-            'l',
-            's',
-            'e'
-    };
     private static final byte[] NULL = new byte[]{
             'n',
             'u',
