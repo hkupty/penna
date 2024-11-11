@@ -262,12 +262,10 @@ public final class CoreSink implements Sink, Closeable {
         jsonGenerator.writeStringFormatting(logEvent.message, logEvent.arguments);
     }
 
-    // The method must conform to the functional interface, so we should ignore this rule here.
-    @SuppressWarnings("PMD.UnusedFormalParameter")
     private void emitTimestamp(final PennaLogEvent logEvent) {
         jsonGenerator.checkSpace(25);
         jsonGenerator.writeKey(LogField.TIMESTAMP.fieldName);
-        jsonGenerator.writeNumber(logEvent.timestamp);
+        jsonGenerator.writePositveNumberFromByteBuffer(logEvent.timestamp);
     }
 
 

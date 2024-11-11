@@ -6,6 +6,7 @@ import org.slf4j.event.LoggingEvent;
 import penna.core.internals.Clock;
 import penna.core.slf4j.marker.PennaMarker;
 
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -22,7 +23,7 @@ public final class PennaLogEvent implements LoggingEvent {
     public Throwable throwable;
     public byte[] logger;
     public LogConfig config;
-    public long timestamp;
+    public final ByteBuffer timestamp = Clock.getTimestamp();
 
     private Thread thread;
 
@@ -49,7 +50,7 @@ public final class PennaLogEvent implements LoggingEvent {
             this.threadName = holder.getName().getBytes();
         }
 
-        timestamp = Clock.getTimestamp();
+        timestamp.rewind();
     }
 
     @Override
@@ -109,7 +110,7 @@ public final class PennaLogEvent implements LoggingEvent {
 
     @Override
     public long getTimeStamp() {
-        return timestamp;
+        return 0;
     }
 
     @Override

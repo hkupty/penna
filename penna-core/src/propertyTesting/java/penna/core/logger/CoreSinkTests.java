@@ -19,11 +19,12 @@ import penna.core.slf4j.marker.PennaMarker;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.security.SecureRandom;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 class CoreSinkTests {
 
@@ -154,7 +155,8 @@ class CoreSinkTests {
 
     @Property
     void validJsonMessage(@ForAll("fields") LogField[] fields) throws IOException {
-        File testFile = File.createTempFile("valid-message", ".json");
+        String prefix = Arrays.stream(fields).map(field -> new String(field.fieldName)).collect(Collectors.joining("-"));
+        File testFile = File.createTempFile("valid-message-" + prefix, ".json");
         FileOutputStream fos = new FileOutputStream(testFile);
 
         TestContextPoolManager.replace(() -> new CoreSink(fos));
@@ -164,7 +166,6 @@ class CoreSinkTests {
         cache.replaceConfig(config);
         PennaLogger logger = cache.getOrCreate("c.est.moi");
 
-
         Marker marker = MarkerFactory.getMarker("something");
 
         logger.atInfo()
@@ -173,7 +174,14 @@ class CoreSinkTests {
                 .setCause(new RuntimeException("oh-noes!"))
                 .log("My message");
 
-        Assertions.assertDoesNotThrow(() -> om.readValue(testFile, Map.class));
+        Assertions.assertDoesNotThrow(() -> om.readValue(testFile, Map.class), () -> {
+            try {
+                return Files.readString(testFile.toPath());
+            } catch (IOException e) {
+                return "Unable to read file\n" + e.getMessage();
+
+            }
+        });
         testFile.deleteOnExit();
         fos.close();
     }

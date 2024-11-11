@@ -289,6 +289,12 @@ public final class DirectJson implements Closeable {
         intToAscii.longToAscii(data, buffer);
     }
 
+    public void writePositveNumberFromByteBuffer(final ByteBuffer numberBuffer) {
+        checkSpace(numberBuffer.limit() + 1);
+        buffer.put(numberBuffer);
+        buffer.put(KV_SEP);
+    }
+
     public void writeNumber(final long data) {
         if (data < 0) {
             writeRaw('-');
