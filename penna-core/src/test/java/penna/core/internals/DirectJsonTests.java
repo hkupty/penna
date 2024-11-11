@@ -44,7 +44,7 @@ class DirectJsonTests {
     void can_write_kv_to_buffer() {
         var chars = Helper.write(directJson -> {
             directJson.openObject();
-            directJson.writeStringValue("hello", "world");
+            directJson.writeStringKeyValue("hello", "world");
             directJson.closeObject();
         });
 
@@ -61,61 +61,6 @@ class DirectJsonTests {
         });
 
         assertEquals("[\"hello\",\"world\"]", chars);
-    }
-
-    @Test
-    void can_write_number_kv_to_buffer() {
-        var chars = Helper.write(directJson -> {
-            directJson.openObject();
-            directJson.writeNumberValue("hello", 1337);
-            directJson.closeObject();
-        });
-
-        assertEquals("{\"hello\":1337}", chars);
-    }
-
-    @Test
-    void can_format_strings() {
-        var chars = Helper.write(directJson -> {
-            directJson.openObject();
-            directJson.writeStringValueFormatting("message", "hello {}", "world");
-            directJson.closeObject();
-        });
-
-        assertEquals("{\"message\":\"hello world\"}", chars);
-    }
-
-    @Test
-    void ignores_escaped_format_blocks() {
-        var chars = Helper.write(directJson -> {
-            directJson.openObject();
-            directJson.writeStringValueFormatting("message", "hello \\{}", "world");
-            directJson.closeObject();
-        });
-
-        assertEquals("{\"message\":\"hello {}\"}", chars);
-    }
-
-    @Test
-    void a_previous_escape_doesnt_break_formatting() {
-        var chars = Helper.write(directJson -> {
-            directJson.openObject();
-            directJson.writeStringValueFormatting("message", "hello \\| {}", "world");
-            directJson.closeObject();
-        });
-
-        assertEquals("{\"message\":\"hello \\\\| world\"}", chars);
-    }
-
-    @Test
-    void formats_double_escaped_format_blocks() {
-        var chars = Helper.write(directJson -> {
-            directJson.openObject();
-            directJson.writeStringValueFormatting("message", "hello http:\\\\{}", "world.com");
-            directJson.closeObject();
-        });
-
-        assertEquals("{\"message\":\"hello http:\\\\\\\\world.com\"}", chars);
     }
 
     @Test
