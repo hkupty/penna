@@ -266,6 +266,14 @@ public final class DirectJson implements Closeable {
         buffer.put(KV_SEP);
     }
 
+    public void writeStringFromBuffer(final ByteBuffer str) {
+        checkSpace(str.limit() + 3);
+        buffer.put(QUOTE);
+        buffer.put(str);
+        buffer.put(QUOTE);
+        buffer.put(KV_SEP);
+    }
+
     public void writeStringFormatting(final String str, final Object... args) {
         buffer.put(QUOTE);
         writeRawFormatting(str, args);
