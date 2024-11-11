@@ -4,21 +4,32 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.IMarkerFactory;
 import penna.core.slf4j.marker.PennaMarker;
 
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 
 /**
  * This is an {@link IMarkerFactory} implementation that builds {@link PennaMarker} instances.
  */
 public class PennaMarkerFactory implements IMarkerFactory {
     private final Map<@NotNull String, @NotNull PennaMarker> storage = new ConcurrentHashMap<>();
+    private final Function<@NotNull String, @NotNull PennaMarker> compute = this::getDetachedMarker;
 
     @Override
-    public PennaMarker getMarker(String name) {
+    public @NotNull PennaMarker getMarker(String name) {
         if (name == null) {
             throw new IllegalArgumentException("Marker name cannot be null");
         }
-        return storage.computeIfAbsent(name, this::getDetachedMarker);
+        PennaMarker marker;
+
+        if ((marker = storage.get(name)) == null) {
+            // `computeIfAbsent` can be unnecessarily expensive if we have the marker already
+            marker = storage.computeIfAbsent(name, compute);
+        }
+
+        return marker;
     }
 
     @Override
