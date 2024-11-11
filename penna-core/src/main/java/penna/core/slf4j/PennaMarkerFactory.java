@@ -51,7 +51,7 @@ public class PennaMarkerFactory implements IMarkerFactory {
     }
 
     @Override
-    public PennaMarker getDetachedMarker(String name) {
-        return new PennaMarker(name);
+    public @NotNull PennaMarker getDetachedMarker(String name) {
+        return new PennaMarker(ByteBuffer.wrap(name.getBytes(StandardCharsets.UTF_8)));
     }
 }

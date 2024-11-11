@@ -2,6 +2,8 @@ package penna.core.slf4j.marker;
 
 import org.slf4j.Marker;
 
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Iterator;
 
@@ -12,12 +14,12 @@ import java.util.Iterator;
  * <br />
  * This is a deliberate design choice to align with SLF4J's 2.x API in which multiple markers are preferred
  * over nested markers.
- * @param name
  */
-public record PennaMarker(String name) implements Marker {
+public record PennaMarker(ByteBuffer buffer) implements Marker {
+
     @Override
     public String getName() {
-        return name;
+        return StandardCharsets.UTF_8.decode(buffer).toString();
     }
 
     @Override
