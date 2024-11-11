@@ -13,6 +13,8 @@ import penna.core.models.KeyValuePair;
 import penna.core.models.LogConfig;
 import penna.core.models.PennaLogEvent;
 import penna.core.sink.CoreSink;
+import penna.core.slf4j.PennaMarkerFactory;
+import penna.core.slf4j.marker.PennaMarker;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -26,6 +28,7 @@ import java.util.Random;
 class CoreSinkTests {
 
     private static final ObjectMapper om = new ObjectMapper();
+    private static final PennaMarkerFactory pmf = new PennaMarkerFactory();
 
     @Provide
     Arbitrary<LogField[]> fields() {
@@ -55,12 +58,12 @@ class CoreSinkTests {
                 .excludeChars('"')
                 .ofMaxLength(256)
                 .ofMinLength(2);
-        Arbitrary<List<Marker>> markers = Arbitraries
+        Arbitrary<List<PennaMarker>> markers = Arbitraries
                 .strings()
                 .alpha()
                 .ofMinLength(1)
                 .ofMaxLength(20)
-                .map(MarkerFactory::getMarker)
+                .map(pmf::getMarker)
                 .list()
                 .ofMinSize(0)
                 .ofMaxSize(4);

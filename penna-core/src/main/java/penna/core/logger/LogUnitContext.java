@@ -8,6 +8,7 @@ import penna.core.internals.LogUnitContextPool;
 import penna.core.models.KeyValuePair;
 import penna.core.models.PennaLogEvent;
 import penna.core.sink.Sink;
+import penna.core.slf4j.marker.PennaMarker;
 
 import java.io.IOException;
 import java.util.function.Supplier;
@@ -70,7 +71,9 @@ public record LogUnitContext(
 
     @Override
     public LoggingEventBuilder addMarker(Marker marker) {
-        logEvent.markers.add(marker);
+        if (marker instanceof PennaMarker pennaMarker) {
+            logEvent.markers.add(pennaMarker);
+        }
         return this;
     }
 
