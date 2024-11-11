@@ -70,7 +70,7 @@ public final class CoreSink implements Sink, Closeable {
             mdcAdapter = null;
         }
         jsonGenerator = new DirectJson(channel);
-        mdcWriter = jsonGenerator::writeStringValue;
+        mdcWriter = jsonGenerator::writeStringKeyValue;
     }
 
     public static Sink getSink() {
@@ -101,7 +101,7 @@ public final class CoreSink implements Sink, Closeable {
             jsonGenerator.writeUnsafe(fileName);
             if (frame.getLineNumber() > 0) {
                 jsonGenerator.writeRaw(':');
-                jsonGenerator.writeNumberRaw(frame.getLineNumber());
+                jsonGenerator.writePositiveNumber(frame.getLineNumber());
             }
         } else if (frame.isNativeMethod()) {
             jsonGenerator.writeRaw(NATIVE);
@@ -265,7 +265,7 @@ public final class CoreSink implements Sink, Closeable {
     private void emitTimestamp(final PennaLogEvent logEvent) {
         jsonGenerator.checkSpace(25);
         jsonGenerator.writeKey(LogField.TIMESTAMP.fieldName);
-        jsonGenerator.writePositveNumberFromByteBuffer(logEvent.timestamp);
+        jsonGenerator.writePositiveNumberFromByteBuffer(logEvent.timestamp);
     }
 
 

@@ -274,11 +274,11 @@ public final class DirectJson implements Closeable {
         buffer.put(KV_SEP);
     }
 
-    public void writeNumberRaw(final long data) {
+    public void writePositiveNumber(final long data) {
         intToAscii.longToAscii(data, buffer);
     }
 
-    public void writePositveNumberFromByteBuffer(final ByteBuffer numberBuffer) {
+    public void writePositiveNumberFromByteBuffer(final ByteBuffer numberBuffer) {
         checkSpace(numberBuffer.limit() + 1);
         buffer.put(numberBuffer);
         buffer.put(KV_SEP);
@@ -288,7 +288,7 @@ public final class DirectJson implements Closeable {
         if (data < 0) {
             writeRaw('-');
         }
-        writeNumberRaw(data);
+        writePositiveNumber(data);
         buffer.put(KV_SEP);
     }
 
@@ -298,7 +298,7 @@ public final class DirectJson implements Closeable {
             writeRaw('-');
             number = Math.abs(data);
         }
-        writeNumberRaw((long) number);
+        writePositiveNumber((long) number);
         buffer.put(DOT);
         var pos = buffer.position();
         BigDecimal fractional = BigDecimal.valueOf(number).remainder(BigDecimal.ONE);
@@ -319,7 +319,7 @@ public final class DirectJson implements Closeable {
         buffer.put(buffer.position() - 1, ENTRY_SEP);
     }
 
-    public void writeStringValue(final String key, final String value) {
+    public void writeStringKeyValue(final String key, final String value) {
         checkSpace(key.length() + value.length() + 5);
         writeKey(key);
         writeString(value);
