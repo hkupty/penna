@@ -33,7 +33,7 @@ public final class LogUnitContextPool {
     }
 
     public LogUnitContextPool() {
-        int size = 16;
+        int size = 256;
         objectGroup = new LogUnitContext[size];
         locks = new ReentrantLock[size];
         for (int i = 0; i < size; i++) {
@@ -63,9 +63,9 @@ public final class LogUnitContextPool {
             but never hitting the end of the array.
          */
 
-        var index = Thread.currentThread().hashCode() & 0xF;
+        var index = Thread.currentThread().hashCode() & 0xFF;
         while (!locks[index].tryLock()) {
-            index = ++index & 0xF;
+            index = ++index & 0xFF;
         }
         return index;
     }
