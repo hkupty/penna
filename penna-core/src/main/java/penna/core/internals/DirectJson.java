@@ -58,6 +58,7 @@ public final class DirectJson implements Closeable {
     @VisibleForTesting
     ByteBuffer buffer = ByteBuffer.allocateDirect(INITIAL_BUFFER_SIZE);
     private final IntToAscii intToAscii = new IntToAscii();
+    private boolean kvLast = false;
 
     public DirectJson(WritableByteChannel channel) {
         this.backingOs = null;
@@ -170,29 +171,33 @@ public final class DirectJson implements Closeable {
     public void openObject(final byte[] str) {
         writeKey(str);
         buffer.put(OPEN_OBJ);
+        kvLast = false;
     }
 
     public void openArray(final byte[] str) {
         writeKey(str);
         buffer.put(OPEN_ARR);
+        kvLast = false;
     }
 
     public void closeObject() {
-        var target = buffer.position() - 1;
-        if (',' == buffer.get(target)) {
+        if (kvLast) {
+            var target = buffer.position() - 1;
             buffer.put(target, CLOSE_OBJ);
         } else {
             buffer.put(CLOSE_OBJ);
         }
+        kvLast = false;
     }
 
     public void closeArray() {
-        var target = buffer.position() - 1;
-        if (',' == buffer.get(target)) {
+        if (kvLast) {
+            var target = buffer.position() - 1;
             buffer.put(target, CLOSE_ARR);
         } else {
             buffer.put(CLOSE_ARR);
         }
+        kvLast = false;
     }
 
     public void writeUnsafe(final String str) {
@@ -211,7 +216,7 @@ public final class DirectJson implements Closeable {
         buffer.put(QUOTE);
         writeRaw(chars);
         buffer.put(QUOTE);
-        buffer.put(KV_SEP);
+        writeSep();
     }
 
     public void writeKey(String str) {
@@ -232,7 +237,7 @@ public final class DirectJson implements Closeable {
         buffer.put(QUOTE);
         writeUnsafe(str);
         buffer.put(QUOTE);
-        buffer.put(KV_SEP);
+        writeSep();
     }
 
     public void writeString(final String str) {
@@ -241,7 +246,7 @@ public final class DirectJson implements Closeable {
         buffer.put(QUOTE);
         writeRaw(str);
         buffer.put(QUOTE);
-        buffer.put(KV_SEP);
+        writeSep();
     }
 
     public void writeStringFromBuffer(final ByteBuffer str) {
@@ -250,18 +255,19 @@ public final class DirectJson implements Closeable {
         buffer.put(QUOTE);
         buffer.put(str);
         buffer.put(QUOTE);
-        buffer.put(KV_SEP);
+        writeSep();
     }
 
     public void writeStringFormatting(final String str, final Object... args) {
         buffer.put(QUOTE);
         writeRawFormatting(str, args);
         buffer.put(QUOTE);
-        buffer.put(KV_SEP);
+        writeSep();
     }
 
     public void writeSep() {
         buffer.put(KV_SEP);
+        kvLast = true;
     }
 
     public void writePositiveNumber(final long data) {
@@ -271,7 +277,7 @@ public final class DirectJson implements Closeable {
     public void writePositiveNumberFromByteBuffer(final ByteBuffer numberBuffer) {
         checkSpace(numberBuffer.limit() + 1);
         buffer.put(numberBuffer);
-        buffer.put(KV_SEP);
+        writeSep();
     }
 
     public void writeNumber(final long data) {
@@ -279,7 +285,7 @@ public final class DirectJson implements Closeable {
             writeRaw('-');
         }
         writePositiveNumber(data);
-        buffer.put(KV_SEP);
+        writeSep();
     }
 
     public void writeNumber(final double data) {
@@ -302,7 +308,7 @@ public final class DirectJson implements Closeable {
         }
 
         buffer.position(pos + decs);
-        buffer.put(KV_SEP);
+        writeSep();
     }
 
     public void writeEntrySep() {
@@ -317,7 +323,7 @@ public final class DirectJson implements Closeable {
 
     public void writeNull() {
         buffer.put(NULL);
-        buffer.put(KV_SEP);
+        writeSep();
     }
 
     public void checkSpace(int size) {
