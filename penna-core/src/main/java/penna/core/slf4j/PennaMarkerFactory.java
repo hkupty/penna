@@ -8,14 +8,12 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
 
 /**
  * This is an {@link IMarkerFactory} implementation that builds {@link PennaMarker} instances.
  */
 public class PennaMarkerFactory implements IMarkerFactory {
     private final Map<@NotNull String, @NotNull PennaMarker> storage = new ConcurrentHashMap<>();
-    private final Function<@NotNull String, @NotNull PennaMarker> compute = this::getDetachedMarker;
 
     @Override
     public @NotNull PennaMarker getMarker(String name) {
@@ -25,8 +23,8 @@ public class PennaMarkerFactory implements IMarkerFactory {
         PennaMarker marker;
 
         if ((marker = storage.get(name)) == null) {
-            // `computeIfAbsent` can be unnecessarily expensive if we have the marker already
-            marker = storage.computeIfAbsent(name, compute);
+            marker = getDetachedMarker(name);
+            storage.put(name, marker);
         }
 
         return marker;
@@ -52,6 +50,6 @@ public class PennaMarkerFactory implements IMarkerFactory {
 
     @Override
     public @NotNull PennaMarker getDetachedMarker(String name) {
-        return new PennaMarker(ByteBuffer.wrap(name.getBytes(StandardCharsets.UTF_8)));
+        return PennaMarker.build(name);
     }
 }

@@ -1,5 +1,6 @@
 package penna.core.slf4j.marker;
 
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Marker;
 
 import java.nio.ByteBuffer;
@@ -16,6 +17,10 @@ import java.util.Iterator;
  * over nested markers.
  */
 public record PennaMarker(ByteBuffer buffer) implements Marker {
+
+    public static @NotNull PennaMarker build(String name){
+        return new PennaMarker(ByteBuffer.wrap(name.getBytes(StandardCharsets.UTF_8)));
+    }
 
     @Override
     public String getName() {
