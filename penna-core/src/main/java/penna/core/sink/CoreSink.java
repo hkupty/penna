@@ -88,8 +88,6 @@ public final class CoreSink implements Sink, Closeable {
     // Hand-crafted based on from StackTraceElement::toString
     // ClassLoader is intentionally removed
     private void writeStackFrame(StackTraceElement frame) {
-        String fileName;
-
         jsonGenerator.writeQuote();
 
         jsonGenerator.writeUnsafe(frame.getClassName());
@@ -97,16 +95,17 @@ public final class CoreSink implements Sink, Closeable {
         jsonGenerator.writeUnsafe(frame.getMethodName());
         jsonGenerator.writeRaw('(');
 
-        if ((fileName = frame.getFileName()) != null && !fileName.isEmpty()) {
-            jsonGenerator.writeUnsafe(fileName);
-            if (frame.getLineNumber() > 0) {
-                jsonGenerator.writeRaw(':');
-                jsonGenerator.writePositiveNumber(frame.getLineNumber());
+        String finalFileName = frame.getFileName();
+        switch (frame) {
+            case StackTraceElement ignored when finalFileName != null && !finalFileName.isEmpty() ->  {
+                jsonGenerator.writeUnsafe(finalFileName);
+                if (frame.getLineNumber() > 0) {
+                    jsonGenerator.writeRaw(':');
+                    jsonGenerator.writePositiveNumber(frame.getLineNumber());
+                }
             }
-        } else if (frame.isNativeMethod()) {
-            jsonGenerator.writeRaw(NATIVE);
-        } else {
-            jsonGenerator.writeRaw(UNKNOWN);
+            case StackTraceElement f when f.isNativeMethod() -> jsonGenerator.writeRaw(NATIVE);
+            default -> jsonGenerator.writeRaw(UNKNOWN);
         }
 
         jsonGenerator.writeRaw(')');
