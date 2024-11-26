@@ -20,9 +20,9 @@ public class LoggerPerformanceTest {
     @State(Scope.Thread)
     public static class TestBehavior {
         @Param({
-                "simple",
-                "modest",
-                "moderate",
+//                "simple",
+//                "modest",
+//                "moderate",
                 "large"
         })
         String behavior;
@@ -63,7 +63,7 @@ public class LoggerPerformanceTest {
 
     @State(Scope.Thread)
     public static class TestState {
-        @Param
+        @Param({"Penna"})
         PerfTestLoggerFactory.Implementation implementation;
         PerfTestLoggerFactory factory;
         Logger logger;
@@ -92,8 +92,8 @@ public class LoggerPerformanceTest {
         var options = RunnerOptions
                 .averageTime(LoggerPerformanceTest.class.getName() + ".*")
                 .addProfiler("gc")
-                .addProfiler("perfnorm")
-                .addProfiler("perfasm")
+//                .addProfiler("perfnorm")
+//                .addProfiler("perfasm")
                 .addProfiler("jfr")
                 .build();
 

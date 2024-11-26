@@ -38,3 +38,7 @@ dependencies {
 
     annotationProcessor libs.jmh.annotations
 }
+
+application {
+    mainClassName = project.findProperty("chooseMain").toString()
+}
