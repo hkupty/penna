@@ -1,6 +1,7 @@
 package penna.core.slf4j;
 
 import org.slf4j.spi.MDCAdapter;
+import penna.core.slf4j.mdc.PennaMDCImpl;
 import penna.core.slf4j.mdc.PennaMDCImpl.Control;
 
 import java.util.Deque;
@@ -16,6 +17,10 @@ public class PennaMDCAdapter implements MDCAdapter {
     @Override
     public String get(String s) {
         return Control.mdcStorage.get().get(s);
+    }
+
+    public PennaMDCImpl get() {
+        return Control.mdcStorage.get();
     }
 
     @Override
@@ -57,13 +62,4 @@ public class PennaMDCAdapter implements MDCAdapter {
     public void clearDequeByKey(String s) {
 
     }
-
-    public boolean isNotEmpty() {
-        return Control.mdcStorage.get() != Control.empty;
-    }
-
-    public void forEach(BiConsumer<String, String> action) {
-        Control.mdcStorage.get().forEach(action);
-    }
-
 }

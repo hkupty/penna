@@ -7,6 +7,7 @@ import penna.core.internals.StackTraceBloomFilter;
 import penna.core.models.LogConfig;
 import penna.core.models.PennaLogEvent;
 import penna.core.slf4j.PennaMDCAdapter;
+import penna.core.slf4j.mdc.PennaMDCImpl;
 
 import java.io.Closeable;
 import java.io.FileDescriptor;
@@ -272,9 +273,10 @@ public final class CoreSink implements Sink, Closeable {
     // The method must conform to the functional interface, so we should ignore this rule here.
     @SuppressWarnings("PMD.UnusedFormalParameter")
     private void emitMDC(final PennaLogEvent logEvent) {
-        if (mdcAdapter.isNotEmpty()) {
+        var adapter = mdcAdapter.get();
+        if (adapter != PennaMDCImpl.Control.empty) {
             jsonGenerator.openObject(LogField.MDC.fieldName);
-            mdcAdapter.forEach(mdcWriter);
+            adapter.forEach(mdcWriter);
             jsonGenerator.closeObject();
             jsonGenerator.writeSep();
         }
