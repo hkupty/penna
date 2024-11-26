@@ -19,7 +19,8 @@ import java.util.Iterator;
 public record PennaMarker(ByteBuffer buffer) implements Marker {
 
     public static @NotNull PennaMarker build(String name){
-        return new PennaMarker(ByteBuffer.wrap(name.getBytes(StandardCharsets.UTF_8)));
+        var buffer = ByteBuffer.wrap(name.getBytes(StandardCharsets.UTF_8)).asReadOnlyBuffer();
+        return new PennaMarker(buffer);
     }
 
     @Override

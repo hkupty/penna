@@ -246,6 +246,7 @@ public final class DirectJson implements Closeable {
 
     public void writeStringFromBuffer(final ByteBuffer str) {
         checkSpace(str.limit() + 3);
+        str.rewind();
         buffer.put(QUOTE);
         buffer.put(str);
         buffer.put(QUOTE);
