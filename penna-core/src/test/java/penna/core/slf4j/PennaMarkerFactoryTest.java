@@ -4,6 +4,8 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Marker;
 import penna.core.slf4j.marker.PennaMarker;
 
+import java.nio.ByteBuffer;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class PennaMarkerFactoryTest {
@@ -43,6 +45,8 @@ class PennaMarkerFactoryTest {
         var marker = markerFactory.getMarker("test");
 
         assertEquals("test", marker.getName());
-        assertEquals("test", new String(marker.buffer().array()));
+        ByteBuffer buffer = ByteBuffer.allocate(4);
+        buffer.put(marker.buffer().rewind());
+        assertEquals("test", new String(buffer.array()));
     }
 }
