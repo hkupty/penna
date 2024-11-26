@@ -63,11 +63,12 @@ public final class CoreSink implements Sink, Closeable {
     }
 
     public CoreSink(WritableByteChannel channel) {
-        if (MDC.getMDCAdapter() instanceof PennaMDCAdapter adapter) {
-            mdcAdapter = adapter;
-        } else {
-            report("ERROR", "Not using PennaMDCAdapter for some reason! MDC will be off");
-            mdcAdapter = null;
+        switch (MDC.getMDCAdapter()) {
+            case PennaMDCAdapter adapter -> mdcAdapter = adapter;
+            default -> {
+                report("ERROR", "Not using XxMdcAdapter for some reason! MDC will be off");
+                mdcAdapter = null;
+            }
         }
         jsonGenerator = new DirectJson(channel);
         mdcWriter = jsonGenerator::writeStringKeyValue;

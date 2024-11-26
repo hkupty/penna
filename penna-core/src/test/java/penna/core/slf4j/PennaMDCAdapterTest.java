@@ -7,7 +7,7 @@ class PennaMDCAdapterTest {
 
     @Test
     void canStoreInTheMdc() {
-        var adapter = new PennaMDCAdapter();
+        var adapter = new XxMdcAdapter();
 
         adapter.put("Key", "value");
         Assertions.assertEquals("value", adapter.get("Key"));
@@ -15,7 +15,7 @@ class PennaMDCAdapterTest {
 
     @Test
     void canOverwriteAValueInMdc() {
-        var adapter = new PennaMDCAdapter();
+        var adapter = new XxMdcAdapter();
 
         adapter.put("Key", "value");
         Assertions.assertEquals("value", adapter.get("Key"));
@@ -25,7 +25,7 @@ class PennaMDCAdapterTest {
 
     @Test
     void canReplaceTheContextMap() {
-        var adapter = new PennaMDCAdapter();
+        var adapter = new XxMdcAdapter();
 
         // Sets initial value
         adapter.put("Key", "value");
@@ -50,7 +50,7 @@ class PennaMDCAdapterTest {
 
     @Test
     void canUpdateContextOutsideMdc() {
-        var adapter = new PennaMDCAdapter();
+        var adapter = new XxMdcAdapter();
 
         // Sets initial value
         adapter.put("Key", "value");

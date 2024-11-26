@@ -8,7 +8,7 @@ import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.options.TimeValue;
 import org.slf4j.spi.MDCAdapter;
 import penna.core.logger.utils.RunnerOptions;
-import penna.core.slf4j.PennaMDCAdapter;
+import penna.core.slf4j.XxMdcAdapter;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -24,7 +24,7 @@ public class MdcAdapterPerformanceTest {
 
     @State(Scope.Thread)
     public static class MDCProxy {
-        private final PennaMDCAdapter pennaMDCAdapter = new PennaMDCAdapter();
+        private final XxMdcAdapter pennaMDCAdapter = new XxMdcAdapter();
         private final LogbackMDCAdapter logbackMDCAdapter = new LogbackMDCAdapter();
 
         @Param({"Penna"})
