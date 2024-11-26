@@ -1,4 +1,4 @@
-package penna.core.slf4j.mdcv2;
+package penna.core.slf4j.mdc;
 
 import org.slf4j.spi.MDCAdapter;
 

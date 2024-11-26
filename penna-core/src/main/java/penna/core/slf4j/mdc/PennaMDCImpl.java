@@ -1,4 +1,4 @@
-package penna.core.slf4j.mdcv2;
+package penna.core.slf4j.mdc;
 
 import java.util.Map;
 import java.util.TreeMap;

@@ -1,7 +1,7 @@
 package penna.core.slf4j;
 
 import org.slf4j.spi.MDCAdapter;
-import penna.core.slf4j.mdcv2.PennaMDCImpl.Control;
+import penna.core.slf4j.mdc.PennaMDCImpl.Control;
 
 import java.util.Deque;
 import java.util.Map;
