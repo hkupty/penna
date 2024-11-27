@@ -60,6 +60,8 @@ public class ThreadsPerformanceTest {
     public static class TestState {
         @Param({"2", "16", "128", "1024"})
         int threads;
+
+        @Param
         PerfTestLoggerFactory.Implementation implementation;
         PerfTestLoggerFactory factory;
         Logger logger;
