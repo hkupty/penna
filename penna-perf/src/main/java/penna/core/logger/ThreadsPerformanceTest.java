@@ -58,10 +58,10 @@ public class ThreadsPerformanceTest {
 
     @State(Scope.Thread)
     public static class TestState {
-        @Param({"2", "16", "128", "1024"})
+        @Param({"2", "16", "128"})
         int threads;
 
-        @Param
+        @Param({"Penna", "Logback"})
         PerfTestLoggerFactory.Implementation implementation;
         PerfTestLoggerFactory factory;
         Logger logger;
@@ -84,13 +84,15 @@ public class ThreadsPerformanceTest {
     @Benchmark
     public void testLogger(TestState state, TestBehavior tb) throws InterruptedException {
         CountDownLatch cdl = new CountDownLatch(state.threads);
-        int messagesPerLogger = 512_000 / state.threads;
-        Thread.ofVirtual().start(() -> {
-            for (int i = 0; i < messagesPerLogger; i++) {
-                tb.log(state.logger);
+        int messagesPerLogger = 512 / state.threads;
+        for (int t = 0; t < state.threads; t++) {
+          Thread.ofVirtual().start(() -> {
+            for (int i = 0; i <= messagesPerLogger; i++) {
+              tb.log(state.logger);
             }
             cdl.countDown();
-        });
+          });
+        }
         cdl.await();
     }
 
