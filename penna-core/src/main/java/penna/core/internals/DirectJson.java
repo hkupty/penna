@@ -27,7 +27,7 @@ public final class DirectJson implements Closeable {
     private static final byte OPEN_ARR = '[';
     private static final byte CLOSE_ARR = ']';
 
-    private static final byte[] NEWLINE = new byte[]{
+    public static final byte[] NEWLINE = new byte[]{
             '\\',
             'n',
     };
@@ -35,7 +35,7 @@ public final class DirectJson implements Closeable {
             '\\',
             '\\',
     };
-    private static final byte[] LINEBREAK = new byte[]{
+    public static final byte[] LINEBREAK = new byte[]{
             '\\',
             'r',
     };

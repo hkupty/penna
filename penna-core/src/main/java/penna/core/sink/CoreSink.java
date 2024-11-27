@@ -90,8 +90,6 @@ public final class CoreSink implements Sink, Closeable {
     // Hand-crafted based on from StackTraceElement::toString
     // ClassLoader is intentionally removed
     private void writeStackFrame(StackTraceElement frame) {
-        jsonGenerator.writeQuote();
-
         jsonGenerator.writeUnsafe(frame.getClassName());
         jsonGenerator.writeRaw('.');
         jsonGenerator.writeUnsafe(frame.getMethodName());
@@ -111,7 +109,6 @@ public final class CoreSink implements Sink, Closeable {
         }
 
         jsonGenerator.writeRaw(')');
-        jsonGenerator.writeQuote();
 
     }
 
@@ -134,27 +131,27 @@ public final class CoreSink implements Sink, Closeable {
 
         if ((frames = throwable.getStackTrace()) != null && frames.length > 0) {
             jsonGenerator.writeKey(STACKTRACE);
-            jsonGenerator.openArray();
+            jsonGenerator.writeQuote();
             var brokenOut = false;
             var filter = config.filter;
             for (int index = 0; index < Math.min(frames.length, config.stacktraceDepth); index++) {
                 filter.hash(filterHashes, frames[index]);
                 jsonGenerator.checkSpace(128);
                 writeStackFrame(frames[index]);
-                jsonGenerator.writeRaw(',');
                 if (filter.check(filterHashes)) {
                     jsonGenerator.writeStringFromBytes(REPEATED);
                     brokenOut = true;
                     break;
                 }
                 filter.mark(filterHashes);
+                jsonGenerator.writeRaw(DirectJson.NEWLINE);
             }
 
             if (!brokenOut && frames.length > config.stacktraceDepth) {
-                jsonGenerator.writeStringFromBytes(ELLIPSIS);
+                jsonGenerator.writeRaw(ELLIPSIS);
             }
 
-            jsonGenerator.closeArray();
+            jsonGenerator.writeQuote();
             jsonGenerator.writeSep();
         }
 
