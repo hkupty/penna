@@ -79,7 +79,8 @@ public final class DirectJson implements Closeable {
         int cursor = 0;
         boolean isPlaceholder = false;
         boolean escaped = false;
-        for (int i = 0; i < str.length(); i++) {
+        int length = str.length();
+        for (int i = 0; i < length; i++) {
             var chr = str.codePointAt(i);
             switch (chr) {
                 case '\\' -> {
@@ -92,8 +93,7 @@ public final class DirectJson implements Closeable {
                 case '\r' -> buffer.put(LINEBREAK);
                 case '\t' -> buffer.put(TAB);
                 case DELIM_START -> {
-                    if (cursor < arguments.length &&
-                            str.codePointAt(i + 1) == '}') {
+                    if (cursor < arguments.length && (i + 1 < length) && str.codePointAt(i + 1) == '}') {
                         // We only consider a curly braces to be a placeholder if not escaped,
                         // but we double-check escaped as it could've happened further back
                         isPlaceholder = !escaped || str.codePointBefore(i) != '\\';
