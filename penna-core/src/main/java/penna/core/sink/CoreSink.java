@@ -7,6 +7,7 @@ import penna.core.internals.StackTraceBloomFilter;
 import penna.core.models.LogConfig;
 import penna.core.models.PennaLogEvent;
 import penna.core.slf4j.PennaMDCAdapter;
+import penna.core.slf4j.mdc.PennaMDCImpl;
 
 import java.io.Closeable;
 import java.io.FileDescriptor;
@@ -62,16 +63,16 @@ public final class CoreSink implements Sink, Closeable {
         this.fos = fos;
     }
 
-    public CoreSink(WritableByteChannel channel) {
-        if (MDC.getMDCAdapter() instanceof PennaMDCAdapter adapter) {
-            mdcAdapter = adapter;
-        } else {
-            report("ERROR", "Not using PennaMDCAdapter for some reason! MDC will be off");
-            mdcAdapter = null;
-        }
+  public CoreSink(WritableByteChannel channel) {
+      if (MDC.getMDCAdapter() instanceof PennaMDCAdapter adapter) {
+          mdcAdapter = adapter;
+      } else {
+          report("ERROR", "Not using XxMdcAdapter for some reason! MDC will be off");
+          mdcAdapter = null;
+      }
         jsonGenerator = new DirectJson(channel);
-        mdcWriter = jsonGenerator::writeStringValue;
-    }
+        mdcWriter = jsonGenerator::writeStringKeyValue;
+  }
 
     public static Sink getSink() {
         return new CoreSink();
@@ -88,29 +89,25 @@ public final class CoreSink implements Sink, Closeable {
     // Hand-crafted based on from StackTraceElement::toString
     // ClassLoader is intentionally removed
     private void writeStackFrame(StackTraceElement frame) {
-        String fileName;
-
-        jsonGenerator.writeQuote();
-
         jsonGenerator.writeUnsafe(frame.getClassName());
         jsonGenerator.writeRaw('.');
         jsonGenerator.writeUnsafe(frame.getMethodName());
         jsonGenerator.writeRaw('(');
 
-        if ((fileName = frame.getFileName()) != null && !fileName.isEmpty()) {
-            jsonGenerator.writeUnsafe(fileName);
-            if (frame.getLineNumber() > 0) {
-                jsonGenerator.writeRaw(':');
-                jsonGenerator.writeNumberRaw(frame.getLineNumber());
+        String finalFileName = frame.getFileName();
+        switch (frame) {
+            case StackTraceElement ignored when finalFileName != null && !finalFileName.isEmpty() ->  {
+                jsonGenerator.writeUnsafe(finalFileName);
+                if (frame.getLineNumber() > 0) {
+                    jsonGenerator.writeRaw(':');
+                    jsonGenerator.writePositiveNumber(frame.getLineNumber());
+                }
             }
-        } else if (frame.isNativeMethod()) {
-            jsonGenerator.writeRaw(NATIVE);
-        } else {
-            jsonGenerator.writeRaw(UNKNOWN);
+            case StackTraceElement f when f.isNativeMethod() -> jsonGenerator.writeRaw(NATIVE);
+            default -> jsonGenerator.writeRaw(UNKNOWN);
         }
 
         jsonGenerator.writeRaw(')');
-        jsonGenerator.writeQuote();
 
     }
 
@@ -133,27 +130,27 @@ public final class CoreSink implements Sink, Closeable {
 
         if ((frames = throwable.getStackTrace()) != null && frames.length > 0) {
             jsonGenerator.writeKey(STACKTRACE);
-            jsonGenerator.openArray();
+            jsonGenerator.writeQuote();
             var brokenOut = false;
             var filter = config.filter;
             for (int index = 0; index < Math.min(frames.length, config.stacktraceDepth); index++) {
                 filter.hash(filterHashes, frames[index]);
                 jsonGenerator.checkSpace(128);
                 writeStackFrame(frames[index]);
-                jsonGenerator.writeRaw(',');
                 if (filter.check(filterHashes)) {
                     jsonGenerator.writeStringFromBytes(REPEATED);
                     brokenOut = true;
                     break;
                 }
                 filter.mark(filterHashes);
+                jsonGenerator.writeRaw(DirectJson.NEWLINE);
             }
 
             if (!brokenOut && frames.length > config.stacktraceDepth) {
-                jsonGenerator.writeStringFromBytes(ELLIPSIS);
+                jsonGenerator.writeRaw(ELLIPSIS);
             }
 
-            jsonGenerator.closeArray();
+            jsonGenerator.writeQuote();
             jsonGenerator.writeSep();
         }
 
@@ -262,21 +259,20 @@ public final class CoreSink implements Sink, Closeable {
         jsonGenerator.writeStringFormatting(logEvent.message, logEvent.arguments);
     }
 
-    // The method must conform to the functional interface, so we should ignore this rule here.
-    @SuppressWarnings("PMD.UnusedFormalParameter")
     private void emitTimestamp(final PennaLogEvent logEvent) {
         jsonGenerator.checkSpace(25);
         jsonGenerator.writeKey(LogField.TIMESTAMP.fieldName);
-        jsonGenerator.writeNumber(logEvent.timestamp);
+        jsonGenerator.writePositiveNumberFromByteBuffer(logEvent.timestamp);
     }
 
 
     // The method must conform to the functional interface, so we should ignore this rule here.
     @SuppressWarnings("PMD.UnusedFormalParameter")
     private void emitMDC(final PennaLogEvent logEvent) {
-        if (mdcAdapter.isNotEmpty()) {
+        var adapter = mdcAdapter.get();
+        if (adapter != PennaMDCImpl.Control.empty) {
             jsonGenerator.openObject(LogField.MDC.fieldName);
-            mdcAdapter.forEach(mdcWriter);
+            adapter.forEach(mdcWriter);
             jsonGenerator.closeObject();
             jsonGenerator.writeSep();
         }
@@ -312,9 +308,8 @@ public final class CoreSink implements Sink, Closeable {
         if (!logEvent.markers.isEmpty()) {
             jsonGenerator.openArray(LogField.MARKERS.fieldName);
             for (int i = 0; i < logEvent.markers.size(); i++) {
-                var marker = logEvent.markers.get(i).getName();
-                jsonGenerator.checkSpace(4 + marker.length());
-                jsonGenerator.writeString(marker);
+                var marker = logEvent.markers.get(i).buffer();
+                jsonGenerator.writeStringFromBuffer(marker);
             }
             jsonGenerator.closeArray();
             jsonGenerator.writeSep();

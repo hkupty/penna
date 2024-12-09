@@ -25,7 +25,7 @@ class LoggerTests {
     record ThrowableLog(
             @JsonProperty("class") String throwable,
             String message,
-            List<String> stacktrace
+            String stacktrace
     ) {
     }
 
@@ -139,6 +139,38 @@ class LoggerTests {
         Assertions.assertEquals("marker", logMessage.tags().getFirst());
         Assertions.assertEquals("java.lang.RuntimeException", logMessage.throwable().throwable());
         Assertions.assertEquals("exception", logMessage.throwable().message());
+
+        // Keep this line at the bottom, so we can inspect the file if the test breaks
+        testFile.deleteOnExit();
+        fos.close();
+    }
+
+    @Test
+    void we_can_log_a_broken_string_without_breaking_json_formatting() throws IOException {
+        var cache = new LoggerStorage();
+        PennaLogger logger = cache.getOrCreate("c.est.moi");
+
+        File testFile = File.createTempFile("broken-json", ".json");
+        FileOutputStream fos = new FileOutputStream(testFile);
+
+        TestContextPoolManager.replace(() -> new CoreSink(fos));
+
+        logger.atInfo().log("{");
+
+        Assertions.assertDoesNotThrow(() -> om.readValue(testFile, LogMessage.class), () -> {
+            try {
+                om.readValue(testFile, LogMessage.class);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                return ex.getMessage();
+            }
+
+            return "Unable to deserialize";
+        });
+
+        var logMessage = om.readValue(testFile, LogMessage.class);
+
+        Assertions.assertEquals("{", logMessage.message());
 
         // Keep this line at the bottom, so we can inspect the file if the test breaks
         testFile.deleteOnExit();

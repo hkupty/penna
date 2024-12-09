@@ -12,6 +12,28 @@ public final class IntToAscii {
 
     private final byte[] innerBuffer = new byte[20];
 
+    static ByteBuffer createTimestampBuffer(long number) {
+        byte[] bytearray = new byte[13];
+        longToAscii(number, bytearray);
+
+        return ByteBuffer.wrap(bytearray);
+    }
+
+    static void asciiIncrement(ByteBuffer buffer) {
+        byte current;
+        var cursor = buffer.limit() - 1;
+        boolean overflow;
+        do {
+            current = (byte) (buffer.get(cursor) + 1);
+            overflow = (current == 0b00111010);
+            if (overflow) {
+                current = 0b00110000;
+            }
+            buffer.put(cursor--, current);
+        } while(overflow && cursor >= 0);
+        buffer.rewind();
+    }
+
     /**
      * writes {@param num} to the byte[], one digit at a time
      *
@@ -19,7 +41,7 @@ public final class IntToAscii {
      * @param target the byte array to write to
      * @return the number of bytes written
      */
-    int longToAscii(long num, byte[] target) {
+    static int longToAscii(long num, byte[] target) {
         var quot = num;
         int i = target.length - 1;
         for (; i >= 0; i--) {

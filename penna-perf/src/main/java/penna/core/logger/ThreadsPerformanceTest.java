@@ -3,9 +3,6 @@ package penna.core.logger;
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.infra.Blackhole;
 import org.openjdk.jmh.runner.Runner;
-import org.openjdk.jmh.runner.options.Options;
-import org.openjdk.jmh.runner.options.OptionsBuilder;
-import org.openjdk.jmh.runner.options.TimeValue;
 import org.slf4j.Logger;
 import org.slf4j.MDC;
 import org.slf4j.MarkerFactory;
@@ -13,22 +10,20 @@ import penna.core.logger.utils.PerfTestLoggerFactory;
 import penna.core.logger.utils.RunnerOptions;
 
 import java.io.IOException;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.CountDownLatch;
 
-public class LoggerPerformanceTest {
+public class ThreadsPerformanceTest {
 
     @State(Scope.Thread)
     public static class TestBehavior {
         @Param({
-//                "simple",
-//                "modest",
-//                "moderate",
+                "simple",
                 "large"
         })
         String behavior;
         Throwable exception = new RuntimeException("with an exception");
 
-        public void log(org.slf4j.Logger logger) {
+        public void log(Logger logger) {
             switch (behavior) {
                 case "modest" -> {
                     logger.atInfo()
@@ -63,7 +58,10 @@ public class LoggerPerformanceTest {
 
     @State(Scope.Thread)
     public static class TestState {
-        @Param({"Penna"})
+        @Param({"2", "16", "128"})
+        int threads;
+
+        @Param({"Penna", "Logback"})
         PerfTestLoggerFactory.Implementation implementation;
         PerfTestLoggerFactory factory;
         Logger logger;
@@ -84,13 +82,23 @@ public class LoggerPerformanceTest {
 
 
     @Benchmark
-    public void testLogger(TestState state, TestBehavior tb) throws IOException {
-        tb.log(state.logger);
+    public void testLogger(TestState state, TestBehavior tb) throws InterruptedException {
+        CountDownLatch cdl = new CountDownLatch(state.threads);
+        int messagesPerLogger = 512 / state.threads;
+        for (int t = 0; t < state.threads; t++) {
+          Thread.ofVirtual().start(() -> {
+            for (int i = 0; i <= messagesPerLogger; i++) {
+              tb.log(state.logger);
+            }
+            cdl.countDown();
+          });
+        }
+        cdl.await();
     }
 
     public static void main(String[] args) throws Exception {
         var options = RunnerOptions
-                .averageTime(LoggerPerformanceTest.class.getName() + ".*")
+                .averageTime(ThreadsPerformanceTest.class.getName() + ".*")
                 .addProfiler("gc")
 //                .addProfiler("perfnorm")
 //                .addProfiler("perfasm")

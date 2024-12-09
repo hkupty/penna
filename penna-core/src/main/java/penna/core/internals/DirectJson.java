@@ -11,12 +11,13 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.ByteBuffer;
 import java.nio.channels.WritableByteChannel;
-import java.nio.charset.StandardCharsets;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 public final class DirectJson implements Closeable {
     private static final int INITIAL_BUFFER_SIZE = 2 * 1024;
     private int highWatermark = (int) Math.ceil(INITIAL_BUFFER_SIZE * 0.8);
-    private static final byte[] LINE_BREAK = System.lineSeparator().getBytes(StandardCharsets.UTF_8);
+    private static final byte[] LINE_BREAK = System.lineSeparator().getBytes(UTF_8);
     private static final byte QUOTE = '"';
     private static final byte ENTRY_SEP = ':';
     private static final byte KV_SEP = ',';
@@ -26,7 +27,7 @@ public final class DirectJson implements Closeable {
     private static final byte OPEN_ARR = '[';
     private static final byte CLOSE_ARR = ']';
 
-    private static final byte[] NEWLINE = new byte[]{
+    public static final byte[] NEWLINE = new byte[]{
             '\\',
             'n',
     };
@@ -34,26 +35,13 @@ public final class DirectJson implements Closeable {
             '\\',
             '\\',
     };
-    private static final byte[] LINEBREAK = new byte[]{
+    public static final byte[] LINEBREAK = new byte[]{
             '\\',
             'r',
     };
     private static final byte[] TAB = new byte[]{
             '\\',
             't',
-    };
-    private static final byte[] TRUE = new byte[]{
-            't',
-            'r',
-            'u',
-            'e'
-    };
-    private static final byte[] FALSE = new byte[]{
-            'f',
-            'a',
-            'l',
-            's',
-            'e'
     };
     private static final byte[] NULL = new byte[]{
             'n',
@@ -69,6 +57,7 @@ public final class DirectJson implements Closeable {
     @VisibleForTesting
     ByteBuffer buffer = ByteBuffer.allocateDirect(INITIAL_BUFFER_SIZE);
     private final IntToAscii intToAscii = new IntToAscii();
+    private boolean kvLast;
 
     public DirectJson(WritableByteChannel channel) {
         this.backingOs = null;
@@ -90,7 +79,8 @@ public final class DirectJson implements Closeable {
         int cursor = 0;
         boolean isPlaceholder = false;
         boolean escaped = false;
-        for (int i = 0; i < str.length(); i++) {
+        int length = str.length();
+        for (int i = 0; i < length; i++) {
             var chr = str.codePointAt(i);
             switch (chr) {
                 case '\\' -> {
@@ -103,8 +93,7 @@ public final class DirectJson implements Closeable {
                 case '\r' -> buffer.put(LINEBREAK);
                 case '\t' -> buffer.put(TAB);
                 case DELIM_START -> {
-                    if (cursor < arguments.length &&
-                            str.codePointAt(i + 1) == '}') {
+                    if (cursor < arguments.length && (i + 1 < length) && str.codePointAt(i + 1) == '}') {
                         // We only consider a curly braces to be a placeholder if not escaped,
                         // but we double-check escaped as it could've happened further back
                         isPlaceholder = !escaped || str.codePointBefore(i) != '\\';
@@ -178,42 +167,36 @@ public final class DirectJson implements Closeable {
         buffer.put(OPEN_ARR);
     }
 
-    public void openObject(String str) {
-        writeKey(str);
-        buffer.put(OPEN_OBJ);
-    }
-
     public void openObject(final byte[] str) {
         writeKey(str);
         buffer.put(OPEN_OBJ);
-    }
-
-    public void openArray(String str) {
-        writeKey(str);
-        buffer.put(OPEN_ARR);
+        kvLast = false;
     }
 
     public void openArray(final byte[] str) {
         writeKey(str);
         buffer.put(OPEN_ARR);
+        kvLast = false;
     }
 
     public void closeObject() {
-        var target = buffer.position() - 1;
-        if (',' == buffer.get(target)) {
+        if (kvLast) {
+            var target = buffer.position() - 1;
             buffer.put(target, CLOSE_OBJ);
         } else {
             buffer.put(CLOSE_OBJ);
         }
+        kvLast = false;
     }
 
     public void closeArray() {
-        var target = buffer.position() - 1;
-        if (',' == buffer.get(target)) {
+        if (kvLast) {
+            var target = buffer.position() - 1;
             buffer.put(target, CLOSE_ARR);
         } else {
             buffer.put(CLOSE_ARR);
         }
+        kvLast = false;
     }
 
     public void writeUnsafe(final String str) {
@@ -232,8 +215,7 @@ public final class DirectJson implements Closeable {
         buffer.put(QUOTE);
         writeRaw(chars);
         buffer.put(QUOTE);
-        buffer.put(KV_SEP);
-
+        writeSep();
     }
 
     public void writeKey(String str) {
@@ -254,7 +236,7 @@ public final class DirectJson implements Closeable {
         buffer.put(QUOTE);
         writeUnsafe(str);
         buffer.put(QUOTE);
-        buffer.put(KV_SEP);
+        writeSep();
     }
 
     public void writeString(final String str) {
@@ -263,30 +245,46 @@ public final class DirectJson implements Closeable {
         buffer.put(QUOTE);
         writeRaw(str);
         buffer.put(QUOTE);
-        buffer.put(KV_SEP);
+        writeSep();
+    }
+
+    public void writeStringFromBuffer(final ByteBuffer str) {
+        checkSpace(str.limit() + 3);
+        str.rewind();
+        buffer.put(QUOTE);
+        buffer.put(str);
+        buffer.put(QUOTE);
+        writeSep();
     }
 
     public void writeStringFormatting(final String str, final Object... args) {
         buffer.put(QUOTE);
         writeRawFormatting(str, args);
         buffer.put(QUOTE);
-        buffer.put(KV_SEP);
+        writeSep();
     }
 
     public void writeSep() {
         buffer.put(KV_SEP);
+        kvLast = true;
     }
 
-    public void writeNumberRaw(final long data) {
+    public void writePositiveNumber(final long data) {
         intToAscii.longToAscii(data, buffer);
+    }
+
+    public void writePositiveNumberFromByteBuffer(final ByteBuffer numberBuffer) {
+        checkSpace(numberBuffer.limit() + 1);
+        buffer.put(numberBuffer);
+        writeSep();
     }
 
     public void writeNumber(final long data) {
         if (data < 0) {
             writeRaw('-');
         }
-        writeNumberRaw(data);
-        buffer.put(KV_SEP);
+        writePositiveNumber(data);
+        writeSep();
     }
 
     public void writeNumber(final double data) {
@@ -295,7 +293,7 @@ public final class DirectJson implements Closeable {
             writeRaw('-');
             number = Math.abs(data);
         }
-        writeNumberRaw((long) number);
+        writePositiveNumber((long) number);
         buffer.put(DOT);
         var pos = buffer.position();
         BigDecimal fractional = BigDecimal.valueOf(number).remainder(BigDecimal.ONE);
@@ -309,44 +307,22 @@ public final class DirectJson implements Closeable {
         }
 
         buffer.position(pos + decs);
-        buffer.put(KV_SEP);
+        writeSep();
     }
 
     public void writeEntrySep() {
         buffer.put(buffer.position() - 1, ENTRY_SEP);
     }
 
-    public void writeStringValue(final String key, final String value) {
+    public void writeStringKeyValue(final String key, final String value) {
         checkSpace(key.length() + value.length() + 5);
         writeKey(key);
         writeString(value);
     }
 
-    public void writeStringValueFormatting(String key, String value, Object... args) {
-        checkSpace(key.length() + value.length() + 5);
-        writeKey(key);
-        writeStringFormatting(value, args);
-    }
-
-    public void writeNumberValue(String key, long value) {
-        checkSpace(key.length() + 3);
-        writeKey(key);
-        writeNumber(value);
-    }
-
-    public void writeNumberValue(String key, double value) {
-        writeKey(key);
-        writeNumber(value);
-    }
-
-    public void writeBoolean(boolean value) {
-        buffer.put(value ? TRUE : FALSE);
-        buffer.put(KV_SEP);
-    }
-
     public void writeNull() {
         buffer.put(NULL);
-        buffer.put(KV_SEP);
+        writeSep();
     }
 
     public void checkSpace(int size) {

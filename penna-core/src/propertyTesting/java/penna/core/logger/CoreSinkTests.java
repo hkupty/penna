@@ -13,19 +13,23 @@ import penna.core.models.KeyValuePair;
 import penna.core.models.LogConfig;
 import penna.core.models.PennaLogEvent;
 import penna.core.sink.CoreSink;
+import penna.core.slf4j.PennaMarkerFactory;
+import penna.core.slf4j.marker.PennaMarker;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.security.SecureRandom;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 class CoreSinkTests {
 
     private static final ObjectMapper om = new ObjectMapper();
+    private static final PennaMarkerFactory pmf = new PennaMarkerFactory();
 
     @Provide
     Arbitrary<LogField[]> fields() {
@@ -55,12 +59,12 @@ class CoreSinkTests {
                 .excludeChars('"')
                 .ofMaxLength(256)
                 .ofMinLength(2);
-        Arbitrary<List<Marker>> markers = Arbitraries
+        Arbitrary<List<PennaMarker>> markers = Arbitraries
                 .strings()
                 .alpha()
                 .ofMinLength(1)
                 .ofMaxLength(20)
-                .map(MarkerFactory::getMarker)
+                .map(pmf::getMarker)
                 .list()
                 .ofMinSize(0)
                 .ofMaxSize(4);
@@ -151,7 +155,8 @@ class CoreSinkTests {
 
     @Property
     void validJsonMessage(@ForAll("fields") LogField[] fields) throws IOException {
-        File testFile = File.createTempFile("valid-message", ".json");
+        String prefix = Arrays.stream(fields).map(field -> new String(field.fieldName)).collect(Collectors.joining("-"));
+        File testFile = File.createTempFile("valid-message-" + prefix, ".json");
         FileOutputStream fos = new FileOutputStream(testFile);
 
         TestContextPoolManager.replace(() -> new CoreSink(fos));
@@ -161,7 +166,6 @@ class CoreSinkTests {
         cache.replaceConfig(config);
         PennaLogger logger = cache.getOrCreate("c.est.moi");
 
-
         Marker marker = MarkerFactory.getMarker("something");
 
         logger.atInfo()
@@ -170,7 +174,14 @@ class CoreSinkTests {
                 .setCause(new RuntimeException("oh-noes!"))
                 .log("My message");
 
-        Assertions.assertDoesNotThrow(() -> om.readValue(testFile, Map.class));
+        Assertions.assertDoesNotThrow(() -> om.readValue(testFile, Map.class), () -> {
+            try {
+                return Files.readString(testFile.toPath());
+            } catch (IOException e) {
+                return "Unable to read file\n" + e.getMessage();
+
+            }
+        });
         testFile.deleteOnExit();
         fos.close();
     }

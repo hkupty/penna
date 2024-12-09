@@ -1,6 +1,7 @@
 package penna.core.internals;
 
-import java.util.concurrent.atomic.AtomicLong;
+import java.nio.ByteBuffer;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.LockSupport;
 import java.util.concurrent.locks.ReentrantLock;
@@ -31,7 +32,7 @@ public final class Clock {
      * This is how often, in ms, we should sync with System.currentTimeMillis()
      * It is a 2^n number as that is faster to compare than using modulo
      */
-    private static final long PRECISION = 1_023;
+    private static final long PRECISION = 0b1111111111;
 
     /**
      * Lock used to ensure a single thread will be in charge of starting the clock.
@@ -40,10 +41,9 @@ public final class Clock {
      */
     private static final Lock startThreadLock = new ReentrantLock();
 
-    /**
-     * A thread-safe storage for the timestamp to be consumed by {@link penna.core.models.PennaLogEvent}.
-     */
-    private static final AtomicLong timestamp = new AtomicLong(System.currentTimeMillis());
+    private static final AtomicInteger counter = new AtomicInteger();
+    private static final ByteBuffer asciiTimestamp = IntToAscii.createTimestampBuffer(System.currentTimeMillis());
+    private static final IntToAscii itoa = new IntToAscii();
 
     /**
      * The thread responsible for keeping the clock up-to-date.
@@ -54,26 +54,28 @@ public final class Clock {
      */
     private static final Thread clockThread = Thread.ofVirtual().name("penna-clock-ticker").start(() -> {
         while(!Thread.currentThread().isInterrupted()) {
-            var ts = timestamp.incrementAndGet();
-
-            if ((ts & PRECISION) == 0x0) { timestamp.set(System.currentTimeMillis()); }
+            if ((counter.incrementAndGet() & PRECISION) == 0x0) {
+                var current = System.currentTimeMillis();
+                itoa.longToAscii(current, asciiTimestamp);
+            } else {
+                IntToAscii.asciiIncrement(asciiTimestamp);
+            }
 
             LockSupport.parkNanos(REFRESH_RATE);
         }
     });
-
     /**
-     * This method returns a timestamp as stored in {@link Clock#timestamp}. If {@link Clock#clockThread} is
+     * This method returns a read only view to the timestamp buffer.
      * not started, this method will initialize it.
      * @return a roughly accurate current timestamp
      */
-    public static long getTimestamp() {
+    public static ByteBuffer getTimestamp() {
         if (!clockThread.isAlive() && startThreadLock.tryLock()) {
-            timestamp.updateAndGet(ignored -> System.currentTimeMillis());
             clockThread.start();
             startThreadLock.unlock();
         }
 
-        return timestamp.get();
+        return asciiTimestamp.asReadOnlyBuffer();
     }
+
 }

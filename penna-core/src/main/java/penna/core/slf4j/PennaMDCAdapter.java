@@ -1,81 +1,65 @@
 package penna.core.slf4j;
 
 import org.slf4j.spi.MDCAdapter;
-import penna.core.slf4j.mdc.Mdc;
+import penna.core.slf4j.mdc.PennaMDCImpl;
+import penna.core.slf4j.mdc.PennaMDCImpl.Control;
 
 import java.util.Deque;
 import java.util.Map;
 import java.util.function.BiConsumer;
 
-/**
- * This is just a proxy over the internal implementation of MDC.
- * The MDC storage is a thread-local variable managed by {@link Mdc.Control}.
- */
-public final class PennaMDCAdapter implements MDCAdapter {
-
-    public void forEach(BiConsumer<String, String> action) {
-        var node = Mdc.Control.mdcStorage.get();
-        node.forEach(action);
-    }
-
-    public boolean isNotEmpty() {
-        Mdc inner = Mdc.Control.mdcStorage.get();
-        return inner.isNotEmpty();
+public class PennaMDCAdapter implements MDCAdapter {
+    @Override
+    public void put(String s, String s1) {
+        Control.mdcStorage.get().put(s, s1);
     }
 
     @Override
-    public void put(String key, String val) {
-        Mdc inner = Mdc.Control.mdcStorage.get();
-        inner.put(key, val);
+    public String get(String s) {
+        return Control.mdcStorage.get().get(s);
+    }
+
+    public PennaMDCImpl get() {
+        return Control.mdcStorage.get();
     }
 
     @Override
-    public String get(String key) {
-        Mdc inner = Mdc.Control.mdcStorage.get();
-        return inner.get(key);
-    }
-
-    @Override
-    public void remove(String key) {
-        Mdc inner = Mdc.Control.mdcStorage.get();
-        inner.remove(key);
+    public void remove(String s) {
+        Control.mdcStorage.get().remove(s);
     }
 
     @Override
     public void clear() {
-        Mdc inner = Mdc.Control.mdcStorage.get();
-        inner.clear();
+        Control.mdcStorage.get().clear();
     }
 
     @Override
     public Map<String, String> getCopyOfContextMap() {
-        Mdc inner = Mdc.Control.mdcStorage.get();
-        return inner.getCopyOfContextMap();
+        return Control.mdcStorage.get().getCopyOfContextMap();
     }
 
     @Override
-    public void setContextMap(Map<String, String> contextMap) {
-        Mdc inner = Mdc.Control.mdcStorage.get();
-        inner.setContextMap(contextMap);
+    public void setContextMap(Map<String, String> map) {
+       Control.mdcStorage.get().setContextMap(map);
     }
 
     @Override
-    public void pushByKey(String key, String value) {
-        // Intentionally left blank, not supported at the moment
+    public void pushByKey(String s, String s1) {
+
     }
 
     @Override
-    public String popByKey(String key) {
+    public String popByKey(String s) {
+        return "";
+    }
+
+    @Override
+    public Deque<String> getCopyOfDequeByKey(String s) {
         return null;
     }
 
     @Override
-    public Deque<String> getCopyOfDequeByKey(String key) {
-        return null;
-    }
+    public void clearDequeByKey(String s) {
 
-    @Override
-    public void clearDequeByKey(String key) {
-        // Intentionally left blank, not supported at the moment
     }
 }
