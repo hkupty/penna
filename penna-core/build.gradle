@@ -39,8 +39,10 @@ tasks.withType(JavaCompile).configureEach {
 
 
 pmd {
+    consoleOutput = true
+    toolVersion = "7.8.0"
     sourceSets = [sourceSets.main]
-    ruleSets("category/java/performance.xml", "category/java/bestpractices.xml")
+    ruleSetFiles("pmd/ruleset.xml")
 }
 
 testing {
