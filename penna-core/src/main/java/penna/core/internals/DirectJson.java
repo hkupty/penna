@@ -57,7 +57,7 @@ public final class DirectJson implements Closeable {
     @VisibleForTesting
     ByteBuffer buffer = ByteBuffer.allocateDirect(INITIAL_BUFFER_SIZE);
     private final IntToAscii intToAscii = new IntToAscii();
-    private boolean kvLast = false;
+    private boolean kvLast;
 
     public DirectJson(WritableByteChannel channel) {
         this.backingOs = null;
