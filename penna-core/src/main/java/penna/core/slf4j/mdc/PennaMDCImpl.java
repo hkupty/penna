@@ -43,7 +43,7 @@ public sealed interface PennaMDCImpl extends PennaMDCSupport {
         public void clear() {}
 
         @Override
-        public Map<String, String> getCopyOfContextMap() {return Map.of();}
+        public Map<String, String> getCopyOfContextMap() {return new TreeMap<>();}
 
         @Override
         public void setContextMap(Map<String, String> map) {
@@ -80,7 +80,7 @@ public sealed interface PennaMDCImpl extends PennaMDCSupport {
 
         @Override
         public Map<String, String> getCopyOfContextMap() {
-            return Map.copyOf(storage);
+            return new TreeMap<>(storage);
         }
 
         @Override
