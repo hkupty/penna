@@ -25,7 +25,7 @@ class LoggerTests {
     record ThrowableLog(
             @JsonProperty("class") String throwable,
             String message,
-            List<String> stacktrace
+            String stacktrace
     ) {
     }
 
