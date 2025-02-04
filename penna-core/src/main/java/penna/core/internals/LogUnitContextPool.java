@@ -28,8 +28,10 @@ public final class LogUnitContextPool {
 
     private final LogUnitContext[] objectGroup;
 
+    private final PennaClock clock = new PennaClock();
+
     private LogUnitContext leafObject(int index) {
-        return new LogUnitContext(this, index, CoreSink.getSink(), new PennaLogEvent());
+        return new LogUnitContext(this, index, CoreSink.getSink(), new PennaLogEvent(clock.getTimestampBuffer()));
     }
 
     public LogUnitContextPool() {
