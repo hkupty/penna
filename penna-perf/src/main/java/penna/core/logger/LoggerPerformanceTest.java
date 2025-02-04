@@ -75,6 +75,7 @@ public class LoggerPerformanceTest {
             factory = PerfTestLoggerFactory.Factory.get(implementation);
             factory.setup(bh);
             logger = factory.getLogger("jmh." + implementation.name() + ".loggerTest");
+            mdc = factory.getMdc();
         }
 
         @TearDown
