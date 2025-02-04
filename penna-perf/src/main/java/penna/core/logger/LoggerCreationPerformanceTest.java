@@ -22,7 +22,9 @@ public class LoggerCreationPerformanceTest {
         public String[] randomDistinct;
 
         public static final int SIZE = 1024;
-        public static final int UNIQUE = 640;
+
+        @Param({"1024", "512"})
+        public int UNIQUE;
         public static final String[] topLevel = new String[]{
                 "com",
                 "org",
@@ -56,6 +58,7 @@ public class LoggerCreationPerformanceTest {
 
         @Setup
         public void setUp(Blackhole bh) {
+            randomDistinct = new String[SIZE];
             factory = PerfTestLoggerFactory.Factory.get(implementation);
             factory.setup(bh);
 
@@ -68,8 +71,10 @@ public class LoggerCreationPerformanceTest {
                     bots, (p, b) -> p + "." + b);
 
 
-            randomDistinct = nss.map(x -> RandomStringUtils.randomAlphabetic(2, 16)).distinct().limit(SIZE).toArray(String[]::new);
-
+            var base = nss.map(x -> RandomStringUtils.randomAlphabetic(2, 16)).distinct().limit(UNIQUE).toArray(String[]::new);
+            for (int i = 0; i < (SIZE / UNIQUE); i++) {
+              System.arraycopy(base, 0, randomDistinct, 0 + UNIQUE * i, UNIQUE);
+            }
         }
 
         Logger getLogger(String name) {
@@ -84,20 +89,11 @@ public class LoggerCreationPerformanceTest {
     }
 
     @Benchmark
-    public void alwaysNewLogger(TestState state, Blackhole bh) {
+    public void createLoggers(TestState state, Blackhole bh) {
         var factory = PerfTestLoggerFactory.Factory.get(state.implementation);
         factory.setup(bh);
         for (int i = 0; i < TestState.SIZE; i++) {
             bh.consume(factory.getLogger(state.randomDistinct[i]));
-        }
-    }
-
-    @Benchmark
-    public void aFewDifferentLoggers(TestState state, Blackhole bh) {
-        var factory = PerfTestLoggerFactory.Factory.get(state.implementation);
-        factory.setup(bh);
-        for (int i = 0; i < TestState.SIZE; i++) {
-            bh.consume(factory.getLogger(state.randomDistinct[i % TestState.UNIQUE]));
         }
     }
 

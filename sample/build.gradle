@@ -44,5 +44,12 @@ dependencies {
 }
 
 application {
+  applicationDefaultJvmArgs = ["-Xmx1G"]
   mainClass = 'org.example.Main'
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': application.mainClass
+    }
 }
