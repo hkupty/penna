@@ -6,6 +6,8 @@ import org.apache.logging.slf4j.Log4jMarkerFactory;
 import org.openjdk.jmh.infra.Blackhole;
 import org.slf4j.ILoggerFactory;
 import org.slf4j.Logger;
+import org.slf4j.MDC;
+import org.slf4j.spi.MDCAdapter;
 import penna.api.models.Config;
 import penna.core.internals.TestContextPoolManager;
 import penna.core.logger.LoggerStorage;
@@ -34,6 +36,7 @@ public sealed interface PerfTestLoggerFactory extends Closeable {
     void setup(Blackhole bh);
 
     Logger getLogger(String name);
+    MDCAdapter getMdc();
 
     enum Implementation {
         Penna,
@@ -55,6 +58,11 @@ public sealed interface PerfTestLoggerFactory extends Closeable {
         }
 
         @Override
+        public MDCAdapter getMdc() {
+            return MDC.getMDCAdapter();
+        }
+
+        @Override
         public void close() throws IOException {
         }
     }
@@ -69,6 +77,11 @@ public sealed interface PerfTestLoggerFactory extends Closeable {
         @Override
         public Logger getLogger(String name) {
             return new IfBasedLogger(name, Config.getDefault());
+        }
+
+        @Override
+        public MDCAdapter getMdc() {
+            return MDC.getMDCAdapter();
         }
 
         @Override
@@ -90,6 +103,11 @@ public sealed interface PerfTestLoggerFactory extends Closeable {
         @Override
         public Logger getLogger(String name) {
             return loggerFactory.getLogger(name);
+        }
+
+        @Override
+        public MDCAdapter getMdc() {
+            return MDC.getMDCAdapter();
         }
 
         @Override
@@ -117,6 +135,11 @@ public sealed interface PerfTestLoggerFactory extends Closeable {
         @Override
         public Logger getLogger(String name) {
             return loggerFactory.getLogger(name);
+        }
+
+        @Override
+        public MDCAdapter getMdc() {
+            return serviceProvider.getMDCAdapter();
         }
 
         @Override

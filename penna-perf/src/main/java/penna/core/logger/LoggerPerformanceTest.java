@@ -9,6 +9,7 @@ import org.openjdk.jmh.runner.options.TimeValue;
 import org.slf4j.Logger;
 import org.slf4j.MDC;
 import org.slf4j.MarkerFactory;
+import org.slf4j.spi.MDCAdapter;
 import penna.core.logger.utils.PerfTestLoggerFactory;
 import penna.core.logger.utils.RunnerOptions;
 
@@ -28,33 +29,33 @@ public class LoggerPerformanceTest {
         String behavior;
         Throwable exception = new RuntimeException("with an exception");
 
-        public void log(org.slf4j.Logger logger) {
+        public void log(TestState state) {
             switch (behavior) {
                 case "modest" -> {
-                    logger.atInfo()
+                    state.logger.atInfo()
                             .addMarker(MarkerFactory.getMarker("For the win!"))
                             .log("Some event");
                 }
                 case "moderate" -> {
-                    MDC.put("SomeKey", "some value");
-                    logger
+                    state.mdc.put("SomeKey", "some value");
+                    state.logger
                             .atInfo()
                             .addMarker(MarkerFactory.getMarker("For the win!"))
                             .addArgument("static-value")
                             .log("Some event: {}");
-                    MDC.remove("SomeKey");
+                    state.mdc.remove("SomeKey");
                 }
                 case "large" -> {
-                    MDC.put("SomeKey", "some value");
-                    logger
+                    state.mdc.put("SomeKey", "some value");
+                    state.logger
                             .atInfo()
                             .addMarker(MarkerFactory.getMarker("For the win!"))
                             .addArgument("static-value")
                             .log("Some event: {}", exception);
-                    MDC.remove("SomeKey");
+                    state.mdc.remove("SomeKey");
                 }
                 default -> {
-                    logger.atInfo().log("hello world");
+                    state.logger.atInfo().log("hello world");
 
                 }
             }
@@ -66,6 +67,7 @@ public class LoggerPerformanceTest {
         @Param({"Penna"})
         PerfTestLoggerFactory.Implementation implementation;
         PerfTestLoggerFactory factory;
+        MDCAdapter mdc;
         Logger logger;
 
         @Setup
@@ -73,6 +75,7 @@ public class LoggerPerformanceTest {
             factory = PerfTestLoggerFactory.Factory.get(implementation);
             factory.setup(bh);
             logger = factory.getLogger("jmh." + implementation.name() + ".loggerTest");
+            mdc = factory.getMdc();
         }
 
         @TearDown
@@ -85,7 +88,7 @@ public class LoggerPerformanceTest {
 
     @Benchmark
     public void testLogger(TestState state, TestBehavior tb) throws IOException {
-        tb.log(state.logger);
+        tb.log(state);
     }
 
     public static void main(String[] args) throws Exception {

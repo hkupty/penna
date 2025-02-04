@@ -3,7 +3,6 @@ package penna.core.models;
 import org.slf4j.Marker;
 import org.slf4j.event.Level;
 import org.slf4j.event.LoggingEvent;
-import penna.core.internals.Clock;
 import penna.core.slf4j.marker.PennaMarker;
 
 import java.nio.ByteBuffer;
@@ -23,9 +22,13 @@ public final class PennaLogEvent implements LoggingEvent {
     public Throwable throwable;
     public byte[] logger;
     public LogConfig config;
-    public final ByteBuffer timestamp = Clock.getTimestamp();
+    public final ByteBuffer timestamp;
 
     private Thread thread;
+
+    public PennaLogEvent(ByteBuffer timestamp) {
+        this.timestamp = timestamp;
+    }
 
     /**
      * Resets all the fields that will change during log creation.
