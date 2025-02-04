@@ -8,6 +8,7 @@ import org.slf4j.MarkerFactory;
 import org.slf4j.event.Level;
 import penna.api.models.Config;
 import penna.api.models.LogField;
+import penna.core.internals.PennaClock;
 import penna.core.internals.TestContextPoolManager;
 import penna.core.models.KeyValuePair;
 import penna.core.models.LogConfig;
@@ -21,6 +22,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.security.SecureRandom;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -30,6 +35,7 @@ class CoreSinkTests {
 
     private static final ObjectMapper om = new ObjectMapper();
     private static final PennaMarkerFactory pmf = new PennaMarkerFactory();
+    private static final PennaClock pc = new PennaClock(Clock.fixed(Instant.EPOCH, ZoneId.from(ZoneOffset.UTC)));
 
     @Provide
     Arbitrary<LogField[]> fields() {
@@ -89,7 +95,7 @@ class CoreSinkTests {
 
         Random random = new SecureRandom();
 
-        return Builders.withBuilder(PennaLogEvent::new)
+        return Builders.withBuilder(() -> new PennaLogEvent(pc.getTimestampBuffer()))
                 .use(messages).in((evt, m) -> {
                     evt.message = m;
                     return evt;
