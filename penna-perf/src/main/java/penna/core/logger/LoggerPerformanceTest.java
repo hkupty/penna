@@ -9,6 +9,7 @@ import org.openjdk.jmh.runner.options.TimeValue;
 import org.slf4j.Logger;
 import org.slf4j.MDC;
 import org.slf4j.MarkerFactory;
+import org.slf4j.spi.MDCAdapter;
 import penna.core.logger.utils.PerfTestLoggerFactory;
 import penna.core.logger.utils.RunnerOptions;
 
@@ -66,6 +67,7 @@ public class LoggerPerformanceTest {
         @Param({"Penna"})
         PerfTestLoggerFactory.Implementation implementation;
         PerfTestLoggerFactory factory;
+        MDCAdapter mdc;
         Logger logger;
 
         @Setup
