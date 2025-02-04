@@ -25,6 +25,7 @@ This might be a common use-case for jvm apps running in kubernetes.
 If that is your use case, you might prefer Penna over logback because:
 
 - Penna is specialized for this use-case, working out of the box with sane defaults;
+- Penna is safe against the [Y2038 bug](https://hkupty.github.io/penna/blog/epochalypse/)
 - It does not require any json library (or any dependency other than slf4j);
 - It is very optimized, with impressive performance when compared to logback;
 - It is also designed not consume almost any runtime memory, so it won't cause GC pressure;
