@@ -19,20 +19,21 @@ It would be immensely appreciated if real world usages of Penna were reported in
 
 ## Why use Penna?
 
-Penna presents itself as an alternative to [logback](https://logback.qos.ch/).
-It is designed for a specific use case: When you want to have [structured logging](https://stackify.com/what-is-structured-logging-and-why-developers-need-it/), straight to the console.
-This might be a common use-case for jvm apps running in kubernetes.
-If that is your use case, you might prefer Penna over logback because:
+Penna is an alternative to Logback, designed for a specific use case: **structured logging** straight to the console.
 
-- Penna is specialized for this use-case, working out of the box with sane defaults;
-- Penna is safe against the [Y2038 bug](https://hkupty.github.io/penna/blog/epochalypse/)
-- It does not require any json library (or any dependency other than slf4j);
-- It is very optimized, with impressive performance when compared to logback;
-- It is also designed not consume almost any runtime memory, so it won't cause GC pressure;
-- If you want to configure, the extension config library [penna-yaml-config](penna-yaml-config/README.md) allows you to configure Penna in yaml,
-which might be a more native configuration format for its runtime environment (i.e. kubernetes);
+This is particularly useful for JVM applications running in **Kubernetes**, where structured logs are often preferred.
 
-However, Penna doesn't try to replace logback for all its use cases. If you have to log in multiple formats, to a file or any other target, logback might still be your tool of choice.
+If this is your use case, you might prefer Penna over Logback because:
+
+- **Purpose-built**: Penna is specialized for this use case, working out of the box with sane defaults.
+- **Future-proof**: Penna is safe against the [Y2038 bug](https://hkupty.github.io/penna/blog/epochalypse/).
+- **Zero extra dependencies**: It does not require any JSON library (or any dependency other than SLF4J).
+- **Optimized for performance**: It delivers impressive speed compared to Logback.
+- **Minimal memory footprint**: Designed to avoid GC pressure, making it highly efficient.
+- **Easy configuration**: If needed, the optional penna-yaml-config extension allows configuration via YAML — a format more native to Kubernetes environments.
+
+That said, **Penna is not a full Logback replacement**.
+If you need **multiple log formats**, file-based logging, or other complex logging targets, Logback might still be the right tool.
 
 
 ## Usage
