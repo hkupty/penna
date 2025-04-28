@@ -52,7 +52,6 @@ testing {
         }
 
         propertyTesting(JvmTestSuite) {
-            testType = "PropertyBasedTesting"
 
             dependencies {
                 implementation project(":penna-api")
