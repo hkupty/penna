@@ -52,6 +52,7 @@ testing {
         }
 
         propertyTesting(JvmTestSuite) {
+            useJUnitJupiter()
 
             dependencies {
                 implementation project(":penna-api")
