@@ -40,7 +40,7 @@ tasks.withType(JavaCompile).configureEach {
 
 pmd {
     consoleOutput = true
-    toolVersion = "7.8.0"
+    toolVersion = "7.13.0"
     sourceSets = [sourceSets.main]
     ruleSetFiles("pmd/ruleset.xml")
 }
