@@ -5,6 +5,12 @@ All notable changes to Penna will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+
+## `penna-core`
+- Refactor internal clock to protect against Y2k38 bug ([#162](https://github.com/hkupty/penna/pull/162))
+- Add native Marker and MarkerFactory ([#152](https://github.com/hkupty/penna/pull/152))
+
 ## 0.8.1
 
 ### `penna-api`

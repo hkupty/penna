@@ -18,6 +18,7 @@ import penna.core.logger.PennaLogger;
  * By introducing the {@link LevelGuard} as a thin proxy in the logger we allow better control over the behavior
  * for the log levels in the logger.
  */
+@SuppressWarnings("PMD.ImplicitFunctionalInterface")
 public sealed interface LevelGuard permits DebugLevelGuard, ErrorLevelGuard, InfoLevelGuard, NOPGuard, TraceLevelGuard, WarnLevelGuard {
 
     final class Shared {
