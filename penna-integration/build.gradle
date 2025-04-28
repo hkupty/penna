@@ -28,9 +28,6 @@ dependencies {
     compileOnly libs.jetbrains.annotations
     implementation libs.jackson.core
     implementation libs.jackson.databind
-
-    testImplementation libs.junit.api
-    testRuntimeOnly libs.junit.engine
 }
 
 application {

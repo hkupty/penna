@@ -42,14 +42,9 @@ tasks.compileJava {
     )
 }
 
-// version = "0.8.1"
-
 dependencies {
     compileOnly(libs.slf4j)
     compileOnly(libs.jetbrains.annotations)
-
-    testImplementation(libs.junit.api)
-    testRuntimeOnly(libs.junit.engine)
 }
 
 tasks.withType<Test>().configureEach {
