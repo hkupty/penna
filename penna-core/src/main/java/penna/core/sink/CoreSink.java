@@ -298,6 +298,7 @@ public final class CoreSink implements Sink, Closeable {
 
     // The method must conform to the functional interface, so we should ignore this rule here.
     @SuppressWarnings("PMD.UnusedFormalParameter")
+    @Deprecated
     private void emitCounter(final PennaLogEvent logEvent) {
         jsonGenerator.checkSpace(64);
         jsonGenerator.writeKey(LogField.COUNTER.fieldName);

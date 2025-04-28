@@ -19,6 +19,7 @@ public enum LogField {
     /**
      * Atomic long counter increasing at each message being logged.
      */
+    @Deprecated
     COUNTER("counter"),
 
     /**
