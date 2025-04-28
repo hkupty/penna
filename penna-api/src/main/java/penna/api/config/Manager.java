@@ -4,6 +4,7 @@ import penna.api.config.internal.ManagerImpl;
 import penna.api.models.Config;
 
 import java.util.Objects;
+import java.util.ServiceConfigurationError;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -21,6 +22,7 @@ public sealed interface Manager permits ManagerImpl {
      * @return a new initialized instance of the manager that initialized {@link Provider}s
      * and registered itself with them
      */
+    // @SuppressWarnings("AvoidCatchingThrowable")
     static Manager create(Storage storage) {
         ManagerImpl.loader.reload();
         var instance = new ManagerImpl(storage);
@@ -28,7 +30,7 @@ public sealed interface Manager permits ManagerImpl {
                 .map(provider -> {
                     try {
                         return provider.get();
-                    } catch (Throwable ex) {
+                    } catch (ServiceConfigurationError | Exception e) {
                         return null;
                     }
                 })

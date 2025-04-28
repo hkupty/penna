@@ -17,6 +17,11 @@ java {
     }
 }
 
+pmd {
+    isConsoleOutput = true
+    toolVersion = "7.13.0"
+}
+
 // Reproducible builds
 tasks.withType<AbstractArchiveTask>().configureEach {
     isPreserveFileTimestamps = false
