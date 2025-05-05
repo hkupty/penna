@@ -1,6 +1,6 @@
 [versions]
 slf4j = "2.0.17"
-jackson = "2.18.3"
+jackson = "2.19.0"
 jqwik = "1.9.2"
 junit = "5.12.1"
 junit-pioneer = "2.3.0"
