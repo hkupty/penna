@@ -5,6 +5,7 @@ import penna.config.yaml.models.ConfigMap;
 import java.io.IOException;
 import java.nio.file.Path;
 
+@FunctionalInterface
 public interface Parser {
     ConfigMap readAndParse(Path file) throws IOException;
 

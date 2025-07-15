@@ -6,6 +6,7 @@ import penna.api.models.ExceptionHandling;
 import penna.api.models.LogField;
 
 import java.util.List;
+import java.util.Locale;
 
 public sealed interface ConfigNode {
     Config toConfig();
@@ -26,7 +27,7 @@ public sealed interface ConfigNode {
     record OnlyLevel(String level) implements ConfigNode, SetsLevel {
         @Override
         public Config toConfig() {
-            return Config.getDefault().replaceLevel(Level.valueOf(level.toUpperCase()));
+            return Config.getDefault().replaceLevel(Level.valueOf(level.toUpperCase(Locale.getDefault())));
         }
     }
 
@@ -49,7 +50,7 @@ public sealed interface ConfigNode {
         @Override
         public Config toConfig() {
             return Config.withFields(
-                    Level.valueOf(level.toUpperCase()),
+                    Level.valueOf(level.toUpperCase(Locale.getDefault())),
                     fields.stream().map(LogField::fromFieldName).toArray(LogField[]::new)
             );
         }
@@ -61,7 +62,7 @@ public sealed interface ConfigNode {
         public Config toConfig() {
             return Config
                     .getDefault()
-                    .replaceLevel(Level.valueOf(level.toUpperCase()))
+                    .replaceLevel(Level.valueOf(level.toUpperCase(Locale.getDefault())))
                     .replaceExceptionHandling(exception);
         }
     }
@@ -81,7 +82,7 @@ public sealed interface ConfigNode {
         @Override
         public Config toConfig() {
             return new Config(
-                    Level.valueOf(level.toUpperCase()),
+                    Level.valueOf(level.toUpperCase(Locale.getDefault())),
                     fields.stream().map(LogField::fromFieldName).toArray(LogField[]::new),
                     exception
             );
