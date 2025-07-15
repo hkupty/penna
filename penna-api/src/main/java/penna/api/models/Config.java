@@ -21,7 +21,6 @@ public record Config(
 ) {
 
     private static final LogField[] defaultFields = new LogField[]{
-            //LogField.Counter,
             LogField.TIMESTAMP,
             LogField.LEVEL,
             LogField.MESSAGE,
