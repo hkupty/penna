@@ -42,8 +42,6 @@ public final class CoreSink implements Sink, Closeable {
 
     private final int[] filterHashes = new int[StackTraceBloomFilter.NUMBER_OF_HASHES];
 
-    private final AtomicLong counter = new AtomicLong(0L);
-
     private FileOutputStream fos;
     private final DirectJson jsonGenerator;
 
