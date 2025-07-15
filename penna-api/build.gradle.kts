@@ -1,8 +1,10 @@
 plugins {
     `java-library`
-    id("penna.publishing")
+    `maven-publish`
+    `signing`
+    `pmd`
+
     id("penna.build.projectVersion")
-    pmd
 }
 
 group = "com.hkupty.penna"
@@ -12,6 +14,8 @@ repositories {
 }
 
 java {
+    withJavadocJar()
+    withSourcesJar()
     toolchain {
         languageVersion = JavaLanguageVersion.of(21)
     }
@@ -19,7 +23,7 @@ java {
 
 pmd {
     isConsoleOutput = true
-    toolVersion = "7.13.0"
+    toolVersion = "7.15.0"
 }
 
 // Reproducible builds
@@ -53,6 +57,48 @@ tasks.withType<Test>().configureEach {
 
 tasks.jar {
     manifest {
-        attributes("Implementation-Version" to project.version)
+        attributes(
+            "Implementation-Version" to project.version,
+            "Implementation-Title" to project.name,
+        )
     }
 }
+
+publishing {
+    publications {
+        create<MavenPublication>("penna-api") {
+            groupId = "${project.group}"
+            artifactId = project.name
+            version = "${project.version}"
+
+            pom {
+                name = project.name
+                description = "An opinionated slf4j backend for structured logging"
+                url = "https://github.com/hkupty/penna"
+                licenses {
+                    license {
+                        name = "MIT License"
+                        url = "https://github.com/hkupty/penna/blob/main/LICENSE"
+                    }
+                }
+                developers {
+                    developer {
+                        id = "hkupty"
+                        name = "Henry John Kupty"
+                        email = "hkupty@gmail.com"
+                    }
+                }
+                scm {
+                    connection = "scm:git:git://github.com/hkupty/penna"
+                    developerConnection = "scm:git:ssh://github.com/hkupty/penna"
+                    url = "https://github.com/hkupty/penna"
+                }
+            }
+        }
+    }
+}
+
+// signing {
+//     sign configurations.archives
+//     sign publishing.publications.mavenJava
+// }
