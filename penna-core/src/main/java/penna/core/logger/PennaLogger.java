@@ -359,8 +359,6 @@ public final class PennaLogger implements IPennaLogger {
         atError().addMarker(marker).setCause(t).log(msg);
     }
 
-    // Please excuse my friend, he's drunk, and he doesn't know *we are the logging framework*.
-    @SuppressWarnings("PMD.GuardLogStatement")
     @Override
     public void log(LoggingEvent event) {
         levelGuard.get(this, event.getLevel()).fromLoggingEvent(event);
