@@ -1,10 +1,10 @@
 plugins {
     `java-library`
-    `maven-publish`
-    `signing`
     `jvm-test-suite`
-    `pmd`
 
+    pmd
+
+    alias(libs.plugins.publish)
     id("penna.build.projectVersion")
 }
 
@@ -108,40 +108,37 @@ tasks.named("check") {
     dependsOn(testing.suites.named("propertyTesting"))
 }
 
-publishing {
-    publications {
-        create<MavenPublication>("penna-core") {
-            groupId = "${project.group}"
-            artifactId = project.name
-            version = "${project.version}"
 
-            pom {
-                name = project.name
-                description = "An opinionated slf4j backend for structured logging"
-                url = "https://github.com/hkupty/penna"
-                licenses {
-                    license {
-                        name = "MIT License"
-                        url = "https://github.com/hkupty/penna/blob/main/LICENSE"
-                    }
-                }
-                developers {
-                    developer {
-                        id = "hkupty"
-                        name = "Henry John Kupty"
-                        email = "hkupty@gmail.com"
-                    }
-                }
-                scm {
-                    connection = "scm:git:git://github.com/hkupty/penna"
-                    developerConnection = "scm:git:ssh://github.com/hkupty/penna"
-                    url = "https://github.com/hkupty/penna"
-                }
+mavenPublishing {
+    publishToMavenCentral()
+
+    signAllPublications()
+
+    coordinates("com.hkupty.penna", "penna-core", "${project.version}")
+
+    pom {
+        name = project.name
+        description = "An opinionated slf4j backend for structured logging"
+        inceptionYear = "2023"
+        url = "https://github.com/hkupty/penna"
+        licenses {
+            license {
+                name = "MIT License"
+                url = "https://opensource.org/license/mit"
+                distribution = "https://github.com/hkupty/penna/blob/dev/0.9/LICENSE"
             }
         }
+        developers {
+            developer {
+                id = "hkupty"
+                name = "Henry John Kupty"
+                email = "hkupty@gmail.com"
+            }
+        }
+        scm {
+            connection = "scm:git:git://github.com/hkupty/penna"
+            developerConnection = "scm:git:ssh://github.com/hkupty/penna"
+            url = "https://github.com/hkupty/penna"
+        }
     }
-}
-
-signing {
-    sign(publishing.publications["penna-core"])
 }

@@ -59,3 +59,7 @@ log4j-json = { module = "org.apache.logging.log4j:log4j-layout-template-json", v
 # utils
 guava = { module = "com.google.guava:guava", version.ref = "guava" }
 commons-lang3 = { module = "org.apache.commons:commons-lang3", version.ref = "commons-lang3" }
+
+[plugins]
+
+publish = {id = "com.vanniktech.maven.publish", version = "0.34.0"}
