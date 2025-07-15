@@ -22,7 +22,6 @@ public sealed interface Manager permits ManagerImpl {
      * @return a new initialized instance of the manager that initialized {@link Provider}s
      * and registered itself with them
      */
-    // @SuppressWarnings("AvoidCatchingThrowable")
     static Manager create(Storage storage) {
         ManagerImpl.loader.reload();
         var instance = new ManagerImpl(storage);

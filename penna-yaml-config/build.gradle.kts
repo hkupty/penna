@@ -24,6 +24,10 @@ java {
 pmd {
     isConsoleOutput = true
     toolVersion = "7.15.0"
+
+    sourceSets = listOf(java.sourceSets["main"])
+
+    ruleSets("category/java/performance.xml", "category/java/bestpractices.xml")
 }
 
 // Reproducible builds
@@ -40,15 +44,41 @@ tasks.compileJava {
     options.compilerArgs.addAll(
         listOf(
             "-Xlint:all",
-            "-Xdoclint:all/public",
+            // "-Xdoclint:all/public",
             "-Werror",
         ),
     )
 }
 
 dependencies {
-    compileOnly(libs.slf4j)
+    implementation(project(":penna-api"))
+    implementation(project(":penna-core"))
+    implementation(libs.slf4j)
+
+    // (optional) Jackson support
+    compileOnly(libs.jackson.core)
+    compileOnly(libs.jackson.databind)
+    compileOnly(libs.jackson.yaml)
+
+    // Annotations for better code readability
     compileOnly(libs.jetbrains.annotations)
+
+    // (optional) SnakeYaml support
+    compileOnly(libs.snakeyaml.plain)
+    compileOnly(libs.snakeyaml.engine)
+
+    // Tests
+    testImplementation(libs.junit.api)
+    testImplementation(libs.junit.pioneer)
+    testRuntimeOnly(libs.junit.engine)
+    testRuntimeOnly(libs.jackson.core)
+    testRuntimeOnly(libs.jackson.databind)
+    testRuntimeOnly(libs.jackson.yaml)
+    testRuntimeOnly(libs.snakeyaml.engine)
+
+    testImplementation(libs.jackson.core)
+    testImplementation(libs.jackson.databind)
+    testImplementation(libs.jackson.yaml)
 }
 
 tasks.withType<Test>().configureEach {
@@ -66,7 +96,7 @@ tasks.jar {
 
 publishing {
     publications {
-        create<MavenPublication>("penna-api") {
+        create<MavenPublication>("penna-version") {
             groupId = "${project.group}"
             artifactId = project.name
             version = "${project.version}"

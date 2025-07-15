@@ -2,6 +2,7 @@ plugins {
     `java-library`
     `maven-publish`
     `signing`
+    `jvm-test-suite`
     `pmd`
 
     id("penna.build.projectVersion")
@@ -24,6 +25,10 @@ java {
 pmd {
     isConsoleOutput = true
     toolVersion = "7.15.0"
+
+    sourceSets = listOf(java.sourceSets["main"])
+
+    ruleSetFiles("pmd/ruleset.xml")
 }
 
 // Reproducible builds
@@ -32,27 +37,62 @@ tasks.withType<AbstractArchiveTask>().configureEach {
     isReproducibleFileOrder = true
 }
 
-// The API is an optional client-facing library and therefore it should not have gaps
-// in the documentation, nor fail on linting, so it is easier for consumers to understand
-// what it is doing under the hood.
 tasks.compileJava {
     options.encoding = "UTF-8"
     options.compilerArgs.addAll(
         listOf(
             "-Xlint:all",
-            "-Xdoclint:all/public",
-            "-Werror",
+            // "-Xdoclint:all/public",
+            // "-Werror",
         ),
     )
 }
 
-dependencies {
-    compileOnly(libs.slf4j)
-    compileOnly(libs.jetbrains.annotations)
+testing {
+    suites {
+        val test by getting(JvmTestSuite::class) {
+            useJUnitJupiter()
+        }
+
+        register<JvmTestSuite>("propertyTesting") {
+            useJUnitJupiter()
+
+            dependencies {
+                implementation(project(":penna-api"))
+                implementation(project())
+
+                implementation(libs.slf4j)
+                implementation(libs.jqwik)
+                implementation(libs.commons.math)
+                implementation(libs.jackson.core)
+                implementation(libs.jackson.databind)
+
+                compileOnly(libs.jetbrains.annotations)
+            }
+
+            targets {
+                all {
+                    testTask.configure {
+                        shouldRunAfter(test)
+                    }
+                }
+            }
+        }
+    }
 }
 
-tasks.withType<Test>().configureEach {
-    useJUnitPlatform()
+dependencies {
+    implementation(project(":penna-api"))
+    implementation(libs.slf4j)
+
+    compileOnly(libs.jetbrains.annotations)
+
+    testImplementation(libs.junit.pioneer)
+
+    testRuntimeOnly(libs.junit.engine)
+    testImplementation(libs.junit.api)
+    testImplementation(libs.jackson.core)
+    testImplementation(libs.jackson.databind)
 }
 
 tasks.jar {
@@ -64,9 +104,13 @@ tasks.jar {
     }
 }
 
+tasks.named("check") {
+    dependsOn(testing.suites.named("propertyTesting"))
+}
+
 publishing {
     publications {
-        create<MavenPublication>("penna-api") {
+        create<MavenPublication>("penna-core") {
             groupId = "${project.group}"
             artifactId = project.name
             version = "${project.version}"

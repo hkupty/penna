@@ -10,6 +10,8 @@ class ProjectVersionPlugin : Plugin<Project> {
                 .resolve("version")
                 .readBytes()
                 .toString(Charsets.UTF_8)
+                .trim()
+
         project.getLogger().info("Read $version")
         project.version = version
         project.setProperty("version", version)
