@@ -16,6 +16,7 @@ repositories {
 java {
     withJavadocJar()
     withSourcesJar()
+
     toolchain {
         languageVersion = JavaLanguageVersion.of(21)
     }
@@ -98,7 +99,6 @@ publishing {
     }
 }
 
-// signing {
-//     sign configurations.archives
-//     sign publishing.publications.mavenJava
-// }
+ signing {
+     sign(publishing.publications["penna-api"])
+ }

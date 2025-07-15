@@ -142,7 +142,6 @@ publishing {
     }
 }
 
-// signing {
-//     sign configurations.archives
-//     sign publishing.publications.mavenJava
-// }
+signing {
+    sign(publishing.publications["penna-core"])
+}

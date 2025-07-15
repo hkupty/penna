@@ -96,7 +96,7 @@ tasks.jar {
 
 publishing {
     publications {
-        create<MavenPublication>("penna-version") {
+        create<MavenPublication>("penna-yaml-config") {
             groupId = "${project.group}"
             artifactId = project.name
             version = "${project.version}"
@@ -128,7 +128,6 @@ publishing {
     }
 }
 
-// signing {
-//     sign configurations.archives
-//     sign publishing.publications.mavenJava
-// }
+signing {
+    sign(publishing.publications["penna-yaml-config"])
+}
