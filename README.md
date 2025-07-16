@@ -43,8 +43,8 @@ Penna is a backend for slf4j, so you don't need to interact with it directly.
 In order to use it, add it to the [build manager of your preference](https://mvnrepository.com/artifact/com.hkupty.penna/penna-core/0.7.0), for example:
 
 ```groovy
-// gradle
-runtimeOnly 'com.hkupty.penna:penna-core:0.9.0'
+// slf4j won't detect Penna if it's not packaged as `implementation`
+implementation 'com.hkupty.penna:penna-core:0.9.0'
 
 // Penna doesn't have any strict dependencies aside from slf4j.
 implementation 'org.slf4j:slf4j-api:2.0.17'
