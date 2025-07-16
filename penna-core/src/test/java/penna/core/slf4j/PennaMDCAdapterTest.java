@@ -1,5 +1,6 @@
 package penna.core.slf4j;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import penna.core.slf4j.mdc.PennaMDCImpl;
@@ -7,6 +8,13 @@ import penna.core.slf4j.mdc.PennaMDCImpl;
 import java.util.HashMap;
 
 class PennaMDCAdapterTest {
+
+    @AfterEach
+    void cleanup() {
+        var adapter = new PennaMDCAdapter();
+        adapter.clear();
+
+    }
 
     @Test
     void canStoreInTheMdc() {
