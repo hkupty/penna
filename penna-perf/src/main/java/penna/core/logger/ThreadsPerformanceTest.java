@@ -58,10 +58,10 @@ public class ThreadsPerformanceTest {
 
     @State(Scope.Thread)
     public static class TestState {
-        @Param({"2", "16", "128"})
+        @Param({"8", "64"})
         int threads;
 
-        @Param({"Penna", "Logback"})
+        @Param({"Penna", "Log4j", "Logback"})
         PerfTestLoggerFactory.Implementation implementation;
         PerfTestLoggerFactory factory;
         Logger logger;

@@ -21,7 +21,7 @@ public class RunnerOptions {
                 .shouldFailOnError(true)
                 .shouldDoGC(true)
                 .threads(1)
-                .jvm("/usr/lib/jvm/java-21-jetbrains/bin/java")
+                .jvm("/usr/lib/jvm/java-24-openjdk/bin/java")
                 .jvmArgs("-Xmx8192m");
     }
 
@@ -38,7 +38,7 @@ public class RunnerOptions {
                 .shouldFailOnError(true)
                 .shouldDoGC(true)
                 .threads(1)
-                .jvm("/usr/lib/jvm/java-21-jetbrains/bin/java")
+                .jvm("/usr/lib/jvm/java-24-openjdk/bin/java")
                 .jvmArgs("-Xmx8192m");
     }
 }

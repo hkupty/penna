@@ -9,11 +9,10 @@ jbrAnn = "26.0.2"
 snakeyaml = "2.4"
 snakeyaml-engine = "2.9"
 logback = "1.5.18"
-shax = "2.0.16.0.4.2"
 log4j2 = "2.25.1"
 
 guava = "33.4.8-jre"
-commons-lang3 = "3.17.0"
+commons-lang3 = "3.18.0"
 
 commons-math = "3.6.1"
 
@@ -46,9 +45,6 @@ jetbrains-annotations = { module = "org.jetbrains:annotations", version.ref = "j
 # Logback
 logback-core = { module = "ch.qos.logback:logback-core", version.ref = "logback" }
 logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
-
-# Shax
-shax = { module = "io.vacco.shax:shax", version.ref = "shax" }
 
 # Log4J2
 log4j-api = { module = "org.apache.logging.log4j:log4j-api", version.ref = "log4j2" }
