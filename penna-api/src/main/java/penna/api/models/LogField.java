@@ -17,12 +17,6 @@ public enum LogField {
     LEVEL("level"),
 
     /**
-     * Atomic long counter increasing at each message being logged.
-     */
-    @Deprecated
-    COUNTER("counter"),
-
-    /**
      * Name of the logger responsible for writing the message.
      */
     LOGGER_NAME("logger"),

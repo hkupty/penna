@@ -42,8 +42,6 @@ public final class CoreSink implements Sink, Closeable {
 
     private final int[] filterHashes = new int[StackTraceBloomFilter.NUMBER_OF_HASHES];
 
-    private final AtomicLong counter = new AtomicLong(0L);
-
     private FileOutputStream fos;
     private final DirectJson jsonGenerator;
 
@@ -296,15 +294,6 @@ public final class CoreSink implements Sink, Closeable {
         jsonGenerator.writeStringFromBytes(logEvent.threadName);
     }
 
-    // The method must conform to the functional interface, so we should ignore this rule here.
-    @SuppressWarnings("PMD.UnusedFormalParameter")
-    @Deprecated
-    private void emitCounter(final PennaLogEvent logEvent) {
-        jsonGenerator.checkSpace(64);
-        jsonGenerator.writeKey(LogField.COUNTER.fieldName);
-        jsonGenerator.writeNumber(counter.getAndIncrement());
-    }
-
     private void emitMarkers(final PennaLogEvent logEvent) {
         if (!logEvent.markers.isEmpty()) {
             jsonGenerator.openArray(LogField.MARKERS.fieldName);
@@ -361,7 +350,6 @@ public final class CoreSink implements Sink, Closeable {
         for (int i = 0; i < fields.length; i++) {
             switch (fields[i]) {
                 case LEVEL -> emitLevel(logEvent);
-                case COUNTER -> emitCounter(logEvent);
                 case LOGGER_NAME -> emitLogger(logEvent);
                 case MESSAGE -> emitMessage(logEvent);
                 case MARKERS -> emitMarkers(logEvent);
