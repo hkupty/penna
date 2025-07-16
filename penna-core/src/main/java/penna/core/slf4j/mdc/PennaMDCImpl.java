@@ -47,7 +47,9 @@ public sealed interface PennaMDCImpl extends PennaMDCSupport {
 
         @Override
         public void setContextMap(Map<String, String> map) {
-            Control.mdcStorage.set(new ActiveMDC(new TreeMap<>(map)));
+            if (!map.isEmpty()) {
+                Control.mdcStorage.set(new ActiveMDC(new TreeMap<>(map)));
+            }
         }
 
         @Override
@@ -85,8 +87,12 @@ public sealed interface PennaMDCImpl extends PennaMDCSupport {
 
         @Override
         public void setContextMap(Map<String, String> contextMap) {
-            storage.clear();
-            storage.putAll(contextMap);
+            if (contextMap.isEmpty()) {
+                Control.mdcStorage.set(Control.empty);
+            } else {
+                storage.clear();
+                storage.putAll(contextMap);
+            }
         }
 
         @Override
