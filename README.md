@@ -40,11 +40,11 @@ If you need **multiple log formats**, file-based logging, or other complex loggi
 
 Penna is a backend for slf4j, so you don't need to interact with it directly.
 
-In order to use it, add it to the [build manager of your preference](https://mvnrepository.com/artifact/com.hkupty.penna/penna-core/0.7.0), for example:
+In order to use it, add it to the [build manager of your preference](https://mvnrepository.com/artifact/com.hkupty.penna/penna-core/0.9.1), for example:
 
 ```groovy
 // slf4j won't detect Penna if it's not packaged as `implementation`
-implementation 'com.hkupty.penna:penna-core:0.9.0'
+implementation 'com.hkupty.penna:penna-core:0.9.1'
 
 // Penna doesn't have any strict dependencies aside from slf4j.
 implementation 'org.slf4j:slf4j-api:2.0.17'
@@ -79,7 +79,7 @@ loggers:
 If you want to use [penna-yaml-config](penna-yaml-config/README.md), you have to add it as a dependency:
 
 ```groovy
-runtimeOnly 'com.hkupty.penna:penna-yaml-config:0.9.0'
+runtimeOnly 'com.hkupty.penna:penna-yaml-config:0.9.1'
 
 // penna-yaml-config is a thin layer and uses a yaml parsing libray under the hood.
 // You can chose among jackson, snakeyaml (yaml 1.1) or snakeyaml engine (yaml 1.2)
