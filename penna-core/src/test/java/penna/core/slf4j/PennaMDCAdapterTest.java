@@ -1,9 +1,20 @@
 package penna.core.slf4j;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import penna.core.slf4j.mdc.PennaMDCImpl;
+
+import java.util.HashMap;
 
 class PennaMDCAdapterTest {
+
+    @AfterEach
+    void cleanup() {
+        var adapter = new PennaMDCAdapter();
+        adapter.clear();
+
+    }
 
     @Test
     void canStoreInTheMdc() {
@@ -21,6 +32,28 @@ class PennaMDCAdapterTest {
         Assertions.assertEquals("value", adapter.get("Key"));
         adapter.put("Key", "other");
         Assertions.assertEquals("other", adapter.get("Key"));
+    }
+
+    @Test
+    void  defaultIsEmpty() {
+        var adapter = new PennaMDCAdapter();
+        Assertions.assertEquals(PennaMDCImpl.Control.empty, adapter.get());
+    }
+
+    @Test
+    void settingEmptyMapToContextDoesNotReplaceEmpty() {
+        var adapter = new PennaMDCAdapter();
+        adapter.setContextMap(new HashMap<>());
+        Assertions.assertEquals(PennaMDCImpl.Control.empty, adapter.get());
+    }
+
+    @Test
+    void  settingEmptyMapToContextClearsPreviouslySetMDC() {
+        var adapter = new PennaMDCAdapter();
+        adapter.put("some", "kv");
+        Assertions.assertNotEquals(PennaMDCImpl.Control.empty, adapter.get());
+        adapter.setContextMap(new HashMap<>());
+        Assertions.assertEquals(PennaMDCImpl.Control.empty, adapter.get());
     }
 
     @Test

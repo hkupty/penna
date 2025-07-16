@@ -65,7 +65,7 @@ public final class CoreSink implements Sink, Closeable {
       if (MDC.getMDCAdapter() instanceof PennaMDCAdapter adapter) {
           mdcAdapter = adapter;
       } else {
-          report("ERROR", "Not using XxMdcAdapter for some reason! MDC will be off");
+          report("ERROR", "Not using PennaMdcAdapter for some reason! MDC will be off");
           mdcAdapter = null;
       }
         jsonGenerator = new DirectJson(channel);
