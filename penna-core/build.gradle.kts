@@ -3,6 +3,7 @@ plugins {
     `jvm-test-suite`
 
     pmd
+    signing
 
     alias(libs.plugins.publish)
     id("penna.build.projectVersion")
@@ -15,8 +16,6 @@ repositories {
 }
 
 java {
-    withJavadocJar()
-    withSourcesJar()
     toolchain {
         languageVersion = JavaLanguageVersion.of(21)
     }
@@ -108,7 +107,6 @@ tasks.named("check") {
     dependsOn(testing.suites.named("propertyTesting"))
 }
 
-
 mavenPublishing {
     publishToMavenCentral()
 
@@ -141,4 +139,8 @@ mavenPublishing {
             url = "https://github.com/hkupty/penna"
         }
     }
+}
+
+signing {
+    useGpgCmd()
 }

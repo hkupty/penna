@@ -2,6 +2,7 @@ plugins {
     `java-library`
 
     pmd
+    signing
 
     alias(libs.plugins.publish)
     id("penna.build.projectVersion")
@@ -14,9 +15,6 @@ repositories {
 }
 
 java {
-    withJavadocJar()
-    withSourcesJar()
-
     toolchain {
         languageVersion = JavaLanguageVersion.of(21)
     }
@@ -98,3 +96,9 @@ mavenPublishing {
         }
     }
 }
+
+signing {
+    useGpgCmd()
+    sign(publishing.publications)
+}
+

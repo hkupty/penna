@@ -15,8 +15,6 @@ repositories {
 }
 
 java {
-    withJavadocJar()
-    withSourcesJar()
     toolchain {
         languageVersion = JavaLanguageVersion.of(21)
     }
@@ -127,4 +125,8 @@ mavenPublishing {
             url = "https://github.com/hkupty/penna"
         }
     }
+}
+
+signing {
+    useGpgCmd()
 }
