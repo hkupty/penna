@@ -7,11 +7,13 @@ For us to achieve that, measuring (instead of guessing) is fundamental.
 
 ## Current version
 
+[version 0.9 - Logger Performance](0.9-Logger.md)
+
+## Previous tests
+
 [version 0.8 - Logger Performance](0.8-Logger.md)
 
 [version 0.8 - Logger Creation Performance](0.8-LoggerCreation.md)
-
-## Previous tests
 
 [version 0.6 - Logger Performance](0.6-Logger.md)
 
