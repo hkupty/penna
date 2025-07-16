@@ -44,10 +44,10 @@ In order to use it, add it to the [build manager of your preference](https://mvn
 
 ```groovy
 // gradle
-runtimeOnly 'com.hkupty.penna:penna-core:0.8.1'
+runtimeOnly 'com.hkupty.penna:penna-core:0.9.0'
 
 // Penna doesn't have any strict dependencies aside from slf4j.
-implementation 'org.slf4j:slf4j-api:2.0.12'
+implementation 'org.slf4j:slf4j-api:2.0.17'
 ```
 
 :warning: Note that Penna is built targeting JVM 21+.
@@ -79,21 +79,21 @@ loggers:
 If you want to use [penna-yaml-config](penna-yaml-config/README.md), you have to add it as a dependency:
 
 ```groovy
-runtimeOnly 'com.hkupty.penna:penna-yaml-config:0.8.1'
+runtimeOnly 'com.hkupty.penna:penna-yaml-config:0.9.0'
 
 // penna-yaml-config is a thin layer and uses a yaml parsing libray under the hood.
 // You can chose among jackson, snakeyaml (yaml 1.1) or snakeyaml engine (yaml 1.2)
 
 // Jackson
-runtimeOnly 'com.fasterxml.jackson.core:jackson-core:2.17.0'
-runtimeOnly 'com.fasterxml.jackson.core:jackson-databind:2.17.0'
-runtimeOnly 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.17.0'
+runtimeOnly 'com.fasterxml.jackson.core:jackson-core:2.18.3'
+runtimeOnly 'com.fasterxml.jackson.core:jackson-databind:2.18.3'
+runtimeOnly 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.18.3'
 
 // Snakeyaml
-runtimeOnly 'org.yaml:snakeyaml:2.2'
+runtimeOnly 'org.yaml:snakeyaml:2.4'
 
 // Snakeyaml engine
-runtimeOnly 'org.snakeyaml:snakeyaml-engine:2.7'
+runtimeOnly 'org.snakeyaml:snakeyaml-engine:2.9'
 ```
 
 ## Principles

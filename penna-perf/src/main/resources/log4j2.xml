@@ -4,13 +4,10 @@
         <File name="MyFile" fileName="/dev/null">
             <JsonTemplateLayout eventTemplateUri="classpath:LogstashJsonEventLayoutV1.json"/>
         </File>
-        <Async name="Async">
-            <AppenderRef ref="MyFile"/>
-        </Async>
     </Appenders>
     <Loggers>
         <Root level="debug">
-            <AppenderRef ref="Async"/>
+            <AppenderRef ref="MyFile"/>
         </Root>
     </Loggers>
 </Configuration>

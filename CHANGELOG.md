@@ -7,9 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
-## `penna-core`
+### `penna-api`
+- Remove deprecated field `counter` ([https://github.com/hkupty/penna/pull/182](#182))
+
+### `penna-core`
 - Refactor internal clock to protect against Y2k38 bug ([#162](https://github.com/hkupty/penna/pull/162))
 - Add native Marker and MarkerFactory ([#152](https://github.com/hkupty/penna/pull/152))
+- Remove deprecated field `counter` ([https://github.com/hkupty/penna/pull/182](#182))
 
 ## 0.8.1
 
