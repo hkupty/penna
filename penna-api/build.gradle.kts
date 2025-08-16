@@ -47,7 +47,7 @@ tasks.compileJava {
 
 dependencies {
     compileOnly(libs.slf4j)
-    compileOnly(libs.jetbrains.annotations)
+    api(libs.jetbrains.annotations)
 }
 
 tasks.withType<Test>().configureEach {
@@ -101,4 +101,3 @@ signing {
     useGpgCmd()
     sign(publishing.publications)
 }
-
