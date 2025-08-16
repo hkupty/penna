@@ -47,7 +47,6 @@ tasks.compileJava {
 
 dependencies {
     compileOnly(libs.slf4j)
-    api(libs.jetbrains.annotations)
 }
 
 tasks.withType<Test>().configureEach {

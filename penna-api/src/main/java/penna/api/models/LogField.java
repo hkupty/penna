@@ -1,8 +1,5 @@
 package penna.api.models;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
 import java.util.Arrays;
 
 /**
@@ -75,7 +72,7 @@ public enum LogField {
      */
     public final byte[] fieldName;
 
-    LogField(@NotNull String fieldName) {
+    LogField(String fieldName) {
         this.fieldName = fieldName.getBytes();
     }
 
@@ -85,7 +82,7 @@ public enum LogField {
      * @param fieldName the string representation of the field to be logged
      * @return The respective enum value or null if none matched.
      */
-    public static @Nullable LogField fromFieldName(@NotNull String fieldName) {
+    public static LogField fromFieldName(String fieldName) {
         @SuppressWarnings("PMD.DataflowAnomalyAnalysis")
         var field = fieldName.getBytes();
         for (LogField value : values()) {

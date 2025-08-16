@@ -1,6 +1,5 @@
 package penna.api.config;
 
-import org.jetbrains.annotations.NotNull;
 import penna.api.config.internal.ManagerImpl;
 import penna.api.models.Config;
 
@@ -27,6 +26,5 @@ public interface Storage {
      * @param logger The path/name of the logger
      * @return The configuration for the logger
      */
-    @NotNull
-    Config get(@NotNull String logger);
+    Config get(String logger);
 }

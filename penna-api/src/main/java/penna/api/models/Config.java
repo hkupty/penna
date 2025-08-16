@@ -1,6 +1,5 @@
 package penna.api.models;
 
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.event.Level;
 
 import java.util.Arrays;
@@ -38,7 +37,7 @@ public record Config(
      * @param level the new level which this configuration will consider to be minimum.
      * @return a new Config with this value applied and the same {@link Config#fields} and {@link Config#exceptionHandling} as the original.
      */
-    public Config replaceLevel(@NotNull Level level) {
+    public Config replaceLevel(Level level) {
         return new Config(level, this.fields, this.exceptionHandling);
     }
 
