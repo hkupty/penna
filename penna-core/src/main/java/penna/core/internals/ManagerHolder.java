@@ -1,6 +1,5 @@
 package penna.core.internals;
 
-import org.jetbrains.annotations.Nullable;
 import penna.api.config.Manager;
 
 /**
@@ -22,5 +21,5 @@ public class ManagerHolder {
      * Returns the stored Manager.
      * @return the stored Manager.
      */
-    public static @Nullable Manager getInstance() { return instance; }
+    public static Manager getInstance() { return instance; }
 }

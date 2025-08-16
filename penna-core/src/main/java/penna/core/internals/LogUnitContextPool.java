@@ -1,6 +1,5 @@
 package penna.core.internals;
 
-import org.jetbrains.annotations.VisibleForTesting;
 import penna.core.logger.LogUnitContext;
 import penna.core.models.PennaLogEvent;
 import penna.core.sink.CoreSink;
@@ -44,7 +43,6 @@ public final class LogUnitContextPool {
         }
     }
 
-    @VisibleForTesting
     void refillThePool(Supplier<Sink> sinkSupplier) {
         for (int i = 0; i < objectGroup.length; i++) {
             objectGroup[i] = new LogUnitContext(this, i, sinkSupplier.get(), objectGroup[i].logEvent());

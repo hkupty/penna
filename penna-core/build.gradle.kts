@@ -65,8 +65,6 @@ testing {
                 implementation(libs.commons.math)
                 implementation(libs.jackson.core)
                 implementation(libs.jackson.databind)
-
-                compileOnly(libs.jetbrains.annotations)
             }
 
             targets {
@@ -83,8 +81,6 @@ testing {
 dependencies {
     implementation(project(":penna-api"))
     implementation(libs.slf4j)
-
-    compileOnly(libs.jetbrains.annotations)
 
     testImplementation(libs.junit.pioneer)
 

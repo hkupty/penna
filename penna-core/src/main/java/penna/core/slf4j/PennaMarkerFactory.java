@@ -1,6 +1,5 @@
 package penna.core.slf4j;
 
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.IMarkerFactory;
 import penna.core.slf4j.marker.PennaMarker;
 
@@ -11,10 +10,10 @@ import java.util.concurrent.ConcurrentHashMap;
  * This is an {@link IMarkerFactory} implementation that builds {@link PennaMarker} instances.
  */
 public class PennaMarkerFactory implements IMarkerFactory {
-    private final Map<@NotNull String, @NotNull PennaMarker> storage = new ConcurrentHashMap<>();
+    private final Map<String, PennaMarker> storage = new ConcurrentHashMap<>();
 
     @Override
-    public @NotNull PennaMarker getMarker(String name) {
+    public PennaMarker getMarker(String name) {
         if (name == null) {
             throw new IllegalArgumentException("Marker name cannot be null");
         }
@@ -47,7 +46,7 @@ public class PennaMarkerFactory implements IMarkerFactory {
     }
 
     @Override
-    public @NotNull PennaMarker getDetachedMarker(String name) {
+    public PennaMarker getDetachedMarker(String name) {
         return PennaMarker.build(name);
     }
 }

@@ -1,7 +1,5 @@
 package penna.core.internals;
 
-import org.jetbrains.annotations.VisibleForTesting;
-
 import java.io.Closeable;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -30,7 +28,6 @@ public final class PennaClock implements Closeable {
     private final Clock clock;
     private final Thread clockThread;
 
-    @VisibleForTesting
     public PennaClock(Clock clock) {
         this.clock = clock;
         asciiTimestamp = IntToAscii.createTimestampBuffer(clock.millis());

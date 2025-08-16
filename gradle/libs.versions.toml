@@ -39,8 +39,6 @@ junit-pioneer = { module = "org.junit-pioneer:junit-pioneer", version.ref = "jun
 jmh-core = { module = "org.openjdk.jmh:jmh-core", version.ref = "jmh" }
 jmh-annotations = { module = "org.openjdk.jmh:jmh-generator-annprocess", version.ref = "jmh" }
 
-jetbrains-annotations = { module = "org.jetbrains:annotations", version.ref = "jbrAnn" }
-
 ### For Benchmarking
 # Logback
 logback-core = { module = "ch.qos.logback:logback-core", version.ref = "logback" }

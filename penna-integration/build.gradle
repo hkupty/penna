@@ -25,7 +25,6 @@ tasks.withType(AbstractArchiveTask).configureEach {
 dependencies {
     implementation project(":penna-core")
     implementation libs.slf4j
-    compileOnly libs.jetbrains.annotations
     implementation libs.jackson.core
     implementation libs.jackson.databind
 }

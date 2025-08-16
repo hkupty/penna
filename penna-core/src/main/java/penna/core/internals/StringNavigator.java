@@ -1,7 +1,5 @@
 package penna.core.internals;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.util.Iterator;
 
 public class StringNavigator implements Iterator<StringNavigator.StringView> {
@@ -48,12 +46,12 @@ public class StringNavigator implements Iterator<StringNavigator.StringView> {
         }
 
         @Override
-        public @NotNull CharSequence subSequence(int start, int end) {
+        public CharSequence subSequence(int start, int end) {
             return base.subSequence(startingPoint + start, startingPoint + Math.min(end, length));
         }
 
         @Override
-        public @NotNull String toString() {
+        public String toString() {
             return base.substring(startingPoint, startingPoint + length);
         }
 

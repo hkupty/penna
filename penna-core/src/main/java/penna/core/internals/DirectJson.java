@@ -1,9 +1,6 @@
 package penna.core.internals;
 
 
-import org.jetbrains.annotations.TestOnly;
-import org.jetbrains.annotations.VisibleForTesting;
-
 import java.io.Closeable;
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
@@ -54,7 +51,6 @@ public final class DirectJson implements Closeable {
     private final FileOutputStream backingOs;
     private final WritableByteChannel channel;
 
-    @VisibleForTesting
     ByteBuffer buffer = ByteBuffer.allocateDirect(INITIAL_BUFFER_SIZE);
     private final IntToAscii intToAscii = new IntToAscii();
     private boolean kvLast;
@@ -68,7 +64,6 @@ public final class DirectJson implements Closeable {
     // in JDK 10 the problem was solved. We are targeting JDK 17+, so the problem won't affect us.
     // Plus, any other alternative is significantly slower.
     @SuppressWarnings("PMD.AvoidFileStream")
-    @TestOnly
     DirectJson() {
         this.backingOs = new FileOutputStream(FileDescriptor.out);
         this.channel = backingOs.getChannel();
@@ -207,6 +202,13 @@ public final class DirectJson implements Closeable {
 
     public void writeQuote() {
         buffer.put(QUOTE);
+    }
+
+    public void writeByteBuffer(ByteBuffer byteBuffer) {
+        checkSpace(byteBuffer.limit() + 1);
+        byteBuffer.rewind();
+        buffer.put(byteBuffer);
+        writeSep();
     }
 
     // --[ 2nd level; based on the level above ]-- //

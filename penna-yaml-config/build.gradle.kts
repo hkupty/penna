@@ -59,9 +59,6 @@ dependencies {
     compileOnly(libs.jackson.databind)
     compileOnly(libs.jackson.yaml)
 
-    // Annotations for better code readability
-    compileOnly(libs.jetbrains.annotations)
-
     // (optional) SnakeYaml support
     compileOnly(libs.snakeyaml.plain)
     compileOnly(libs.snakeyaml.engine)

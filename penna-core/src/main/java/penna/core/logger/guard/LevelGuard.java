@@ -1,7 +1,5 @@
 package penna.core.logger.guard;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.VisibleForTesting;
 import org.slf4j.event.Level;
 import org.slf4j.spi.LoggingEventBuilder;
 import org.slf4j.spi.NOPLoggingEventBuilder;
@@ -21,7 +19,6 @@ import penna.core.logger.PennaLogger;
 public sealed interface LevelGuard permits DebugLevelGuard, ErrorLevelGuard, InfoLevelGuard, NOPGuard, TraceLevelGuard, WarnLevelGuard {
 
     final class Shared {
-        @VisibleForTesting
         public static final LogUnitContextPool logUnits = new LogUnitContextPool();
     }
 
@@ -30,7 +27,7 @@ public sealed interface LevelGuard permits DebugLevelGuard, ErrorLevelGuard, Inf
         private FromConfig() {
         }
 
-        public static LevelGuard get(@NotNull Config config) {
+        public static LevelGuard get(Config config) {
             return switch (config.level()) {
                 case ERROR -> ErrorLevelGuard.singleton();
                 case WARN -> WarnLevelGuard.singleton();

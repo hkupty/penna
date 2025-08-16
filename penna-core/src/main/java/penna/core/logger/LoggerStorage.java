@@ -1,7 +1,5 @@
 package penna.core.logger;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.VisibleForTesting;
 import penna.api.models.Config;
 import penna.core.internals.StringNavigator;
 
@@ -43,7 +41,6 @@ public class LoggerStorage {
      * This node can also serve as a config point in the hierarchy. If that's the case, all children loggers will
      * inherit the config of the nearest config point.
      */
-    @VisibleForTesting
     static class Node {
         private Node(String component) {this.component = component;}
 
@@ -60,7 +57,7 @@ public class LoggerStorage {
         public final Lock lock = new ReentrantLock();
 
 
-        void setConfigAndUpdateRecursively(@NotNull Config baseConfig) {
+        void setConfigAndUpdateRecursively(Config baseConfig) {
             lock.lock();
             try {
                 configRef = baseConfig;
@@ -74,7 +71,7 @@ public class LoggerStorage {
             if (children[1] != null) {children[1].updateRecursively(baseConfig);}
         }
 
-        void updateRecursively(@NotNull Config baseConfig) {
+        void updateRecursively(Config baseConfig) {
             lock.lock();
             try {
                 if (configRef != null) {
@@ -101,7 +98,6 @@ public class LoggerStorage {
      * The root of the TST. This is a special node that doesn't have any component, therefore all children of this node will
      * live on the left children.
      */
-    @VisibleForTesting
     final Node root = Node.create("", Config.getDefault());
 
     /**
@@ -111,7 +107,7 @@ public class LoggerStorage {
      * @param key a string containing a fully qualified class name.
      * @return a {@link PennaLogger}
      */
-    public PennaLogger getOrCreate(@NotNull String key) {
+    public PennaLogger getOrCreate(String key) {
         StringNavigator path = new StringNavigator(key);
         Node cursor = root;
         Config config = root.configRef;
@@ -144,8 +140,8 @@ public class LoggerStorage {
         return cursor.loggerRef;
     }
 
-    public void replaceConfig(@NotNull String prefix,
-                              @NotNull Config newConfig) {
+    public void replaceConfig(String prefix,
+                              Config newConfig) {
         StringNavigator path = new StringNavigator(prefix);
         Node cursor = root;
         int nodeIndex = 2; // Anything will be greater than ""
@@ -176,7 +172,7 @@ public class LoggerStorage {
      * @param prefix the path to the logger
      * @return The configuration instance that is applied to it
      */
-    public @NotNull Config getConfig(@NotNull String prefix) {
+    public Config getConfig(String prefix) {
         StringNavigator path = new StringNavigator(prefix);
         Node cursor = root;
         Config configRef = root.configRef;
@@ -196,7 +192,7 @@ public class LoggerStorage {
         return configRef;
     }
 
-    public void replaceConfig(@NotNull Config newConfig) {
+    public void replaceConfig(Config newConfig) {
         root.updateRecursively(newConfig);
     }
 }

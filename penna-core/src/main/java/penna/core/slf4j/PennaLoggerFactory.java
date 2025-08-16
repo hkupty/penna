@@ -1,7 +1,5 @@
 package penna.core.slf4j;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.VisibleForTesting;
 import org.slf4j.ILoggerFactory;
 import org.slf4j.Logger;
 import penna.api.models.Config;
@@ -18,7 +16,6 @@ public final class PennaLoggerFactory implements ILoggerFactory, Storage {
         return singleton;
     }
 
-    @VisibleForTesting
     PennaLoggerFactory() {
         cache = new LoggerStorage();
     }
@@ -41,7 +38,7 @@ public final class PennaLoggerFactory implements ILoggerFactory, Storage {
     }
 
     @Override
-    public @NotNull Config get(@NotNull String logger) {
+    public Config get(String logger) {
         return cache.getConfig(logger);
     }
 }
