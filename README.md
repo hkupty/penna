@@ -119,3 +119,14 @@ With that in mind, Penna tries to be a simple yet effective component in your ar
 It should not require you to add in more dependencies. Instead, it should work with whatever you have available.
 Also, it should make its best effort to consume the fewer resources as possible, being efficient and sparing your app of GC pauses
 when under heavy load. [Read more on our performance tests.](performance/)
+
+## Star History
+
+<a href="https://www.star-history.com/?repos=hkupty%2Fpenna&type=date&legend=top-left">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/image?repos=hkupty/penna&type=date&theme=dark&legend=top-left" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/image?repos=hkupty/penna&type=date&legend=top-left" />
+   <img alt="Star History Chart" src="https://api.star-history.com/image?repos=hkupty/penna&type=date&legend=top-left" />
+ </picture>
+</a>
+
