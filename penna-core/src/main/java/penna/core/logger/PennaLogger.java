@@ -2,6 +2,7 @@ package penna.core.logger;
 
 import org.slf4j.Marker;
 import org.slf4j.event.LoggingEvent;
+import org.slf4j.event.Level;
 import org.slf4j.spi.LoggingEventBuilder;
 import penna.api.models.Config;
 import penna.core.logger.guard.LevelGuard;
@@ -32,6 +33,17 @@ public final class PennaLogger implements IPennaLogger {
     @Override
     public String getName() {
         return name;
+    }
+
+    @Override
+    public LoggingEventBuilder atLevel(Level level) {
+        return switch (level) {
+        case Level.DEBUG -> levelGuard.debug(this);
+        case Level.ERROR -> levelGuard.error(this);
+        case Level.INFO -> levelGuard.info(this);
+        case Level.TRACE -> levelGuard.trace(this);
+        case Level.WARN -> levelGuard.warn(this);
+        };
     }
 
     @Override
