@@ -3,7 +3,6 @@ package penna.config.yaml.parsers;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
-import org.jetbrains.annotations.VisibleForTesting;
 import penna.api.models.ExceptionHandling;
 import penna.config.yaml.models.ConfigMap;
 import penna.config.yaml.models.ConfigNode;
@@ -15,7 +14,6 @@ import java.util.*;
 import java.util.stream.StreamSupport;
 
 public final class JacksonParser implements Parser {
-    @VisibleForTesting
     transient final ObjectMapper mapper;
 
     public JacksonParser() {this.mapper = new YAMLMapper();}
@@ -78,7 +76,6 @@ public final class JacksonParser implements Parser {
         }
     }
 
-    @VisibleForTesting
     ConfigMap readConfig(JsonNode root) {
         var configNodes = new HashMap<String, ConfigNode>();
         var watch = root.get("watch").asBoolean();
