@@ -31,11 +31,17 @@ public record LogUnitContext(
         setCause(event.getThrowable());
         setMessage(event.getMessage());
         addArguments(event.getArgumentArray());
-        for (var kvp : event.getKeyValuePairs()) {
-            addKeyValue(kvp.key, kvp.value);
+        var kvps = event.getKeyValuePairs();
+        if (kvps != null) {
+            for (var kvp : kvps) {
+                addKeyValue(kvp.key, kvp.value);
+            }
         }
-        for (var marker : event.getMarkers()) {
-            addMarker(marker);
+        var markers = event.getMarkers();
+        if (markers != null) {
+            for (var marker : markers) {
+                addMarker(marker);
+            }
         }
 
         log();
